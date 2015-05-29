@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>WebFD - When Go meets Raspberry Pi</title>
+    <title>使用Gradle生成包含所有依赖库(.jar或.aar)的aar包 - When Go meets Raspberry Pi</title>
   
-    <meta name="description" content="Web Frontend Developer 树莓派">
+    <meta name="description" content="Assemble aar package with all dependencies using Gradle 2.1 树莓派">
   
     <meta name="author" content="pjx3">
 
@@ -104,192 +104,183 @@
     <div class="container">
 
       <div class="content">
-        
-<div class="page-header">
-  <h1>WebFD </h1>
+        <div class="page-header">
+  <h1>使用Gradle生成包含所有依赖库(.jar或.aar)的aar包 </h1>
 </div>
 
 <div class="row">
-  <div class="span12">
+  <div class="span8">
+    <p>Android Library项目中如果使用Android Gradle plugin打aar包，通过maven依赖的库，或者是local依赖的aar都不会包含在生成的aar包里，如果项目是发布一个SDK，为了方便开发者使用，我们倾向于生成一个包含所有依赖库以及.so等文件的aar包。</p>
+
+<p>通过反复研究和测试，以下Gradle脚本能满足需求，如果需要对代码运行ProGuard混淆，则需要使用Gradle 2.1</p>
+
+<p>方法是为项目增加一个sub project（如<code>pkg_project</code>）专门用于打包，该项目中<code>build.gradle</code>内容如下：</p>
+
+<pre><code>apply plugin: 'java'
+version = 1.0
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:19.1.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':&lt;your_library_project&gt;') //此处填写需要打包的Android Library Project name
+}
+
+task sync_jars() &lt;&lt; {
+	 //把所有依赖的.jar库都拷贝到build/aar/libs下
+    copy {
+        into buildDir.getPath() +&quot;/aar/libs&quot;
+        from configurations.compile.findAll {
+            it.getName().endsWith(&quot;.jar&quot;)
+        }
+    }
+}
+
+task sync_aars(dependsOn:':&lt;your_library_project&gt;:assembleRelease') &lt;&lt; {
+	 //把所有依赖的.aar库里包含的classes.jar都拷贝到build/aar/libs下，并重命名以不被覆盖
+    def jar_name
+    def aar_path
+    def dest_dir = buildDir.getPath()+&quot;/aar&quot;
+    configurations.compile.findAll {
+        it.getName().endsWith(&quot;.aar&quot;)
+    }.collect {
+        aar_path = it.getPath()
+        jar_name = &quot;libs/&quot;+it.getName().replace(&quot;.aar&quot;,&quot;.jar&quot;)
+        copy {
+            from zipTree(aar_path)
+            into dest_dir
+            include &quot;**/*&quot;
+            rename 'classes.jar', jar_name
+        }
+    }
+}
+
+task fataar(dependsOn:[sync_aars, sync_jars]) &lt;&lt; {
+    task (obfuse_classes_jar, type: proguard.gradle.ProGuardTask) {
+    	//把build/aar/libs/*.jar混淆后生成build/aar/classes.jar
+        configuration &quot;proguard.cfg&quot;
+        injars buildDir.getPath()+&quot;/aar/libs&quot;
+        outjars buildDir.getPath()+&quot;/aar/classes.jar&quot;
+        libraryjars &quot;${System.getProperty('java.home')}/lib/rt.jar&quot;
+        libraryjars &quot;${System.getProperty('java.home')}/Contents/Classes/classes.jar&quot;
+        libraryjars System.getenv(&quot;ANDROID_HOME&quot;)+&quot;/platforms/android-19/android.jar&quot;
+    }.execute()
+
+    task (gen_aar, type: Zip) {
+    	//把生成最终的aar包，注意libs目录需要被排除
+        def dest_dir = buildDir.getPath()+&quot;/aar/&quot;
+        baseName = &quot;mysdk-all&quot;
+        extension = &quot;aar&quot;
+        destinationDir = file(buildDir.getPath())
+        from dest_dir
+        exclude &quot;libs&quot;
+    }.execute()
+}
+</code></pre>
+
+<p>最后就可以使用<code>gradlew pkg_project:fataar</code>来打包了</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2015/02/10/53-robinhood-zero-commission-brokerage.html" title="零佣金的券商靠什么赚钱？">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/09/04/51-useful-linux-command.html" title="常用Linux命令">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
     
-<div class="jumbotron">
-<p class="lead">This site is running on a <a href="http://www.raspberrypi.org" target="_blank">Raspberry Pi</a>, most codes are written in <a href="http://golang.org" target="_blank">Go</a> programming language</p>
-</div>
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'hugozhu'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
 
-<hr/>
-<div class="row-fluid marketing">
-<div class="span6">
-<h3>最近文章</h3>
-  
-  <h4><a href="/2015/04/12/60-run-docker-on-raspberry-pi.html">在树莓派上运行Docker</a></h4>
-  <p>Run docker on Raspberry Pi</p>
-  
-  <h4><a href="/2015/03/28/59-use-raspberrypi-to-build-an-augmented-traffic-control-system.html">使用树莓派搭建低成本，便携，多用户的弱网模拟器：高效测试手机App在弱网下的可用性</a></h4>
-  <p>Use Raspberry Pi to build low cost augmented traffic control system</p>
-  
-  <h4><a href="/2015/03/15/58-diy-airplay-hifi-audio-system.html">自己搭建Airplay高清音乐播放系统</a></h4>
-  <p>DIY airplay HIFI audio system</p>
-  
-  <h4><a href="/2015/03/07/57-use-node-module-phantom-to-monitor-webpage-updates.html">在树莓派上用Node.js监视网页变化并通知手机</a></h4>
-  <p>Use Node.js module phantom to monitor webpage updates on Raspberry Pi</p>
-  
-  <h4><a href="/2015/03/05/56-boot-raspberrypi-from-16m-sdcard-and-install-raspbian-on-usb-sticker.html">用16M的SD卡启动树莓派，在U盘上安装和运行Linux</a></h4>
-  <p>Boot Raspberry Pi from 16M SDCard</p>
-  
-  <h4><a href="/2015/02/27/55-use-telegram-to-chat-with-raspberrypi.html">用Telegram和树莓派交互</a></h4>
-  <p>Use Telegram to chat with your Raspberry Pi</p>
-  
-  <h4><a href="/2015/02/26/54-raspberrypi2-pptp-redsocks2-chinadns.html">用树莓派2代打造智能家庭路由</a></h4>
-  <p>Set up your RaspberryPi 2 as a smart router</p>
-  
-  <h4><a href="/2015/02/10/53-robinhood-zero-commission-brokerage.html">零佣金的券商靠什么赚钱？</a></h4>
-  <p>How does zero commision brokerage make money?</p>
-  
-  <h4><a href="/2014/11/05/52-assemble-aar-with-all-dependencies-with-gradle.html">使用Gradle生成包含所有依赖库(.jar或.aar)的aar包</a></h4>
-  <p>Assemble aar package with all dependencies using Gradle 2.1</p>
-  
-  <h4><a href="/2014/09/04/51-useful-linux-command.html">常用Linux命令</a></h4>
-  <p>Useful Liunx Command</p>
-  
-
-  <div class="pagination">
-    <ul>
-        <li><a href="../posts/2/">更多文章...</a></li>
-    </ul>
   </div>
-</div>
 
-<div class="span6">
-<h3>文章标签</h3>
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1808008002', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
 
-<ul class="tag_box inline">
 
-  <li>
+      <h4>Published</h4>
+      <div class="date"><span>2014-11-05</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#Blog-ref">Blog <span>60</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
   <a href="/tags/#Android-ref">Android <span>9</span></a>
 </li>
-
-  <li>
-  <a href="/tags/#Arduino-ref">Arduino <span>2</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Concurrency-ref">Concurrency <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Concurrent-Programming-ref">Concurrent Programming <span>3</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Github-ref">Github <span>2</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Golang-ref">Golang <span>4</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Google-App-Engine-ref">Google App Engine <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Gradle-ref">Gradle <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Java-ref">Java <span>5</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Javascript-ref">Javascript <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Linux-ref">Linux <span>6</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Network-ref">Network <span>2</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Raspberry-Pi-ref">Raspberry Pi <span>21</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Rasperry-Pi-ref">Rasperry Pi <span>2</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Shell-Scripting-ref">Shell Scripting <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Stock-ref">Stock <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#Sublime-ref">Sublime <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#VPN-ref">VPN <span>2</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#docker-ref">docker <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#pcDunio-Acadia-ref">pcDunio Acadia <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E-ref">代码之美 <span>2</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#%E5%B9%BF%E5%91%8A%E7%B3%BB%E7%BB%9F-ref">广告系统 <span>1</span></a>
-</li>
-
-  <li>
-  <a href="/tags/#%E6%96%87%E7%AB%A0%E7%BF%BB%E8%AF%91-ref">文章翻译 <span>1</span></a>
-</li>
-
-</ul>
-  
-<div align="center">
-<a data-type="3" data-tmpl="250x250" data-tmplid="185" data-rd="2" data-style="2" data-border="1" href="#"></a>
-</div>
-
-</div>
-</div>
-
-<hr/>
-
-<div align="center">
-
-<a href="https://xively.com/feeds/119331"><img src="https://api.cosm.com/v2/feeds/119331/datastreams/1.png?width=340&height=180&colour=%23f15a24&duration=1days&title=Router+Download+Kbps&show_axis_labels=false&detailed_grid=true&scale="/></a>
+      
+      </ul>
 
 
-
-<a href="https://xively.com/feeds/119331"><img src="https://api.cosm.com/v2/feeds/119331/datastreams/2.png?width=340&height=180&colour=%23f15a24&duration=1days&title=Router+Upload+Kbps&show_axis_labels=false&detailed_grid=true&scale="/></a>
-
+    <div style="float:right">
 <br/>
-
-<a href="https://xively.com/feeds/119331"><img src="https://api.cosm.com/v2/feeds/119331/datastreams/3.png?width=340&height=180&colour=%23f15a24&duration=2days&title=Raspberry%20Pi%E7%9A%84CPU%20Load&show_axis_labels=false&detailed_grid=true&scale="/></a>
-
-
-
-<a href="https://xively.com/feeds/119331"><img src="https://api.cosm.com/v2/feeds/119331/datastreams/4.png?width=340&height=180&colour=%23f15a24&duration=2days&title=Raspberry%20Pi%E7%9A%84CPU%E6%B8%A9%E5%BA%A6&show_axis_labels=false&detailed_grid=true&scale="/></a>
-
 </div>
 
-<br/><br/>
-
-
-  </div>
+      
+    </div>
+  
 </div>
+
 
         <hr/>
 
