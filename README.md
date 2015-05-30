@@ -1,2 +1,0 @@
-# webfd.github.io
-blog

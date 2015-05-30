@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>WebFD Page 5 - 关注前端前沿技术，探寻业界深邃思想</title>
     
-    <meta name="description" content="客人来了发光二极管会闪0.2秒 树莓派"> 
+    <meta name="description" content="Useful Liunx Command 树莓派"> 
     <meta name="author" content="pjx3">
     <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
     <!--[if lt IE 9]>
@@ -136,7 +136,35 @@
 
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/24/20-raspberry-pi-drive-nokia-5110.html">升级版电子钟 - 如何使用Raspberry Pi驱动Nokia 5110液晶屏</a> <span class="date">2013-03-24</span></h1>
+        <h1 class="title"><a href="/2013/03/21-realtime-online-user-counter.html">个人网站实时在线人数接口</a> <span class="date">2013-03-27</span></h1>
+
+        <p>感觉把个人网站正在访问的在线人数显示在Nokia 5110液晶屏挺好玩，就稍微研究了一下如何提取实时在线人数。</p>
+
+<h1>实现方法</h1>
+
+<h2>Google Analytics</h2>
+
+<p>Google Analytics具有很强大的实时流量分析功能，不过网站主必须登陆到后台才能看，但并没有提供Open API，所以就不能用这个服务了。</p>
+
+<h2>日志分析</h2>
+
+<p>不修改网站通过web服务器的日志分析，用一个脚本统计15分钟内日志的Unique IP可以粗略的获得一个在线人数。
+但多个用户可能通过一个IP过来，这种做法肯定不精确。一般我们可以通过在页面上部署Javascript脚本，由Javascript为每一个浏览器产生一个独特的持久化Cookie，用这个Cookie代替IP来统计。但用Raspberry Pi来做这件事情会拖慢网站，于是一种方案是采用免费的Google App Engine来实现，打算有空来实现一个。</p>
+
+<h2>CNZZ</h2>
+
+<p>CNZZ也提供了15分钟内的在线人数统计功能。分析CNZZ的计数器代码后发现如下方法可以提取到在线人数:</p>
+
+<p>```</p>
+
+
+        <div class="more">
+          <a href="/2013/03/21-realtime-online-user-counter.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/20-raspberry-pi-drive-nokia-5110.html">升级版电子钟 - 如何使用Raspberry Pi驱动Nokia 5110液晶屏</a> <span class="date">2013-03-24</span></h1>
 
         <p>Nokia 5110屏比前面介绍过的<a href="http://hugozhu.myalert.info/2013/03/23/19-raspberry-pi-drive-1602-lcd.html">1602液晶屏</a>功能好很多，淘宝上买价格相差不大（二手5110 12块左右, 全新1602 8块左右），Nokia 5110最少只需要占用4个GPIO引脚：</p>
 
@@ -162,12 +190,12 @@
 
 
         <div class="more">
-          <a href="/2013/03/24/20-raspberry-pi-drive-nokia-5110.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/20-raspberry-pi-drive-nokia-5110.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/23/19-raspberry-pi-drive-1602-lcd.html">如何使用Raspberry Pi在1602液晶屏上显示当前时间--电子钟</a> <span class="date">2013-03-23</span></h1>
+        <h1 class="title"><a href="/2013/03/19-raspberry-pi-drive-1602-lcd.html">如何使用Raspberry Pi在1602液晶屏上显示当前时间--电子钟</a> <span class="date">2013-03-23</span></h1>
 
         <h1>硬件准备</h1>
 
@@ -208,12 +236,12 @@
 
 
         <div class="more">
-          <a href="/2013/03/23/19-raspberry-pi-drive-1602-lcd.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/19-raspberry-pi-drive-1602-lcd.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/22/19-raspberry-pi-gpio-port-naming.html">Raspberry Pi GPIO的编号规范</a> <span class="date">2013-03-22</span></h1>
+        <h1 class="title"><a href="/2013/03/19-raspberry-pi-gpio-port-naming.html">Raspberry Pi GPIO的编号规范</a> <span class="date">2013-03-22</span></h1>
 
         <p>树莓派和普通电脑不一样的地方在于它还带了17个可编程的<a href="http://en.wikipedia.org/wiki/General_Purpose_Input/Output">GPIO</a>（General Purpose Input/Output），可以用来驱动各种外设（如传感器，步进电机等）。但GPIO的编号方法有些混乱，不同的API（如wiringPi，RPi.GPIO等）对GPIO的端口号编号并不一样，下面则用图表标明了对应的叫法，这样在看程序例子的时候可以确定物理是哪个接口。</p>
 
@@ -369,12 +397,12 @@
 
 
         <div class="more">
-          <a href="/2013/03/22/19-raspberry-pi-gpio-port-naming.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/19-raspberry-pi-gpio-port-naming.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/17/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html">如何使用Raspberry Pi测量室内温度和湿度并绘制曲线</a> <span class="date">2013-03-17</span></h1>
+        <h1 class="title"><a href="/2013/03/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html">如何使用Raspberry Pi测量室内温度和湿度并绘制曲线</a> <span class="date">2013-03-17</span></h1>
 
         <h1>硬件准备</h1>
 
@@ -397,12 +425,12 @@
 
 
         <div class="more">
-          <a href="/2013/03/17/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/16/03-16-use-raspberry-pi-control-step-motor-rotate-webcam.html">如何使用Raspberry Pi控制步进电机旋转高清摄像头并拍照</a> <span class="date">2013-03-16</span></h1>
+        <h1 class="title"><a href="/2013/03/03-16-use-raspberry-pi-control-step-motor-rotate-webcam.html">如何使用Raspberry Pi控制步进电机旋转高清摄像头并拍照</a> <span class="date">2013-03-16</span></h1>
 
         <h1>硬件准备</h1>
 
@@ -425,12 +453,12 @@
 
 
         <div class="more">
-          <a href="/2013/03/16/03-16-use-raspberry-pi-control-step-motor-rotate-webcam.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/03-16-use-raspberry-pi-control-step-motor-rotate-webcam.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/13/vistor-on-homepage-led-indicator.html">如何在Raspberry Pi上用LED闪烁提示网站首页新访客</a> <span class="date">2013-03-13</span></h1>
+        <h1 class="title"><a href="/2013/03/vistor-on-homepage-led-indicator.html">如何在Raspberry Pi上用LED闪烁提示网站首页新访客</a> <span class="date">2013-03-13</span></h1>
 
         <p>本方法只适合小网站，主要是好玩。Raspberry Pi不是很合适需要实时控制的系统（比如，飞行器，遥控小车），因为Linux内核要多任务，应用程序的优先级不能保持最高，会带来延时，但做些实时性要求不高的系统还是可以的。</p>
 
@@ -455,12 +483,12 @@
 
 
         <div class="more">
-          <a href="/2013/03/13/vistor-on-homepage-led-indicator.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/vistor-on-homepage-led-indicator.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/09/setup-archliunx-on-raspberry-pi.html">在Raspberry Pi上安装ArchLinux</a> <span class="date">2013-03-09</span></h1>
+        <h1 class="title"><a href="/2013/03/setup-archliunx-on-raspberry-pi.html">在Raspberry Pi上安装ArchLinux</a> <span class="date">2013-03-09</span></h1>
 
         <h1>介绍</h1>
 
@@ -490,12 +518,12 @@
 
 
         <div class="more">
-          <a href="/2013/03/09/setup-archliunx-on-raspberry-pi.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/setup-archliunx-on-raspberry-pi.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/08/block_failed_ssh_attempts_with_iptable.html">如何封杀尝试Raspberry Pi SSH密码的来源IP</a> <span class="date">2013-03-08</span></h1>
+        <h1 class="title"><a href="/2013/03/block_failed_ssh_attempts_with_iptable.html">如何封杀尝试Raspberry Pi SSH密码的来源IP</a> <span class="date">2013-03-08</span></h1>
 
         <p>Raspberry Pi整天开着，如果用缺省SSH端口对外开放，就会经常遇到扫描SSH密码的肉鸡。虽然密码不是很简单，但还是感觉很不安全的。</p>
 
@@ -532,12 +560,12 @@ done
 
 
         <div class="more">
-          <a href="/2013/03/08/block_failed_ssh_attempts_with_iptable.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/block_failed_ssh_attempts_with_iptable.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/06/raspberry-pi-with-xmbc.html">Raspberry Pi做BT下载机+高清播放器</a> <span class="date">2013-03-06</span></h1>
+        <h1 class="title"><a href="/2013/03/raspberry-pi-with-xmbc.html">Raspberry Pi做BT下载机+高清播放器</a> <span class="date">2013-03-06</span></h1>
 
         <h2>介绍</h2>
 
@@ -583,60 +611,7 @@ done
 
 
         <div class="more">
-          <a href="/2013/03/06/raspberry-pi-with-xmbc.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/05/java-SynchronousQueue-notes.html">Java并发包中的同步队列SynchronousQueue实现原理</a> <span class="date">2013-03-05</span></h1>
-
-        <h2>介绍</h2>
-
-<p>Java 6的并发编程包中的<a href="http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/SynchronousQueue.html">SynchronousQueue</a>是一个没有数据缓冲的<a href="http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/BlockingQueue.html">BlockingQueue</a>，生产者线程对其的插入操作put必须等待消费者的移除操作take，反过来也一样。</p>
-
-<p>不像ArrayBlockingQueue或LinkedListBlockingQueue，SynchronousQueue内部并没有数据缓存空间，你不能调用peek()方法来看队列中是否有数据元素，因为数据元素只有当你试着取走的时候才可能存在，不取走而只想偷窥一下是不行的，当然遍历这个队列的操作也是不允许的。队列头元素是第一个排队要插入数据的<strong>线程</strong>，而不是要交换的数据。数据是在配对的生产者和消费者线程之间直接传递的，并不会将数据缓冲数据到队列中。可以这样来理解：生产者和消费者互相等待对方，握手，然后<strong>一起</strong>离开。</p>
-
-<p>SynchronousQueue的一个使用场景是在线程池里。Executors.newCachedThreadPool()就使用了SynchronousQueue，这个线程池根据需要（新任务到来时）创建新的线程，如果有空闲线程则会重复使用，线程空闲了60秒后会被回收。</p>
-
-<h2>实现原理</h2>
-
-<p>同步队列的实现方法有许多：</p>
-
-<h3>阻塞算法实现</h3>
-
-<p>阻塞算法实现通常在内部采用一个锁来保证多个线程中的put()和take()方法是串行执行的。采用锁的开销是比较大的，还会存在一种情况是线程A持有线程B需要的锁，B必须一直等待A释放锁，即使A可能一段时间内因为B的优先级比较高而得不到时间片运行。所以在高性能的应用中我们常常希望规避锁的使用。</p>
-
-<pre><code>public class NativeSynchronousQueue&lt;E&gt; {
-    boolean putting = false;
-    E item = null;
-
-    public synchronized E take() throws InterruptedException {
-        while (item == null)
-            wait();
-        E e = item;
-        item = null;
-        notifyAll();
-        return e;
-    }
-
-    public synchronized void put(E e) throws InterruptedException {
-        if (e==null) return;
-        while (putting)
-            wait();
-        putting = true;
-        item = e;
-        notifyAll();
-        while (item!=null)
-            wait();
-        putting = false;
-        notifyAll();
-    }
-}
-</code></pre>
-
-
-        <div class="more">
-          <a href="/2013/03/05/java-SynchronousQueue-notes.html" class="btn btn-small">阅读全文</a>
+          <a href="/2013/03/raspberry-pi-with-xmbc.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
