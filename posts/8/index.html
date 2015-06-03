@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>WebFD Page 8 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      
+<div class="page-header">
+  <h1>Blogs</h1>
+</div>
+
+
+<div class="row">
+  <div class="span12">
+
+    <div class="pagination">
+      <ul>
+      
+        
+        
+          <li><a href="../../posts/1/">1</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/2/">2</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/3/">3</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/4/">4</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/5/">5</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/6/">6</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/7/">7</a></li>
+        
+      
+        
+          <li class="active"><a href="../../posts/8/">8</a></li>
+        
+        
+      
+        
+        
+          <li><a href="../../posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/14/">14</a></li>
+        
+      
+      </ul>
+    </div>
+
+
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/gitignore-dot-io.html">gitignore.io 方便生成.gitignore的工具</a> <span class="date">2014-03-08</span></h1>
+
+        <p>一直对使用git时，每次对生成<code>.gitignore</code>都是此次拷贝，比较痛苦。今天偶然间发现了这个站点，很不错！<a href="http://www.gitignore.io">http://www.gitignore.io</a>。另外也支持命令行形式，其实也是通过网络的方式。大伙一看就明白了。</p>
+
+<p>比如，我这边通过如下命令：</p>
+
+<pre><code>$ echo &quot;function gi() { curl http://www.gitignore.io/api/\$@ ;}&quot; &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc
+</code></pre>
+
+<p>其他的命令在<a href="http://www.gitignore.io/cli">http://www.gitignore.io/cli</a>，支持<code>linux</code>、<code>osx</code>、<code>Windows</code>。</p>
+
+<p>具体使用</p>
+
+<pre><code>$ gi java
+# Created by http://www.gitignore.io
+
+### Java ###
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/gitignore-dot-io.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/02/elasticsearch-install-config.html">分布式搜索引擎ElasticSearch安装与配置</a> <span class="date">2014-02-17</span></h1>
+
+        <h2>1. 安装与启动</h2>
+
+<h3>1.1 安装ElasticSearch</h3>
+
+<blockquote>
+<p>两种安装方式，一种是根据发行版，通过ElasticSearch提供的repositories安装，参考<a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/setup-repositories.html">官方指南</a>; 另一种是利用压缩包安装；由于第二种方式，在配置上更加灵活，这里主要介绍第二种方式的安装和配置。</p>
+</blockquote>
+
+<p>从<a href="http://www.elasticsearch.org/overview/elkdownloads/">ElasticSearch网站</a>下载压缩包：<code>elasticsearch-1.0.0.tar.gz</code>，解压到指定目录：</p>
+
+<pre><code>$ wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.0.tar.gz -P /opt/app
+$ cd /opt/app
+$ tar zxvf elasticsearch-1.0.0.tar.gz -C ./
+</code></pre>
+
+<blockquote>
+<p>启动ElasticSearch很简单，执行安装目录下bin/elasticsearch即可；ElasticSearch 1.0.0的启动机制有一些变化，默认在前台运行，-d参数表示在后台运行；另外还提供-p参数，后接文件名，保存当前ElasticSearch进程的pid，方便关闭进程；</p>
+</blockquote>
+
+<pre><code>$ bin/elasticsearch -d -p /tmp/es.pid
+$ kill `cat /tmp/es.pid`
+</code></pre>
+
+<blockquote>
+<p>另外还有一种启动方式，通过serviceWrapper，可以更加方便地控制ElasticSearch的启动、关闭以及重启，在下一节<code>安装插件</code>中介绍。</p>
+</blockquote>
+
+
+        <div class="more">
+          <a href="/2014/02/elasticsearch-install-config.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/02/xmemcached-usage-with-spring.html">xmemcached主要用法及与Spring集成</a> <span class="date">2014-02-16</span></h1>
+
+        <p>xMemcached是memcached的一个java客户端，基于java nio，支持memcached的所有协议。本文简要介绍xMemcached的基本用法，以及与Spring的集成配置。</p>
+
+<h2>xMemcached的主要方法示例</h2>
+
+<pre><code>/**
+ * XMemcachedClientBuilder是MemcachedClientBuilder的一个实现类，XMemcachedClient是MemcachedClient的一个实现类；
+ * 在实际使用中，应该使用接口，利用多态特性，这里直接使用实现类，是为了方便查看实现类的源码。
+ */
+/**
+ * MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil.getAddresses(&quot;192.168.56.200:11211&quot;));
+ * MemcachedClient memcachedClient = null;
+ */
+
+XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil.getAddresses(&quot;192.168.56.200:11211 192.168.56.200:11212&quot;));
+XMemcachedClient xMemcachedClient = null;
+
+// 注意处理相关异常
+
+// 默认是采用余数哈希，可以修改为一致性哈希
+builder.setSessionLocator(new KetamaMemcachedSessionLocator());
+// 启用二进制协议，getAndTouch等方法仅在二进制协议中支持
+builder.setCommandFactory(new BinaryCommandFactory());
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/02/xmemcached-usage-with-spring.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/02/memcached-usage-parameters-commands.html">memcached用法：参数和命令详解</a> <span class="date">2014-02-15</span></h1>
+
+        <h2>1. memcached 参数说明：</h2>
+
+<pre><code># memcached -h
+</code></pre>
+
+<h3>1.1 memcached 的参数</h3>
+
+<p>常用参数</p>
+
+<pre><code>-p &lt;num&gt; 监听的TCP端口号，默认是11211；（port）
+-l &lt;addr&gt; 监听的主机地址，默认是INADDR_ANY，即所有地址，&lt;addr&gt;可以是host:port的形式，如果没有指定port，则使用-p或者-U的值；可以指定多个地址，以逗号分隔或者多次使用-l参数；尽量不要使用默认值，有安全隐患。(listen)
+-d 以守护进程运行 (daemon)
+-u &lt;username&gt; 指定进程的所有者（只有以root用户执行时才可以使用该参数）(username)
+-m &lt;num&gt; 用于存储数据的最大内存，单位是MB，默认是64MB；(memory)
+-c &lt;num&gt; 最大并发连接数，默认是1024；
+-vv 显示更详细的信息（还显示客户端的命令和响应）
+-vvv 显示最详细的信息（还显示内部的状态转变）
+-h 显示帮助信息
+-P &lt;file&gt; 将PID保存到&lt;file&gt;中，仅和-d参数一起使用；
+-f &lt;factor&gt; chunk的增幅因子，默认是1.25，不同的slab class，slab page大小相同，但是chunk大小不等，chunk的大小根据这个增幅因子增长；(factor)
+-n &lt;bytes&gt; 为key+value+flags分配的最小内存，单位bytes，默认是48；chunk数据结构本身要占据48字节，所以实际大小是n+48；
+-t &lt;num&gt; 使用多少个线程，默认是4；（thread）
+-I 设置slab page的大小，即设置可以保存的item的最大值，默认1MB，最小是1K，最大值128M；
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/02/memcached-usage-parameters-commands.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/02/memcached-install-libevent-repcached-memcached.html">memcached安装: libevent-repcached-memcached</a> <span class="date">2014-02-13</span></h1>
+
+        <blockquote>
+<p>安装顺序：</p>
+</blockquote>
+
+<pre><code>1. 先安装libevent，因为memcached依赖它；
+2. 给memcached打上repcached补丁，支持主从结构，实现高可用；
+3. 安装memcached，启用replication；
+</code></pre>
+
+<h2>1. libevent</h2>
+
+<pre><code># wget https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz -P /opt/softs/
+# ./configure --prefix=/usr/local/
+# make &amp;&amp; make install
+</code></pre>
+
+<h2>2. repcached &amp;&amp; memcached</h2>
+
+<p>当前补丁最新位1.4.13，memcached的版本应该一直，否则会出现异常；</p>
+
+<pre><code># wget https://memcached.googlecode.com/files/memcached-1.4.13.tar.gz -P /opt/softs/
+# wget http://mdounin.ru/files/repcached-2.3.1-1.4.13.patch.gz -P ./
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/02/memcached-install-libevent-repcached-memcached.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/02/45-android-development-productivity-tips.html">提高Android开发效率的小贴士</a> <span class="date">2014-02-10</span></h1>
+
+        <h1>查看日志 adb logcat</h1>
+
+<p>下面命令将只显示错误日志，和所有Tag＝mytag的调试日志，-C 会用不同颜色区分不同级别的日志，但只有Android 4.3以后才支持。</p>
+
+<pre><code>adb logcat [-C] *:E &lt;mytag&gt;:D
+</code></pre>
+
+<h1>远程调试 adb over TCP</h1>
+
+<p>首先在手机或Pad上执行以下命令（要求root）</p>
+
+<pre><code>su
+setprop service.adb.tcp.port 5555
+stop adbd
+start adbd
+</code></pre>
+
+<p>再执行下面命令则可以看到手机的网络地址</p>
+
+
+        <div class="more">
+          <a href="/2014/02/45-android-development-productivity-tips.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/01/sql-cookbook-reading-note.html">SQL COOKBOOK阅读笔记</a> <span class="date">2014-01-19</span></h1>
+
+        <h2>1. 尽量不要使用select *</h2>
+
+<p>返回表中的所有field时，使用<code>select *</code>确实很方便，但是不推荐这么做，应该在select后将所有的field都列出来：一是方便自己，清楚地知道返回了哪些field；而是方便他人，在看你的代码时，别人不一定知道表中有哪些列。
+这两种方式的性能是一样的。</p>
+
+<h2>2. 尽量使用as创建易读的别名</h2>
+
+<h3>2.1 尽量使用易读的别名</h3>
+
+<pre><code>mysql&gt; select sal as salary, empName as employName from employ;
+</code></pre>
+
+<blockquote>
+<p>使用易读的别名，可以让你的sql语句更容易被理解。</p>
+</blockquote>
+
+<h3>2.2 在where中使用别名：</h3>
+
+<pre><code>mysql&gt; select sal as salary from employ where salary &gt;= 10000;
+</code></pre>
+
+<blockquote>
+<p>该语句报错，因为salary字段未识别，可以将该语句包装成一个临时表：</p>
+</blockquote>
+
+
+        <div class="more">
+          <a href="/2014/01/sql-cookbook-reading-note.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/01/mysql-optimize-in-project.html">使用汇总表优化查询一则</a> <span class="date">2014-01-07</span></h1>
+
+        <h2>1. 提出问题</h2>
+
+<p>根据视频的播放数实现排行榜。需要关联4张表：专辑表、视频表、专辑和视频的关联表以及视频的播放数日增表，日增表的日数据大概在2万条左右。出排行榜的sql如下：</p>
+
+<pre><code>SELECT
+    vts.TV_ALUMN_ID AS albumId, inc.tv_vid, inc.tv_id, vts.TV_NAME AS tvName,
+    sum( inc.tv_count + inc.tv_count_app) AS realCount, sum( inc.tv_display_count + inc.tv_display_count_app) AS showCount
+FROM
+    vrs2_playlist vp, vrs2_tv_playlist vtp, vrs_tv_set vts, t_vrs_video_day_inc inc
+WHERE
+    vp.ID = vtp.TV_PLAYLIST_ID AND vtp.TV_ID = inc.tv_id AND vts.ID = vtp.TV_ID 
+AND vts.TV_ALUMN_ID = vp.id AND inc.tv_date BETWEEN ?  AND ? AND vp.IS_BD != 0 
+AND vp.TV_IS_INTREST != 1 AND vp.TV_EFFECTIVE = 1 AND vp.TV_IS_TEST = 0 AND vts.IS_BD != 0
+AND ( vts.TV_S_TYPE &lt; 2 OR vts.TV_S_TYPE IS NULL)
+AND vp.TV_CATEGORY_ID = ?  GROUP BY inc.tv_vid ORDER BY showCount DESC LIMIT 100
+</code></pre>
+
+<blockquote>
+<p>如果是日榜，查询时间大约在8s左右，还可以接受。如果是周榜，大概需要1min，如果是月榜，耗时约2~3分钟。周榜和月榜的时间是令人难以接受的。</p>
+</blockquote>
+
+
+        <div class="more">
+          <a href="/2014/01/mysql-optimize-in-project.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/12/django-used-record.html">django使用记录</a> <span class="date">2013-12-13</span></h1>
+
+        <h1>Django 开发中碰到的问题合集</h1>
+
+<ol>
+<li><p><code>django</code>的form问题</p>
+
+<ul>
+<li>问题描述
+使用<code>Django</code>的<code>forms</code>模块做登录页面时，在点击表单进行登录时， 出现 <code>'NoneType' object has no attribute '__getitem__'</code>异常错误。</li>
+
+<li><p>问题原因
+原因：在实现<code>Django</code>的<code>Form</code>时，覆盖了<code>clean</code>方法，主要代码如下：</p>
+
+<pre><code>def clean(self):
+    if not self.is_valid():
+        raise forms.ValidationError(u&quot;用户名和密码为必填项&quot;)
+    else:
+        cleaned_data = super(LoginForm, self).clean() 
+</code></pre>
+
+<p>注意，就是最后一行导致，将cleaned_data中的数据清理完了导致，出现问题描述中的异常信息</p></li>
+
+<li><p>解决办法
+原因找到后，那么也就容易了。将<code>clean</code>方法体修改如下：</p>
+
+<pre><code>def clean(self):
+    if not self.is_valid():
+        raise forms.ValidationError(u&quot;用户名和密码为必填项&quot;)
+    return self.cleaned_data
+</code></pre></li>
+</ul></li>
+</ol>
+
+
+        <div class="more">
+          <a href="/2013/12/django-used-record.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/11/44-copy-android-app-data.html">拷贝Android应用的数据</a> <span class="date">2013-11-27</span></h1>
+
+        <h1>有root权限</h1>
+
+<pre><code>adb shell su -c cat /data/data/app.package.name/databases/application.sqlite | sed 's/\r$//' &gt; application.sqlite
+</code></pre>
+
+<h1>应用可调试的话</h1>
+
+<pre><code>adb shell
+run-as app.package.name \
+cp /data/data/package.name/databases/application.sqlite /sdcard/
+exit
+adb pull /sdcard/application.sqlite ~/
+</code></pre>
+
+<h1>使用备份方法</h1>
+
+<pre><code>adb backup -f ~/data.ab -noapk app.package.name
+dd if=data.ab bs=1 skip=24 | python -c &quot;import zlib,sys;sys.stdout.write(zlib.decompress(sys.stdin.read()))&quot; | tar -xvf -
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2013/11/44-copy-android-app-data.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+
+    <div class="pagination">
+      <ul>
+      
+        
+        
+          <li><a href="/posts/1/">1</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/2/">2</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/3/">3</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/4/">4</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/5/">5</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/6/">6</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/7/">7</a></li>
+        
+      
+        
+          <li class="active"><a href="/posts/8/">8</a></li>
+        
+        
+      
+        
+        
+          <li><a href="/posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/14/">14</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

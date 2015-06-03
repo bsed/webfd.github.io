@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Jetty9作为Linux服务配置记录 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="将jetty9配置为Linux服务，jdk为1.7 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>Jetty9作为Linux服务配置记录 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>最近将项目都升级到了Jetty 9 和JDK 7，记录一下配置的过程。以下配置基于的版本为：</p>
+
+<ul>
+<li>Jetty：9.1.1.v20140108</li>
+<li>JDK：1.7.0_51</li>
+<li>官方文档版本：2014-03-17T10:14:41-05:00</li>
+</ul>
+
+<h2>1. 作为root用户配置</h2>
+
+<p>如果你希望以root用户启动jetty。并将jetty配置为服务，以下为快速通道：</p>
+
+<h3>1.1 将脚本jetty.sh拷贝init.d目录下</h3>
+
+<pre><code># cp bin/jetty.sh /etc/init.d/jetty
+</code></pre>
+
+<blockquote>
+<p>jetty.sh是jetty的启动脚本。</p>
+</blockquote>
+
+<h3>1.2 配置/etc/default/jetty</h3>
+
+<pre><code># vim /etc/default/jetty
+---------------------------------------------------
+PATH=$PATH:/usr/local/jdk1.7.0_51/bin 
+JETTY_HOME=/usr/local/jetty9.1 
+TMPDIR=/usr/local/jetty9.1/tmp
+---------------------------------------------------
+</code></pre>
+
+<blockquote>
+<p>jetty.sh脚本会将/etc/default/下同名的文件作为其配置文件。需要配置几个环境变量：主要是java和jetty的根目录，以及指定一个目录作为jetty解压war包时的临时目录，默认是/tmp（不够安全，因为系统服务可能会不定时删除/tmp目录）。</p>
+</blockquote>
+
+<h3>1.3 启动与关闭</h3>
+
+<pre><code># service jetty start
+# service jetty stop
+</code></pre>
+
+<blockquote>
+<p>init.d目录下的jetty就是服务名.
+参考：<a href="http://www.eclipse.org/jetty/documentation/current/startup-unix-service.html">Startup a Unix Service using jetty.sh</a></p>
+</blockquote>
+
+<h2>2. 作为普通用户配置</h2>
+
+<p>如果你希望以普通用户运行jetty，并且可以灵活扩展到多工程的部署，同时jetty升级方便，可以参考一下步骤。</p>
+
+<h3>2.1 配置工程目录</h3>
+
+<p>新建工程目录vrs-base</p>
+
+<pre><code>[root@localhost www]# mkdir vrs-base
+[root@localhost www]# cd vrs-base/
+[root@localhost www]# mkdir tmp
+[root@localhost vrs-base]# pwd
+/opt/www/vrs-base
+</code></pre>
+
+<p>配置jetty环境</p>
+
+<pre><code>[root@localhost vrs-base]# cp $JETTY_HOME/start.ini /opt/www/vrs-base
+[root@localhost vrs-base]# java -jar $JETTY_HOME/start.jar --add-to-start=http,deploy,logging
+</code></pre>
+
+<p>修改端口</p>
+
+<pre><code>[root@localhost vrs-base]# grep port start.ini 
+jetty.port=8080 
+</code></pre>
+
+<h3>2.2 配置服务脚本和属性</h3>
+
+<pre><code>[root@localhost www]# cp $JETTY_HOME/bin/jetty.sh /etc/init.d/jetty-vrs
+[root@localhost www]# vim /etc/default/jetty-vrs
+---------------------------------------------------
+PATH=$PATH:/usr/local/jdk1.7.0_51/bin 
+JETTY_HOME=/usr/local/jetty9.1 
+JETTY_BASE=/opt/www/vrs-base
+TMPDIR=/opt/www/vrs-base/tmp
+---------------------------------------------------
+</code></pre>
+
+<blockquote>
+<p>JETTY_HOME环境变量表示jetty的安装根目录，JETTY_BASE环境变量表示当前应用的根目录，TEPDIR表示应用被jetty解压后的临时目录，不建议使用默认的/tmp目录。</p>
+</blockquote>
+
+<h3>2.3 应用部署</h3>
+
+<pre><code>[root@localhost vrs-base]# cp /opt/www/vrs.xml /opt/www/vrs-base/webapps/
+[root@localhost vrs-base]# cp /opt/www/vrs.war /opt/www/vrs-base/webapps/
+</code></pre>
+
+<blockquote>
+<p>将应用的xml配置文件和war包放到$JETTY_BASE/webapps目录中，jetty对该目录下的内容进行自动部署和扫描。</p>
+</blockquote>
+
+<h3>2.4 新建用户/修改权限</h3>
+
+<pre><code># useradd -U www 
+# chown -R www $JETTY_HOME
+# chown -R www /opt/www
+# chown -R www /opt/logs
+</code></pre>
+
+<blockquote>
+<p><strong>注意</strong>：所有jetty会访问的目录都需要修改权限，如：排行榜系统在/opt/rank目录下生成文件，则该目录也需要修改为www用户权限。</p>
+</blockquote>
+
+<h3>2.5 启动与停止</h3>
+
+<pre><code>[root@localhost vrs-base]# su - www service jetty-vrs start
+Starting Jetty: 2014-04-04 10:17:58.452:INFO::main: Redirecting stderr/stdout to /opt/www/vrs-base/logs/2014_04_04.stderrout.log
+. . . . OK Fri Apr  4 10:18:17 CST 2014 
+
+[root@localhost vrs-base]# ps -ef | grep jetty
+www       2821     1 65 10:19 pts/1    00:00:15 /usr/local/jdk1.7.0_51/bin/java -Djetty.state=/opt/www/vrs-base/jetty-vrs.state -Djetty.logs=/opt/www/vrs-base/logs -Djetty.home=/usr/local/jetty9.1 -Djetty.base=/opt/www/vrs-base -Djava.io.tmpdir=/opt/www/vrs-base/tmp -jar /usr/local/jetty9.1/start.jar jetty-logging.xml jetty-started.xml
+root      2887  1929  0 10:19 pts/1    00:00:00 grep jetty
+
+[root@localhost vrs-base]# su - www service jetty-vrs stop
+Stopping Jetty: OK
+</code></pre>
+
+<h3>2.6 多应用部署</h3>
+
+<p>可以使用同一个jetty，启动多个实例，每个实例部署一个应用，并作为服务运行。
+重复2.1~2.5的步骤，只需要再定义一个JETTY_BASE，在/etc/init.d目录下添加一个对应的服务名即可。
+即：将2.1中的vrs-base修改为ugc-base，将2.2中的jetty-vrs修改为jetty-ugc，启动和停止：</p>
+
+<pre><code>$ su - www service jetty-ugc start
+$ su - www service jetty-ugc stop
+</code></pre>
+
+<h3>附录</h3>
+
+<p>xml配置文件示例(feedback.xml):</p>
+
+<pre><code>&lt;?xml version=&quot;1.0&quot;  encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE Configure PUBLIC &quot;-//Jetty//Configure//EN&quot; &quot;http://www.eclipse.org/jetty/configure_9_0.dtd&quot;&gt;
+
+&lt;Configure class=&quot;org.eclipse.jetty.webapp.WebAppContext&quot;&gt;
+
+  &lt;Set name=&quot;contextPath&quot;&gt;/&lt;/Set&gt;
+  &lt;Set name=&quot;war&quot;&gt;/opt/www/feedback-base/webapps/feedback.war&lt;/Set&gt;
+  &lt;Set name=&quot;tempDirectory&quot;&gt;/opt/www/feedback-base/tmp&lt;/Set&gt;
+  &lt;Set name=&quot;persistTempDirectory&quot;&gt;true&lt;/Set&gt;
+
+   &lt;Set name=&quot;handler&quot;&gt;
+    &lt;New id=&quot;RequestLog&quot; class=&quot;org.eclipse.jetty.server.handler.RequestLogHandler&quot;&gt;
+      &lt;Set name=&quot;requestLog&quot;&gt;
+        &lt;New id=&quot;RequestLogImpl&quot; class=&quot;org.eclipse.jetty.server.NCSARequestLog&quot;&gt;
+          &lt;Set name=&quot;filename&quot;&gt;&lt;Property name=&quot;jetty.logs&quot; default=&quot;./logs&quot;/&gt;/feedback-yyyy_mm_dd.request.log&lt;/Set&gt;
+          &lt;Set name=&quot;filenameDateFormat&quot;&gt;yyyy_MM_dd&lt;/Set&gt;
+          &lt;Set name=&quot;LogTimeZone&quot;&gt;Asia/Shanghai&lt;/Set&gt;
+          &lt;Set name=&quot;retainDays&quot;&gt;60&lt;/Set&gt;
+          &lt;Set name=&quot;append&quot;&gt;true&lt;/Set&gt;
+        &lt;/New&gt;
+      &lt;/Set&gt;
+    &lt;/New&gt;
+  &lt;/Set&gt;
+
+&lt;/Configure&gt;
+</code></pre>
+
+<p>/etc/default目录下的配置文件示例(jetty-feedback)：</p>
+
+<pre><code>JAVA=/usr/local/jdk7/bin/java
+JETTY_HOME=/usr/local/jetty9
+JETTY_BASE=/opt/www/feedback-base
+TMPDIR=/opt/www/feedback-base/tmp   
+</code></pre>
+
+<p>启动/停止脚本示例(jettyctl.sh)</p>
+
+<pre><code># usage
+usage()
+{
+    echo &quot;Usage: ${0##*/} {start|stop|status|restart}&quot;
+    exit 1
+}
+
+# need one param
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+action=$1
+
+# control jetty
+case &quot;$action&quot; in
+    start)
+        su - www service jetty-vrs start
+    ;;
+    stop)
+        su - www service jetty-vrs stop
+    ;;
+    status)
+        su - www service jetty-vrs status
+    ;;
+    restart)
+        su - www service jetty-vrs restart
+    ;;
+    *)  
+        usage
+    ;;
+esac
+</code></pre>
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="http://www.eclipse.org/jetty/documentation/current/startup-unix-service.html">Startup a Unix Service using jetty.sh</a></li>
+</ul>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/05/algorithm-practice-addbybit.html" title="算法练习：不使用加减乘除对两个整数求和">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/03/spring-hibernate-example.html" title="Spring持久化之Hibernate">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-04-11</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#Java-ref">Java <span>3</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#Java-ref">Java <span>6</span></a>
+</li>
+      
+        <li>
+  <a href="/tags/#Jetty-9-ref">Jetty 9 <span>1</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

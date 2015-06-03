@@ -5,8 +5,6 @@
   <meta charset="utf-8">
   <title>WebFD Page 1 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="Useful Liunx Command 树莓派">
-  
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
   <!--[if lt IE 9]>
@@ -128,6 +126,41 @@
         
         
           <li><a href="../../posts/7/">7</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/14/">14</a></li>
         
       
       </ul>
@@ -500,89 +533,34 @@ sudo cp -R * /usr/local/
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2014/11/52-assemble-aar-with-all-dependencies-with-gradle.html">使用Gradle生成包含所有依赖库(.jar或.aar)的aar包</a> <span class="date">2014-11-05</span></h1>
+        <h1 class="title"><a href="/2014/12/virtualbox-install-ubuntu-server.html">VirtualBox安装Ubuntu Server</a> <span class="date">2014-12-16</span></h1>
 
-        <p>Android Library项目中如果使用Android Gradle plugin打aar包，通过maven依赖的库，或者是local依赖的aar都不会包含在生成的aar包里，如果项目是发布一个SDK，为了方便开发者使用，我们倾向于生成一个包含所有依赖库以及.so等文件的aar包。</p>
+        <p>有段时间没更新博客了，今天写一篇随手笔记吧。</p>
 
-<p>通过反复研究和测试，以下Gradle脚本能满足需求，如果需要对代码运行ProGuard混淆，则需要使用Gradle 2.1</p>
+<p>公司给配置的电脑是Thinkpad， 装的是Windows，但手边没有个Linux环境，总感觉缺点啥，于是决定在虚拟机上装个Ubuntu。</p>
 
-<p>方法是为项目增加一个sub project（如<code>pkg_project</code>）专门用于打包，该项目中<code>build.gradle</code>内容如下：</p>
+<p>版本情况：</p>
 
-<pre><code>apply plugin: 'java'
-version = 1.0
+<ul>
+<li>Windows：64位Windows 7</li>
+<li>VirtualBox：VirtualBox-4.3.20-96997-Win</li>
+<li>Ubuntu：ubuntu-14.04.1-server-amd64</li>
+</ul>
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:19.1.0'
-    }
-}
+<p>在VirtualBox中新建虚拟机时，发现ubuntu的版本只有<code>Ubuntu(32bit)</code>一个选项，有点纳闷，不管了，先继续安装。选择完语言，开始安装后就报错了：</p>
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile project(':&lt;your_library_project&gt;') //此处填写需要打包的Android Library Project name
-}
-
-task sync_jars() &lt;&lt; {
-	 //把所有依赖的.jar库都拷贝到build/aar/libs下
-    copy {
-        into buildDir.getPath() +&quot;/aar/libs&quot;
-        from configurations.compile.findAll {
-            it.getName().endsWith(&quot;.jar&quot;)
-        }
-    }
-}
-
-task sync_aars(dependsOn:':&lt;your_library_project&gt;:assembleRelease') &lt;&lt; {
-	 //把所有依赖的.aar库里包含的classes.jar都拷贝到build/aar/libs下，并重命名以不被覆盖
-    def jar_name
-    def aar_path
-    def dest_dir = buildDir.getPath()+&quot;/aar&quot;
-    configurations.compile.findAll {
-        it.getName().endsWith(&quot;.aar&quot;)
-    }.collect {
-        aar_path = it.getPath()
-        jar_name = &quot;libs/&quot;+it.getName().replace(&quot;.aar&quot;,&quot;.jar&quot;)
-        copy {
-            from zipTree(aar_path)
-            into dest_dir
-            include &quot;**/*&quot;
-            rename 'classes.jar', jar_name
-        }
-    }
-}
-
-task fataar(dependsOn:[sync_aars, sync_jars]) &lt;&lt; {
-    task (obfuse_classes_jar, type: proguard.gradle.ProGuardTask) {
-    	//把build/aar/libs/*.jar混淆后生成build/aar/classes.jar
-        configuration &quot;proguard.cfg&quot;
-        injars buildDir.getPath()+&quot;/aar/libs&quot;
-        outjars buildDir.getPath()+&quot;/aar/classes.jar&quot;
-        libraryjars &quot;${System.getProperty('java.home')}/lib/rt.jar&quot;
-        libraryjars &quot;${System.getProperty('java.home')}/Contents/Classes/classes.jar&quot;
-        libraryjars System.getenv(&quot;ANDROID_HOME&quot;)+&quot;/platforms/android-19/android.jar&quot;
-    }.execute()
-
-    task (gen_aar, type: Zip) {
-    	//把生成最终的aar包，注意libs目录需要被排除
-        def dest_dir = buildDir.getPath()+&quot;/aar/&quot;
-        baseName = &quot;mysdk-all&quot;
-        extension = &quot;aar&quot;
-        destinationDir = file(buildDir.getPath())
-        from dest_dir
-        exclude &quot;libs&quot;
-    }.execute()
-}
+<pre><code>This kernel requires an X86-64 CPU,but only detected an i686 CPU
 </code></pre>
+
+<p>Goolge一下，很常见的问题了，需要在BIOS中启用<code>Intel VT-x</code>的虚拟化配置，该配置默认是禁用的。</p>
+
+<p>然后，重新启动虚拟机，还是同样的错误，原来还需要在settings中将version修改为<code>Ubuntu(64 bit)</code>，再重新启动就OK了。</p>
+
+<p>以前在VirtualBox中安装CentOS时，也遇到相同的问题，只是过了一段时间后就忘了，好记性不如烂笔头。</p>
 
 
         <div class="more">
-          <a href="/2014/11/52-assemble-aar-with-all-dependencies-with-gradle.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/12/virtualbox-install-ubuntu-server.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
@@ -623,6 +601,41 @@ task fataar(dependsOn:[sync_aars, sync_jars]) &lt;&lt; {
         
         
           <li><a href="/posts/7/">7</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/14/">14</a></li>
         
       
       </ul>

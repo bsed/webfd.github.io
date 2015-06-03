@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Quartz教程二：API、Job与Trigger - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="Quartz教程的第二篇，API，Job和Trigger 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>Quartz教程二：API、Job与Trigger </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <blockquote>
+<p><a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-02">原文链接</a>
+| [译文链接]()
+| 编译、校对：<a href="http://nkcoder.github.io/">nkcoder</a></p>
+
+<p>本系列教程由<a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials">quartz-2.2.x官方文档</a>翻译、整理而来，希望给同样对quartz感兴趣的朋友一些参考和帮助，有任何不当或错误之处，欢迎指正；有兴趣研究源码的同学，可以参考<a href="https://github.com/nkcoder/quartz-explained">我对quartz-core源码的注释(进行中)</a>。</p>
+</blockquote>
+
+<h2>Quartz API</h2>
+
+<p>Quartz API核心接口有：</p>
+
+<ul>
+<li>Scheduler - 与scheduler交互的主要API；</li>
+<li>Job - 你通过scheduler执行任务，你的任务类需要实现的接口；</li>
+<li>JobDetail - 定义Job的实例；</li>
+<li>Trigger - 触发Job的执行；</li>
+<li>JobBuilder - 定义和创建JobDetail实例的接口;</li>
+<li>TriggerBuilder - 定义和创建Trigger实例的接口；</li>
+</ul>
+
+<p>Scheduler的生命期，从SchedulerFactory创建它时开始，到Scheduler调用shutdown()方法时结束；Scheduler被创建后，可以增加、删除和列举Job和Trigger，以及执行其它与调度相关的操作（如暂停Trigger）。但是，Scheduler只有在调用start()方法后，才会真正地触发trigger（即执行job），见<a href="http://nkcoder.github.io/blog/20140623/quartz-tutorial-using-quartz/">教程一</a>。</p>
+
+<p>Quartz提供的“builder”类，可以认为是一种领域特定语言（DSL，Domain Specific Language)。教程一中有相关示例，这里是其中的代码片段：</p>
+
+<pre><code>// define the job and tie it to our HelloJob class
+JobDetail job = newJob(HelloJob.class)
+  .withIdentity(&quot;myJob&quot;, &quot;group1&quot;) // name &quot;myJob&quot;, group &quot;group1&quot;
+  .build();
+
+// Trigger the job to run now, and then every 40 seconds
+Trigger trigger = newTrigger()
+  .withIdentity(&quot;myTrigger&quot;, &quot;group1&quot;)
+  .startNow()
+  .withSchedule(simpleSchedule()
+      .withIntervalInSeconds(40)
+      .repeatForever())            
+  .build();
+
+// Tell quartz to schedule the job using our trigger
+sched.scheduleJob(job, trigger);
+</code></pre>
+
+<p>定义job的代码使用的是从JobBuilder静态导入的方法。同样，定义trigger的代码使用的是从TriggerBuilder静态导入的方法 - 另外，也导入了SimpleSchedulerBuilder类的静态方法；</p>
+
+<p>从DSL里静态导入的语句如下：</p>
+
+<pre><code>import static org.quartz.JobBuilder.*;
+import static org.quartz.SimpleScheduleBuilder.*;
+import static org.quartz.CronScheduleBuilder.*;
+import static org.quartz.CalendarIntervalScheduleBuilder.*;
+import static org.quartz.TriggerBuilder.*;
+import static org.quartz.DateBuilder.*;
+</code></pre>
+
+<p>SchedulerBuilder接口的各种实现类，可以定义不同类型的调度计划（schedule）；</p>
+
+<p>DateBuilder类包含很多方法，可以很方便地构造表示不同时间点的java.util.Date实例（如定义下一个小时为偶数的时间点，如果当前时间为9:43:27，则定义的时间为10:00:00）。</p>
+
+<h2>Job和Trigger</h2>
+
+<p>一个job就是一个实现了Job接口的类，该接口只有一个方法：</p>
+
+<p>Job接口：</p>
+
+<pre><code>package org.quartz;
+
+public interface Job {
+
+public void execute(JobExecutionContext context)
+  throws JobExecutionException;
+}
+</code></pre>
+
+<p>当job的一个trigger被触发后（稍后会讲到），execute()方法会被scheduler的一个工作线程调用；传递给execute()方法的JobExecutionContext对象中保存着该job运行时的一些信息 - 执行job的scheduler的引用，触发job的trigger的引用，JobDetail对象引用，以及一些其它信息。</p>
+
+<p>JobDetail对象是在将job加入scheduler时，由客户端程序（你的程序）创建的。它包含job的各种属性设置，以及用于存储job实例状态信息的JobDataMap。本节是对job实例的简单介绍，更多的细节将在下一节讲到。</p>
+
+<p>Trigger用于触发Job的执行。当你准备调度一个job时，你创建一个Trigger的实例，然后设置调度相关的属性。Trigger也有一个相关联的JobDataMap，用于给Job传递一些触发相关的参数。Quartz自带了各种不同类型的Trigger，最常用的主要是SimpleTrigger和CronTrigger。</p>
+
+<p>SimpleTrigger主要用于“一次性”(one-shot)执行的Job（只在某个特定的时间点执行一次），或者Job在特定的时间点执行，重复执行N次，每次执行之间延迟T个时间单位。CronTrigger在基于日历的调度上非常有用，如“每个星期五的正午”，或者“每月的第十天的上午10:15”等。</p>
+
+<p>为什么既有Job，又有Trigger呢？很多任务调度器并不区分Job和Trigger。有些调度器只是简单地通过一个执行时间和一些job标识符来定义一个Job；其它的一些调度器将Quartz的Job和Trigger对象合二为一。在开发Quartz的时候，我们认为将调度和要调度的任务分离是合理的。在我们看来，这可以带来很多好处。</p>
+
+<p>例如，Job被创建后，可以保存在Scheduler中，与Trigger是独立的，同一个Job可以有多个Trigger；这种松耦合的另一个好处是，当与Scheduler中的Job关联的trigger都过期了时，可以配置Job稍后被重新调度，而不用重新定义Job；还有，可以修改或者替换Trigger，而不用重新定义与之关联的Job。</p>
+
+<h2>Key</h2>
+
+<p>将Job和Trigger注册到Scheduler时，可以为它们设置key，配置其身份属性。Job和Trigger的key（JobKey和TriggerKey）可以用于将Job和Trigger放到不同的分组（group）里，然后基于分组进行操作。同一个分组下的Job或Trigger的名称必须唯一，即一个Job或Trigger的key由名称（name）和分组（group）组成。</p>
+
+<p>对于Job和Trigger，你现在有一个大概的了解了，更详细的介绍，</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/06/quartz-tutorial-03-job-jobdetail.html" title="Quartz教程三：Job与JobDetail介绍">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/06/quartz-tutorial-01-using-quartz.html" title="Quartz教程一：使用quartz">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-06-24</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#quartz-ref">quartz <span>9</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#quartz-ref">quartz <span>7</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

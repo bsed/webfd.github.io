@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>quartz教程：快速入门 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="quartz-2.2.x官方文档的编译和整理 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>quartz教程：快速入门 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <blockquote>
+<p><a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/quick-start">原文链接</a>
+| <a href="http://nkcoder.github.io/blog/20140622/quartz-tutorial-quickstart/">译文链接</a>
+| 编译、校对：<a href="http://nkcoder.github.io/">nkcoder</a></p>
+
+<p>本系列教程由<a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials">quartz-2.2.x官方文档</a>翻译、整理而来，希望给同样对quartz感兴趣的朋友一些参考和帮助，有任何不当或错误之处，欢迎指正；有兴趣研究源码的同学，可以参考<a href="https://github.com/nkcoder/quartz-explained">我对quartz-core源码的注释(进行中)</a>。</p>
+</blockquote>
+
+<p>欢迎来到quartz快速入门教程。阅读本教程，你将会了解：</p>
+
+<ul>
+<li>quartz下载</li>
+<li>quartz安装</li>
+<li>根据你的需要，配置Quartz</li>
+<li>开始一个示例应用</li>
+</ul>
+
+<p>当熟悉了quratz调度的基本功能后，可以尝试一些更高级的特性，比如<a href="http://terracotta.org/documentation/quartz-scheduler/quartz-scheduler-where">Where</a>，这个一个企业级功能，可以让job和trigger运行在指定的，而不是随机的Terracotta客户端上。</p>
+
+<h2>下载和安装</h2>
+
+<p>首先，<a href="http://quartz-scheduler.org/downloads/">下载最新的稳定版</a> - 不用注册。解压并安装。</p>
+
+<h3>Quartz jar文件</h3>
+
+<p>quartz安装包根目录的lib/目录下有很多的jar包。其中，quartz-xxx.jar（其中xxx是版本号）是最主要的。为了使用quartz，必须将该jar包放在应用的classpath下；</p>
+
+<p>下载后，解压，然后将quartz-xxx.jar放到你的应用中。</p>
+
+<p>我主要是在应用服务器的环境中使用quartz，所以一般将quartz jar包放到应用中（.ear或.war）。当然，如果你希望在很多应用中使用quartz，将quartz的jar包放在应用服务器(appserver)的classpath下即可。如果你只是希望在独立的应用中使用quartz，将quartz的jar包和你的应用依赖的其它jar包放在一起即可。</p>
+
+<p>quzrtz依赖一些第三方的库（以jar包的形式），这些库位于quartz安装包的<code>lib</code>目录下。要使用quartz的所有功能，必须将所有的第三方jar包都放到classpath下。如果你开发的是一个独立的quartz应用，建议将所有的jar包都放到classpath下；如果是在应用服务器环境下使用quartz，其中有些包可能已经存在于classpath中了，因此你需要自己选择。</p>
+
+<blockquote>
+<p>在应用服务器环境下，如果同一个jar文件，存在两个不同的版本，要注意，可能会产生一些奇怪的结果；比如，WebLogic包含了一个J2EE的实现（在weblogic.jar中），该实现与servlet.jar的实现可能不一致。此时，应该从你的应用中排除掉servlet.jar，这样你就知道使用的是哪个类了。</p>
+</blockquote>
+
+<h3>properties文件</h3>
+
+<p>quartz使用名为quartz.properties的配置文件。刚开始时该配置文件不是必须的，但是为了使用最基本的配置，该文件必须位于classpath下。</p>
+
+<p>基于我的个人情况举个例子，我的应用是基于WebLogic Workshop开发的。我将所有的配置文件（包括quartz.properties）放到应用根目录下的一个项目中。当我将项目打包成.ear文件时，放置配置文件的项目会以jar包的形式进入最终的.ear包，所以quartz.properties文件就自动位于classpath中了。</p>
+
+<p>如果你准备构建一个使用quartz的web应用（以.war包的形式），你应该将quartz.properties文件放到WEB-INF/classes目录下。</p>
+
+<h2>配置</h2>
+
+<p>这里包含很多内容。quartz是一个配置很灵活的应用。配置quartz最好的方式是，编辑quartz.properties文件，然后放到应用的classpath下。</p>
+
+<p>quartz的安装包中包含了一些配置文件的示例，位于example/目录下。我建议你创建自己的quartz.properties文件，而不是简单地从示例中拷贝并删除不需要的部分。这样看起来更整洁，而且你也会了解到quartz的更多功能。</p>
+
+<p>关于quartz配置文件的详细文档，请查阅<a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/configuration">Quartz配置参考</a></p>
+
+<p>为了使用quartz，一个基本的quartz.properties配置文件如下所示：</p>
+
+<pre><code>org.quartz.scheduler.instanceName = MyScheduler
+org.quartz.threadPool.threadCount = 3
+org.quartz.jobStore.class = org.quartz.simpl.RAMJobStore
+</code></pre>
+
+<p>上述配置的scheduler有如下特点：</p>
+
+<ul>
+<li>org.quartz.scheduler.instanceName - scheduler的名称为“MyScheduler”</li>
+<li>org.quartz.threadPool.threadCount - 线程池中有3个线程，即最多可以同时执行3个job；</li>
+<li>org.quartz.jobStore.class - quartz的所有数据，包括job和trigger的配置，都会存储在内存中（而不是数据库里）。如果你想使用quartz的数据库存储功能，我们建议在使用数据库存储之前，先使用内存存储（RamJobStore）。</li>
+</ul>
+
+<h2>示例应用</h2>
+
+<p>下载和安装完quartz后，是时候开发一个示例应用，并让它跑起来了。下面的示例代码，获取scheduler实例对象，启动，然后关闭。</p>
+
+<p>QuartzTest.java</p>
+
+<pre><code>import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
+import static org.quartz.JobBuilder.*;
+import static org.quartz.TriggerBuilder.*;
+import static org.quartz.SimpleScheduleBuilder.*;
+
+public class QuartzTest {
+
+    public static void main(String[] args) {
+
+        try {
+            // Grab the Scheduler instance from the Factory 
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+
+            // and start it off
+            scheduler.start();
+
+            scheduler.shutdown();
+
+        } catch (SchedulerException se) {
+            se.printStackTrace();
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+<p>当你调用StdSchedulerFactory.getDefaultScheduler()获取scheduler实例对象后，在调用scheduler.shutdown()之前，scheduler不会终止，因为还有活跃的线程在执行。</p>
+</blockquote>
+
+<p>注意示例代码中的静态导入(static import)，下面的代码中也会用到它们。</p>
+
+<p>如果你没有配置日志输出，所有的日志会输出到控制台，比如：</p>
+
+<pre><code>[INFO] 21 Jan 08:46:27.857 AM main [org.quartz.core.QuartzScheduler]
+Quartz Scheduler v.2.0.0-SNAPSHOT created.
+
+[INFO] 21 Jan 08:46:27.859 AM main [org.quartz.simpl.RAMJobStore]
+RAMJobStore initialized.
+
+[INFO] 21 Jan 08:46:27.865 AM main [org.quartz.core.QuartzScheduler]
+Scheduler meta-data: Quartz Scheduler (v2.0.0) 'Scheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 50 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+
+[INFO] 21 Jan 08:46:27.865 AM main [org.quartz.impl.StdSchedulerFactory]
+Quartz scheduler 'Scheduler' initialized from default resource file in Quartz package: 'quartz.properties'
+
+[INFO] 21 Jan 08:46:27.866 AM main [org.quartz.impl.StdSchedulerFactory]
+Quartz scheduler version: 2.0.0
+
+[INFO] 21 Jan 08:46:27.866 AM main [org.quartz.core.QuartzScheduler]
+Scheduler Scheduler_$_NON_CLUSTERED started.
+
+[INFO] 21 Jan 08:46:27.866 AM main [org.quartz.core.QuartzScheduler]
+Scheduler Scheduler_$_NON_CLUSTERED shutting down.
+
+[INFO] 21 Jan 08:46:27.866 AM main [org.quartz.core.QuartzScheduler]
+Scheduler Scheduler_$_NON_CLUSTERED paused.
+
+[INFO] 21 Jan 08:46:27.867 AM main [org.quartz.core.QuartzScheduler]
+Scheduler Scheduler_$_NON_CLUSTERED shutdown complete.
+</code></pre>
+
+<p>你可以在start()和shutdown()之间做一些有趣的事情：</p>
+
+<pre><code>// define the job and tie it to our HelloJob class
+JobDetail job = newJob(HelloJob.class)
+    .withIdentity(&quot;job1&quot;, &quot;group1&quot;)
+    .build();
+
+// Trigger the job to run now, and then repeat every 40 seconds
+Trigger trigger = newTrigger()
+    .withIdentity(&quot;trigger1&quot;, &quot;group1&quot;)
+    .startNow()
+    .withSchedule(simpleSchedule()
+            .withIntervalInSeconds(40)
+            .repeatForever())            
+    .build();
+
+// Tell quartz to schedule the job using our trigger
+scheduler.scheduleJob(job, trigger);
+</code></pre>
+
+<blockquote>
+<p>在调用shutdown()之前，你需要给job的触发和执行预留一些时间，比如，你可以调用Thread.sleep(60000)让线程睡眠一段时间。</p>
+</blockquote>
+
+<p>好了，自己去探索吧！</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/06/quartz-tutorial-01-using-quartz.html" title="Quartz教程一：使用quartz">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/06/jetty-deploy-help.html" title="jetty9 部署指南">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-06-22</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#quartz-ref">quartz <span>9</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#quartz-ref">quartz <span>7</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

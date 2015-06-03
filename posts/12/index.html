@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>WebFD Page 12 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      
+<div class="page-header">
+  <h1>Blogs</h1>
+</div>
+
+
+<div class="row">
+  <div class="span12">
+
+    <div class="pagination">
+      <ul>
+      
+        
+        
+          <li><a href="../../posts/1/">1</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/2/">2</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/3/">3</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/4/">4</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/5/">5</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/6/">6</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/7/">7</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/11/">11</a></li>
+        
+      
+        
+          <li class="active"><a href="../../posts/12/">12</a></li>
+        
+        
+      
+        
+        
+          <li><a href="../../posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/14/">14</a></li>
+        
+      
+      </ul>
+    </div>
+
+
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/brew-version-software.html">brew指定版本安装软件</a> <span class="date">2013-03-16</span></h1>
+
+        <p>最近node.js升级到0.10版本了。周末今天看到yeoman好像有改变了，在主页上更改为<code>yo</code>、<code>brower</code>、<code>grunt</code>了，所以想升级下，发现执行<code>bower</code>时无法使用了。发生错误，找来找去，我猜估计是node.js折腾的，就打算降级node.js。</p>
+
+<p>我的NodeJs是<code>bower</code>管理的，所以才有了这么一段记录，最后Google一大把，最后在这篇博客中找到了答案<a href="https://coderwall.com/p/lqphzg">brew install specific version of formula</a>。我这边大致记录下我的过程：</p>
+
+<pre><code>{% codeblock brew version lang:bash %}
+╭─yfyang@yfyang-mac 03/16/13  1:36PM /usr/local/share/npm/lib git:master ✗✗✗
+╰─⚙ ─➤ brew versions node                                                                                                                        ✖ ✭
+0.10.0   git checkout 687062f /usr/local/Library/Formula/node.rb
+0.8.22   git checkout 3c4a714 /usr/local/Library/Formula/node.rb  # 下面一步可以指定这个 3c4a714
+0.8.21   git checkout a3ef032 /usr/local/Library/Formula/node.rb
+0.8.20   git checkout 9f95fff /usr/local/Library/Formula/node.rb
+…
+╭─yfyang@yfyang-mac 03/16/13  2:08PM /usr/local/share/npm/lib git:master ✗✗✗
+╰─⚙ ─➤ git checkout 3c4a714 /usr/local/Library/Formula/node.rb
+╭─yfyang@yfyang-mac 03/16/13  2:11PM /usr/local/share/npm/lib git:master ✗✗✗
+╰─⚙ ─➤ rm -rf /Library/Caches/Homebrew/Formula/node.brewing
+╭─yfyang@yfyang-mac 03/16/13  2:11PM /usr/local/share/npm/lib git:master ✗✗✗
+╰─⚙ ─➤ brew install node
+╭─yfyang@yfyang-mac 03/16/13  2:16PM /usr/local/share/npm/lib git:master ✗✗✗
+╰─⚙ ─➤ npm install -g yo grunt-cli bower
+{% endcodeblock %}
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2013/03/brew-version-software.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/apache-pig-user.html">Apache Pig 使用</a> <span class="date">2013-03-16</span></h1>
+
+        <p>很久没有写博客了，最近忙着这事那事，加之敬佩的领导也离开公司出去“散心”了。所以本来计划的“大数据”研究的事情也不了了之了。</p>
+
+<p>不过，最近部门安排到公司的研究院做相关工作，这边不少需要大数据处理的事情，原来所设想的发展方向又可以好好的折腾把了。</p>
+
+<p>生命在于折腾嘛。</p>
+
+<p>最新一个工作就是了解和熟悉Apach Pig的使用以及其一些工作原理，刚和研究院的同事讨论这个Pig的使用问题，由于我之前在行软的工作方式和这边的不同，讨论了不少时间总说不明白，故此，在这以博文记之。</p>
+
+<h1>啥是Apach Pig</h1>
+
+<p>之前看<code>Apache Hadoop</code>时，对于<code>MapReduce</code>使用关注较少，但是对于MR的一些服务产品，包括<code>Hive</code>等工具也略知一二。这次来到新的工作岗位的第一个任务就是对于这种<code>MR</code>工具的使用进行一些数据挖掘和分析。这里他们已经对<code>Apache Pig</code>有了一定的使用，所以就选型方面就选了它。那么这周就对<code>Apache Pig</code>进行了一番了解。</p>
+
+<p><code>Apache Pig</code>是对处理超大型数据集的抽象层，在<code>MapReduce</code>中的框架中有<code>map</code>和<code>reduce</code>两个函数，如果我们自己去写一个MapReduce的实现，从代码编写到编译以及部署到Hadoop中执行的话，是非常耗时间的，无法做到高效率。<code>Pig</code>可以简化<code>MapReduce</code>的开发，而且还可以对不同的数据进行转换，同时可以将结果存储到各个介质中。另外它的每个过程都是很清晰开放的，如果我们有需要自己实现加载数据的<code>LAOD</code>或者自己存储的<code>STORGE</code>以及<code>UDFs</code>，都是较简单的。</p>
+
+<h1>Apach Pig 组成部分</h1>
+
+<p><code>Apache Pig</code>自带两个模式，<code>local</code>模式和<code>mapreduce</code>的方式，默认采用<code>mr</code>的方式。如果需要在本地测试的话，可以用<code>local</code>模式来进行。生产的话，就用<code>mr</code>方式。</p>
+
+<p><code>Apache Pig</code>包括一套类似SQL的脚本和执行脚本的工具。类似SQL的脚本在Pig中我们称之为<code>Pig Latin</code>，而执行脚本的工具也就是Pig本身了。</p>
+
+
+        <div class="more">
+          <a href="/2013/03/apache-pig-user.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/AndroidManifest-file-explain.html">AndroidManifest file explain</a> <span class="date">2013-03-16</span></h1>
+
+        <blockquote>
+<p>参考： <a href="http://www.cnblogs.com/pilang/archive/2011/04/20/2022932.html">Android学习笔记之AndroidManifest.xml文件解析</a></p>
+</blockquote>
+
+<p><code>AndroidManifest.xml</code>是<code>Android</code>应用程序中必须的文件。它描述了应用代码包中的全局数据，在<code>application</code>的根目录下，包括配置了应用的组件（activity\service等），同时还配置了启动位置、服务等。</p>
+
+<p>{% code AndroidManifest.xml注释版本 %}</p>
+
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;!--
+    manifest 根节点，描述应用的具体信息，包括包名等
+        package:            应用内主程序包的包名.
+        sharedUserId:       数据权限
+                                因为默认情况下，Android给每个APK分配一个唯一的UserID，
+                                所以是默认禁止不同APK访问共享数据的。若要共享数据，
+                                第一可以采用Share Preference方法，
+                                第二种就可以采用sharedUserId了，
+                                将不同APK的sharedUserId都设为一样，则这些APK之间就可以互相共享数据了
+        sharedUserLabel:    一个共享的用户名，它只有在设置了sharedUserId属性的前提下才会有意义 
+        versionCode:        是给设备程序识别版本(升级)用的必须是一个interger值代表app更新过多少次
+                                比如第一版一般为1，之后若要更新版本就设置为2，3等等
+        versionName:        这个名称是给用户看的，你可以将你的APP版本号设置为1.1版
+                                后续更新版本设置为1.2、2.0版本等等
+        installLocation:    安装参数，是Android2.2中的一个新特性，installLocation有三个值可以选择：
+                                1. internalOnly 系统会优先考虑将APK安装到SD卡上
+                                                (SD卡满了的话，则安装在内存存储上)
+                                2. auto         系统将会根据存储空间自己去适应
+                                3. preferExternal   必须安装到内部才能运行
+--&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;com.package.xxx&quot;
+    android:sharedUserId=&quot;string&quot;
+    android:sharedUserLabel=&quot;string resource&quot;
+    android:versionCode=&quot;integer&quot;
+    android:versionName=&quot;string&quot;
+    android:installLocation=[&quot;auto&quot; | &quot;internalOnly&quot; | &quot;preferExternal&quot;] &gt;
+    &lt;!-- 指定当前应用兼容的最低SDK版本 --&gt;
+    &lt;uses-sdk
+            android:minSdkVersion=&quot;10&quot;
+            android:targetSdkVersion=&quot;14&quot;/&gt;
+    &lt;!-- 请求您的package正常运行所需要赋予的安全许可，可以多个 --&gt;
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot;/&gt;
+    &lt;!-- 声明了安全许可来限制那些程序能够使用应用的组件和功能 --&gt;
+    &lt;permission/&gt;
+    &lt;!-- 声明了用来测试当前应用包或者其他包指定组件的代码 --&gt;
+    &lt;instrumentation/&gt;
+    &lt;!-- 
+        包括package中application级别组件声明的根节点。
+        这个元素也可包含application中的全局和默认的属性，
+        比如 标签,icon，主题,必要的权限等等，只能有最多一个这个元素。
+        1. allowClearUserData: 用户是否能选择自行清除数据，默认为true
+                            程序管理器包含一个选择允许用户清除数据
+                            当为true时，用户可自己清理用户数据，反之亦然
+        2. allowTaskReparenting: 是否允许activity更换从属的任务，比如从短信息任务切换到浏览器任务
+        3. backupAgent: 设置该APP的备份，属性值应该是一个完整的类名
+        4. debuggable: 当设置为true时，表明该APP在手机上可以被调试
+        5. description/label:  此两个属性都是为许可提供的，均为字符串资源
+                            当用户去看许可列表(android:label)
+                            或者某个许可的详细信息(android:description)时，
+                            这些字符串资源就可以显示给用户
+        6. enabled: Android系统是否能够实例化该应用程序的组件
+        7. hasCode: 表示此APP是否包含任何的代码
+                    默认为true，
+                    若为false，则系统在运行组件时，不会去尝试加载任何的APP代码
+        8. icon:   声明整个APP的图标,图片一般都放在drawable文件夹下
+        9. name:   应用程序所实现的Application子类的全名
+                    当应用程序进程开始时，该类在所有应用程序组件之前被实例化
+        10. permission: 设置许可名，这个属性若在&lt;application&gt;上定义的话，
+                    是一个给应用程序的所有组件设置许可的便捷方式，
+                    当然它是被各组件设置的许可名所覆盖的
+        11. persistent: 该应用程序是否应该在任何时候都保持运行状态,默认为false
+        12. process:    应用程序运行的进程名，
+                    它的默认值为&lt;manifest&gt;元素里设置的包名，
+                    当然每个组件都可以通过设置该属性来覆盖默认值。
+        13. restoreAnyVersion:  用来表明应用是否准备尝试恢复所有的备份
+        14. taskAffinity: 拥有相同的affinity的Activity理论上属于相同的Task
+                        应用程序默认的affinity的名字是&lt;manifest&gt;元素中设定的package名
+        15. theme: 一个资源的风格,它定义了一个默认的主题风格给所有的activity
+        16. allowBackup: 是否允许备份用户基础数据
+     --&gt;
+    &lt;application
+            android:allowClearUserData=[&quot;true&quot; | &quot;false&quot;]
+            android:allowTaskReparenting=[&quot;true&quot; | &quot;false&quot;]
+            android:backupAgent=&quot;string&quot;
+            android:debuggable=[&quot;true&quot; | &quot;false&quot;]
+            android:description=&quot;string resource&quot;
+            android:enabled=[&quot;true&quot; | &quot;false&quot;]
+            android:hasCode=[&quot;true&quot; | &quot;false&quot;]
+            android:icon=&quot;drawable resource&quot;
+            android:killAfterRestore=[&quot;true&quot; | &quot;false&quot;]
+            android:label=&quot;string resource&quot;
+            android:manageSpaceActivity=&quot;string&quot;
+            android:name=&quot;com.pack.ApplicationName&quot;
+            android:permission=&quot;string&quot;
+            android:persistent=[&quot;true&quot; | &quot;false&quot;]
+            android:process=&quot;string&quot;
+            android:restoreAnyVersion=[&quot;true&quot; | &quot;false&quot;]
+            android:taskAffinity=&quot;string&quot;
+            android:theme=&quot;resource or theme&quot; 
+            android:allowBackup=[&quot;true&quot; | &quot;false&quot;]&gt;
+        &lt;!-- 
+            用来与用户交互的界面。
+            当开启一个应用时，初始界面就是一个activity，
+            大部分被使用到的其他界面都是由不同的activity所实现并在界面中进行导航调用的。 
+            1. name:
+            2. allowTaskReparenting: 
+                    是否保留状态不变,比如切换回home, 再从新打开，activity处于最后的状态。
+            3. alwaysRetainTaskState:
+            4. clearTaskOnLaunch: 
+                    比如 P 是 activity, Q 是被P 触发的activity,然后返回Home,重新启动 P，是否显示 Q
+            5. configChanges : 
+                    当配置list发生修改时,是否调用 onConfigurationChanged()方法,比如旋转时界面自适应.
+                    1. 正常情况下. 如果手机旋转了.当前Activity后杀掉,然后根据方向重新加载这个Activity.
+                        就会从onCreate开始重新加载.
+                    2. 如果你设置了这个选项，当手机旋转后,当前Activity之后调用onConfigurationChanged()方法.
+                    而不跑onCreate方法等.
+            6. enabled : 
+            7. excludeFromRecents :  
+                    是否可被显示在最近打开的activity列表里，默认是false
+            8. exported : 
+            9. finishOnTaskLaunch : 
+                    当用户重新启动这个任务的时候，是否关闭已打开的activity，默认是false
+            10. icon : 
+            11. label : 
+            12. launchMode : 
+                    在多Activity开发中, 有可能是自己应用之间的Activity跳转，或者夹带其他应用的可复用Activity。
+                    可能会希望跳转到原来某个Activity实例，而不是产生大量重复的Activity。
+                    这需要为Activity配置特定的加载模式，而不是使用默认的加载模式.有4中加载模式，默认为standard
+                    1. standard： 就是intent将发送给新的实例，所以每次跳转都会生成新的activity
+                    2. singleTop：也是发送新的实例，但不同standard的一点是，在请求的Activity正好
+                                  位于栈顶时(配置成singleTop的Activity)，不会构造新的实例
+                    3. singleTask:  和后面的singleInstance都只创建一个实例
+                                    当intent到来，需要创建设置为singleTask的Activity的时候，
+                                    系统会检查栈里面是否已经有该Activity的实例。如果有直接
+                                    将intent发送给它。
+                    4. singleInstance:  singleInstance模式就是将该Activity单独放入一个栈中，
+                                        这样这个栈中只有这一个Activity，不同应用的intent都由
+                                        这个Activity接收和展示，这样就做到了共享。
+                第四种模式的示例解释:
+                首先说明一下task这个概念，Task可以认为是一个栈，可放入多个Activity。
+                比如启动一个应用，那么Android就创建了一个Task，然后启动这个应用的入口Activity，
+                那在它的界面上调用其他的Activity也只是在这个task里面。那如果在多个task中共享一个Activity的话
+                怎么办呢。举个例来说，如果开启一个导游服务类的应用程序，里面有个Activity是开启GOOGLE地图的，
+                当按下home键退回到主菜单又启动GOOGLE地图的应用时，显示的就是刚才的地图，实际上是同一个Activity，
+                实际上这就引入了singleInstance。
+            13. multiprocess : 是否允许多进程，默认是false
+            14. noHistory : 
+                    当用户从Activity上离开并且它在屏幕上不再可见时，
+                    Activity是否从Activity stack中清除并结束。默认是false。Activity不会留下历史痕迹
+            15. permission : 
+            16. process : 
+            17. screenOrientation : activity显示的模式
+                    1. 默认为unspecified：由系统自动判断显示方向
+                    2. landscape横屏模式，宽度比高度大
+                    3. portrait竖屏模式, 高度比宽度大
+                    4. user模式，用户当前首选的方向
+                    5. behind模式：和该Activity下面的那个Activity的方向一致(在Activity堆栈中的)
+                    6. sensor模式：有物理的感应器来决定。如果用户旋转设备这屏幕会横竖屏切换
+                    7. nosensor模式：忽略物理感应器，这样就不会随着用户旋转设备而更改了
+            18. stateNotNeeded : activity被销毁或者成功重启时是否保存状态
+            19. taskAffinity : 
+            20. theme : 
+            21. windowSoftInputMode : activity主窗口与软键盘的交互模式，可以用来避免输入法面板遮挡问题
+        --&gt;
+        &lt;activity 
+                android:name=&quot;com.package.Activity&quot;
+                android:allowTaskReparenting=[&quot;true&quot; | &quot;false&quot;]
+                android:alwaysRetainTaskState=[&quot;true&quot; | &quot;false&quot;]
+                android:clearTaskOnLaunch=[&quot;true&quot; | &quot;false&quot;]
+                android:configChanges=[&quot;mcc&quot;, &quot;mnc&quot;, &quot;locale&quot;,
+                                 &quot;touchscreen&quot;, &quot;keyboard&quot;, &quot;keyboardHidden&quot;,
+                                 &quot;navigation&quot;, &quot;orientation&quot;, &quot;screenLayout&quot;,
+                                 &quot;fontScale&quot;, &quot;uiMode&quot;]
+                android:enabled=[&quot;true&quot; | &quot;false&quot;]
+                android:excludeFromRecents=[&quot;true&quot; | &quot;false&quot;]
+                android:exported=[&quot;true&quot; | &quot;false&quot;]
+                android:finishOnTaskLaunch=[&quot;true&quot; | &quot;false&quot;]
+                android:icon=&quot;drawable resource&quot;
+                android:label=&quot;string resource&quot;
+                android:launchMode=[&quot;multiple&quot; | &quot;singleTop&quot; |
+                              &quot;singleTask&quot; | &quot;singleInstance&quot;]
+                android:multiprocess=[&quot;true&quot; | &quot;false&quot;]
+                android:noHistory=[&quot;true&quot; | &quot;false&quot;]  
+                android:permission=&quot;string&quot;
+                android:process=&quot;string&quot;
+                android:screenOrientation=[&quot;unspecified&quot; | &quot;user&quot; | 
+                                     &quot;behind&quot; | &quot;landscape&quot; |  &quot;portrait&quot; | &quot;sensor&quot; | &quot;nosensor&quot;]
+                android:stateNotNeeded=[&quot;true&quot; | &quot;false&quot;]
+                android:taskAffinity=&quot;string&quot;
+                android:theme=&quot;resource or theme&quot;
+                android:windowSoftInputMode=[&quot;stateUnspecified&quot;,
+                                       &quot;stateUnchanged&quot;, &quot;stateHidden&quot;,
+                                       &quot;stateAlwaysHidden&quot;, &quot;stateVisible&quot;,
+                                       &quot;stateAlwaysVisible&quot;, &quot;adjustUnspecified&quot;,
+                                       &quot;adjustResize&quot;, &quot;adjustPan&quot;] &gt;
+            &lt;!-- 
+                指定一个组件所支持的intent的值
+                1. priority: 有序广播主要是按照声明的优先级别
+                              如A的级别高于B，那么，广播先传给A，再传给B。
+                - action: 只有android:name这个属性
+                   name: android.intent.action.MAIN: 
+                        表明此activity是作为应用程序的入口
+                - category: 只有android:name这个属性
+                    name:android.intent.category.LAUNCHER:
+                        决定应用程序是否显示在程序列表里
+             --&gt;
+            &lt;intent-filter 
+                android:icon=&quot;drawable resource&quot;
+                android:label=&quot;string resource&quot;
+                android:priority=&quot;integer&quot;&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot;/&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot;/&gt;
+                &lt;data /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+        &lt;!-- 任何时间都在后台执行的服务组件 --&gt;
+        &lt;service android:name=&quot;com.package.Service&quot; 
+                android:enabled=[&quot;true&quot; | &quot;false&quot;]
+                android:exported[=&quot;true&quot; | &quot;false&quot;]
+                android:icon=&quot;drawable resource&quot;
+                android:label=&quot;string resource&quot;
+                android:name=&quot;string&quot;
+                android:permission=&quot;string&quot;
+                android:process=&quot;string&quot;&gt;
+            &lt;intent-filter &gt;
+                &lt;action/&gt;
+            &lt;/intent-filter&gt;
+        &lt;/service&gt;
+        &lt;!-- 能够将application获得数据的改变或发生的操作 --&gt;
+        &lt;receiver/&gt;
+        &lt;!-- 用来管理持久化数据并发布给其他应用程序使用的组件 --&gt;
+        &lt;provider/&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+
+<p>{% endcode %}</p>
+
+
+        <div class="more">
+          <a href="/2013/03/AndroidManifest-file-explain.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/03-16-use-raspberry-pi-control-step-motor-rotate-webcam---%E5%89%AF%E6%9C%AC.html">如何使用Raspberry Pi控制步进电机旋转高清摄像头并拍照</a> <span class="date">2013-03-16</span></h1>
+
+        <h1>硬件准备</h1>
+
+<p>需要以下硬件：</p>
+
+<ol>
+<li>可以工作的<a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHo44Chb01aWIu4ho12MwdcCLV6ff8kJMg0iz0FTGXaJAqMvt94sTe0NIrCAdd8LW">树莓派</a>一个</li>
+<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHoWKV0kwS8Wy16Cg6qBM%2BZAOnJCqNG%2BPJAy9U15g8TwJiq5U3GGcJ8eTvC7%2F6APShw%3D%3D">母对母1P杜邦线</a>6根</li>
+<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CFcRfH0GoT805sipKjxjSLt%2BsmFEpvY8zQ4WXjoTHsLWTKD4gnL0sndE3qVPXd4UC6NUEZOQAryYUWhO7gt10i%2FUQ%3D%3D">DC 5V4相28YBJ-48步进电机</a>一个</li>
+<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CFcRfH0GoT805sipKjxjSLuXQmw2TUIlWTNRCvS2wo483pjZyXspPuvkTH5pg4vQUqrztOAoNz2Gfp8MmwKPg%2FbQb8%3D">UL2003芯片步进电机驱动板</a>一块</li>
+</ol>
+
+<h1>安装</h1>
+
+<p>按下图将步进电机接到驱动板上，也就是白色的接口</p>
+
+<p><img src="http://img04.taobaocdn.com/bao/uploaded/i4/T10lS4XnXfXXaZhKrX_115008.jpg_310x310.jpg"/></p>
+
+<p><img src="http://img02.taobaocdn.com/imgextra/i2/49873130/T2534HXoBXXXXXXXXX_!!49873130.jpg" width="600"/></p>
+
+
+        <div class="more">
+          <a href="/2013/03/03-16-use-raspberry-pi-control-step-motor-rotate-webcam---%E5%89%AF%E6%9C%AC.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/golang-precautions-record.html">golang 学习-编程注意事项</a> <span class="date">2013-03-15</span></h1>
+
+        <ol>
+<li><p>在编写结构时，需要注意，属性名称大写，这点与Golang的约定有关系，否则，可能在序列化时，无法对其小写属性进行序列化；</p>
+
+<blockquote>
+<p>我在编写一个结构，然后序列化时，第一次都是首字母小写，总是无法正确序列化出来。后来修改为大写即可；</p>
+
+<p>大致代码如下</p>
+</blockquote>
+
+<pre><code>type StoryCount struct {
+    Id    string &quot;_id&quot;
+    Value CountValue
+}
+// mdi.FindKeyCount 返回的就是StoryCount结构体
+out := &amp;Result{0, &quot;操作成功&quot;, mdi.FindKeyCount(key)}
+// 小写情况下 打印的都是
+// {&quot;Ret&quot;:0,&quot;Reason&quot;:&quot;操作成功&quot;,&quot;Data&quot;:[{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]}
+// 大写后正常
+</code></pre></li>
+
+<li><p>:=与=号的区别在于 := 首次声明或者实例化时使用，后续如果需要对定义的信息进行调整，可以通过=来进行赋值</p></li>
+
+<li><p>项目工程编译模块时，需要注意package的声明与文件夹名称一致；</p></li>
+</ol>
+
+
+        <div class="more">
+          <a href="/2013/03/golang-precautions-record.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/vistor-on-homepage-led-indicator.html">如何在Raspberry Pi上用LED闪烁提示网站首页新访客</a> <span class="date">2013-03-13</span></h1>
+
+        <p>本方法只适合小网站，主要是好玩。Raspberry Pi不是很合适需要实时控制的系统（比如，飞行器，遥控小车），因为Linux内核要多任务，应用程序的优先级不能保持最高，会带来延时，但做些实时性要求不高的系统还是可以的。</p>
+
+<h1>硬件安装</h1>
+
+<p>需要以下硬件：</p>
+
+<ol>
+<li>可以工作的<a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHo44Chb01aWIu4ho12MwdcCLV6ff8kJMg0iz0FTGXaJAqMvt94sTe0NIrCAdd8LW">树莓派</a>一个</li>
+<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHoWKV0kwS8Wy16Cg6qBM%2BZAOnJCqNG%2BPJAy9U15g8TwJiq5U3GGcJ8eTvC7%2F6APShw%3D%3D">1P杜邦线2条</a></li>
+<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CFcRfH0GoT805sipKjxiNm9RKSkRargJCPYP6KVEIQUWKzMUFn1hvlcbkMSKk3m2pVJo%2BqQDYKVz%2Bt1%2FjL7Iywe7g%3D%3D">面包板</a>一个</li>
+<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHKxVk7v382jKYSyD7qi5ltcqvLWmWBL7lxLB2%2BsaWLuet8Ik65QHyGWV5mRTheUA">面包板跳线</a> 或 <a href="http://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.166.XlEzyw&amp;id=15208013820&amp;_u=nqa35596&amp;is_b=1&amp;cat_id=2&amp;q=%C5%C5%D5%EB&amp;rn=bb53adf333ca7517208da34346ac3ffb">单排针</a> 两根</li>
+<li><a href="http://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.30.wnPTNf&amp;id=14576731464&amp;_u=nqa35af3&amp;is_b=1&amp;cat_id=2&amp;q=%B7%A2%B9%E2%B6%FE%BC%AB%B9%DC&amp;rn=b12ffd48699547ed9cb982a88014a0aa">发光二极管</a>一个</li>
+<li>300欧姆的<a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CFcRfH0GoT805sipKjxiNm80QgaIDkojjQIBhc4L8WmRpaGVVBVD9DpAt8wKPZTmbzvVp4EIdCD2Ow2DOQmdPtlV8g%3D">电阻</a>一个</li>
+</ol>
+
+<h2>GPIO接口</h2>
+
+<p><img src="http://ww1.sinaimg.cn/large/6bc40342gw1e2o2uls7wlj.jpg" width="630"/></p>
+
+<p>用杜邦线将上图的3.3V输出和GPIO 23引出（板子正面朝上，GPIO引脚在左上角），将电阻和LED串联起来（电阻防止LED电流过大烧掉），注意二极管的两根脚不一样长，长脚的接正级，这样GPIO 23如果输出高电平，二极管就不发光了，输出低电平就亮啦！</p>
+
+
+        <div class="more">
+          <a href="/2013/03/vistor-on-homepage-led-indicator.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/hadoop-api-attn.html">Hadoop HDFS Java API 开发的一些注意事项</a> <span class="date">2013-03-13</span></h1>
+
+        <h2>环境问题</h2>
+
+<p>需要注意如果是利用一台远程的机器来运行伪分布式环境然后通过开发环境连接时，需要将HDFS的协议连接通过hostname指定到当前机器的IP上；否则Hadoop在启动时，会绑定当前机器的本地IP<code>127.0.0.1</code>，这样远程开发环境就无法连接了；当然不用hostname用ip也可以。类似这样</p>
+
+<ol>
+<li>hosts文件</li>
+</ol>
+
+<p>{% codeblock hosts %}
+192.168.11.244  yfyang-PC
+{% endcodeblock %}</p>
+
+<ol>
+<li><code>core-site.xml</code>文件</li>
+</ol>
+
+<p>{% codeblock core-site.xml lang:xml %}
+<property>
+  <name>fs.default.name</name>
+  <value>hdfs://yfyang-PC:8020</value>
+</property>
+{% endcodeblock %}</p>
+
+
+        <div class="more">
+          <a href="/2013/03/hadoop-api-attn.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/setup-archliunx-on-raspberry-pi.html">在Raspberry Pi上安装ArchLinux</a> <span class="date">2013-03-09</span></h1>
+
+        <h1>介绍</h1>
+
+<p>之前买的Raspberry Pi因为要跑<a href="http://hugozhu.myalert.info">这个网站</a>，不能经常拔下来玩别的，所以又买了一个，这次安装的是<a href="https://www.archlinux.org">Arch Linux</a>。这个发行版安装好后非常基础，占用的空间也只有600M不到，比较合适已有Linux基础的同学玩。初学者可以玩官方推荐的<a href="http://www.raspbian.org">Raspbian</a>。</p>
+
+<p>Arch Linux特点：</p>
+
+<ol>
+<li>启动快，上电后只要3s完成启动</li>
+<li>安装完没有图形界面，干净</li>
+<li>面向开发者的系统</li>
+<li>包管理系统pacman很好用，一个命令就可以完成各种操作</li>
+<li>ArchLinux缺省账号和密码是root/root，弄好了后要记得修改root密码</li>
+<li>从中国用下载包很快，比Raspbian的源快多了</li>
+</ol>
+
+<h1>增加sudo用户</h1>
+
+<pre><code>   useradd hugo
+   passwd hugo
+   mkdir /home/hugo
+   chown hugo:hugo /home/hugo   
+   pacman -S sudo
+   visudo   
+   
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2013/03/setup-archliunx-on-raspberry-pi.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/block_failed_ssh_attempts_with_iptable.html">如何封杀尝试Raspberry Pi SSH密码的来源IP</a> <span class="date">2013-03-08</span></h1>
+
+        <p>Raspberry Pi整天开着，如果用缺省SSH端口对外开放，就会经常遇到扫描SSH密码的肉鸡。虽然密码不是很简单，但还是感觉很不安全的。</p>
+
+<p>系统的ssh登录日志文件在：/var/log/auth.log，登录失败时会记录以下格式的日志：</p>
+
+<pre><code>Mar  7 10:31:51 raspberrypi sshd[24510]: Failed password for root from 221.8.19.129 port 4066 ssh2
+Mar  7 10:31:55 raspberrypi sshd[24514]: Failed password for root from 221.8.19.129 port 4079 ssh2
+Mar  7 10:31:56 raspberrypi sshd[24518]: Failed password for sshd from 221.8.19.129 port 4080 ssh2
+Mar  7 10:32:26 raspberrypi sshd[24522]: Failed password for sshd from 221.8.19.129 port 4149 ssh2
+</code></pre>
+
+<p>用最简单的Shell脚本来解决这个问题：</p>
+
+<h3>guard.sh</h3>
+
+<pre><code>#!/bin/bash
+
+last_ip=&quot;&quot;
+tail -f /var/log/auth | while read LINE; do
+{
+    if [[ &quot;${LINE}&quot; =~ &quot;Failed&quot; ]]; then            
+        ip=&quot;$(echo ${LINE} | awk '{print $(NF-3)}')&quot;
+        if [[ &quot;$last_ip&quot; == &quot;$ip&quot; ]]; then
+             echo &quot;block $ip&quot;
+             #curl -s --data-ascii &quot;uuid=&lt;my iphone's uuid&gt;&quot; --data &quot;body=${LINE}&quot; http://raspberrypi/pushme                 
+             iptables -A INPUT -s &quot;$ip&quot; -j DROP
+        fi
+        last_ip=$ip
+        echo $LINE
+    fi
+}
+done
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2013/03/block_failed_ssh_attempts_with_iptable.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/03/raspberry-pi-with-xmbc.html">Raspberry Pi做BT下载机+高清播放器</a> <span class="date">2013-03-06</span></h1>
+
+        <h2>介绍</h2>
+
+<p>首先高清播放器功能只是Raspberry Pi的一个小功能，如果你只需要高清播放功能又不想折腾，那还是买个<a href="http://s.taobao.com/search?q=%B8%DF%C7%E5%B2%A5%B7%C5%C6%F7&amp;commend=all&amp;ssid=s5-e&amp;search_type=item&amp;sourceId=tb.index&amp;initiative_id=tbindexz_20130306">山寨的</a>的更简单。。。</p>
+
+<p>Raspberry Pi的图形处理器规格：Broadcom VideoCore IV, OpenGL ES 2.0, 1080p 30 h.264/MPEG-4 AVC 高清解码器，内存和CPU共享（可设置成256M），性能还是很强劲的。HDMI支持640x350和1920×1200（1080P）的分辨率。安装了<a href="http://xbmc.org">XBMC</a>，基本上可以实现包括Airplay在内的Apple TV上的大部分功能，但价格只有其一半不到，可以播放下载的视频或观看在线视频，如<a href="http://yisou.com">一搜</a>，优酷，搜狐视频，奇艺等。</p>
+
+<h2>外设</h2>
+
+<p>除了Pi单片机外，你还需要以下外设附件：</p>
+
+<ol>
+<li>5V-1A左右的电源，可以用iPhone或iPad的充电电源，或手机的充电器，电流最少要800毫安</li>
+<li>micro USB线一根，和Kindle以及大多数android手机充电USB线一样</li>
+<li>HDMI线一根，接电视机</li>
+<li>SD卡一张，最少2G</li>
+</ol>
+
+<h2>Raspbmc</h2>
+
+<p><a href="http://www.raspbmc.com/">Raspbmc</a> 是专为在Raspberry Pi上运行<a href="http://xbmc.org">XBMC</a>的定制Linux。最小化的安装，减少了不必要的软件和资源占用，简化了安装和配置，没有Linux知识也可以上手。这个版本的维护者是一个19岁的小朋友Sam Nazarko。有时间折腾的同学可以自己编译XMBC安装。</p>
+
+<h3>特点：</h3>
+
+<ol>
+<li>免费，开源</li>
+<li>支持多语言</li>
+<li>支持1080P回放</li>
+<li>支持直接播放NFS，SMB，FTP,HTTP或USB硬盘的有视频文件，支持大多数格式</li>
+<li>支持AirPlay或AirTune功能，可以把iPhone/iPad上的视频或音乐通过Pi投放到电视上，这点和Apple TV功能一样</li>
+<li>支持GPIO</li>
+<li>基于Debian，可以从Debian的软件源安装其它软件</li>
+<li>支持1080P DTS软解，这个不少播放器是不支持的，需要额外License</li>
+<li>内置了以下服务:
+
+<ol>
+<li>Samba</li>
+<li>TVHeadend Server</li>
+<li>FTP Server</li>
+<li>SSH Server</li>
+</ol></li>
+</ol>
+
+
+        <div class="more">
+          <a href="/2013/03/raspberry-pi-with-xmbc.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+
+    <div class="pagination">
+      <ul>
+      
+        
+        
+          <li><a href="/posts/1/">1</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/2/">2</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/3/">3</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/4/">4</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/5/">5</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/6/">6</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/7/">7</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/11/">11</a></li>
+        
+      
+        
+          <li class="active"><a href="/posts/12/">12</a></li>
+        
+        
+      
+        
+        
+          <li><a href="/posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/14/">14</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

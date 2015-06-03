@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>hadoop-NameNode 的主要数据结构 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="NameNode会将文件和目录的元数据信息存储下来，每次保存或者操作HDFS的操作 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>hadoop-NameNode 的主要数据结构 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>在之前的分析过程中，我们知道NameNode会将文件和目录的元数据信息存储下来，每次保存或者操作HDFS的操作，都会记录到 editlog文件中，当EditLog达到一定大小的时候，namenode会重新将内存中队整个HDFS的目录树和文件元数据刷到fsImage文件中。</p>
+
+<p>那么NameNode有以下几个问题</p>
+
+<ol>
+<li>元数据信息的数据结构是怎样？</li>
+<li>它的EditLog在达到一定大小或者某段保存时间段过后，刷新内存文件到fsImage中是如何做到的呢？</li>
+</ol>
+
+<h2>元数据信息的数据结构</h2>
+
+<p>首先，我们从NameNode启动过程可以看到，NameNode启动时，对<code>FSNamesystem</code>进行初始化操作，这个类是HDFS文件系统的执行的核心操作,提供了各种增删改查的操作接口。它内部维护了多个数据结构之间的关系，它的启动过程主要为：</p>
+
+<p>它的方法链如下：</p>
+
+<p>{% img /images/blog/FSNamesystem_method_flow.png FSNamesystem方法链 %}</p>
+
+<p>这里面主要的方法如下</p>
+
+<p>{% codeblock FSNamesystem#initialize lang:java %}
+private void initialize(NameNode nn, Configuration conf) throws IOException {
+    // 设置检查磁盘可用性的间隔,可以通过 dfs.namenode.resource.check.interval 来设置,默认为5000,单位为毫秒
+    resourceRecheckInterval = conf.getLong(DFSConfigKeys.DFS_NAMENODE_RESOURCE_CHECK_INTERVAL_KEY,DFSConfigKeys.DFS_NAMENODE_RESOURCE_CHECK_INTERVAL_DEFAULT);
+    // 初始化一个&rdquo;检查NameNode上可用磁盘配置的所有卷进行检查&rdquo;的检查类,它的初始化过程一会来说
+    nnResourceChecker = new NameNodeResourceChecker(conf);
+    // 进行资源检查和缓存结果。就是调用 nnResourceChecker.hasAvailableDiskSpace()，它是通过判断文件使用大小来进行是否可用的
+    checkAvailableResources();
+    // 获取当前系统时间
+    this.systemStart = now();
+    // 根据配置对象信息初始化一些配置对象参数
+    setConfigurationParameters(conf);
+    // 创建一个HDFS的身份令牌的管理者
+    dtSecretManager = createDelegationTokenSecretManager(conf);
+    // 获取当前NN的地址
+    this.nameNodeAddress = nn.getNameNodeAddress();
+    // 注册MBean
+    this.registerMBean(conf);
+    // 初始化 存储文件的目录状态的 管理对象
+    this.dir = new FSDirectory(this, conf);
+    // 获取NameNode的启动选项，是format 还是其他的选项
+    StartupOption startOpt = NameNode.getStartupOption(conf);
+    // 根据选项夹在FSImage
+    this.dir.loadFSImage(getNamespaceDirs(conf), getNamespaceEditsDirs(conf), startOpt);
+    // 获取夹在FSImage的时间
+    long timeTakenToLoadFSImage = now() - systemStart;
+    LOG.info(&ldquo;Finished loading FSImage in &rdquo; + timeTakenToLoadFSImage + &ldquo; msecs&rdquo;);
+    //
+    NameNode.getNameNodeMetrics().fsImageLoadTime.set((int) timeTakenToLoadFSImage);
+    // 初始化一个安全模式对象
+    this.safeMode = new SafeModeInfo(conf);
+    // 设置 系统中块的总数
+    setBlockTotal();
+    // 初始化用于 记录所有的block复制请求 的任务线程
+    pendingReplications = new PendingReplicationBlocks( conf.getInt(&ldquo;dfs.replication.pending.timeout.sec&rdquo;, -1) * 1000L);
+    if (isAccessTokenEnabled) {
+        // 设置 主从模式，这里设置当前机器为主机器
+        accessTokenHandler = new BlockTokenSecretManager(true, accessKeyUpdateInterval, accessTokenLifetime);
+    }
+    // 初始化 心跳 检查 任务线程
+    this.hbthread = new Daemon(new HeartbeatMonitor());
+    // 租约管理器LeaseManager负责管理租约
+    this.lmthread = new Daemon(leaseManager.new Monitor());
+    // 定期调用 computeReplicationWork() 的后台任务;
+    this.replthread = new Daemon(new ReplicationMonitor());
+    hbthread.start();
+    lmthread.start();
+    replthread.start();
+    // 定期调用hasAvailableResources的NameNodeResourceChecker，
+    // 如果被发现有可用的资源不足，使NN进入安全模式。
+    // 如果资源已经恢复到可以接受的水平，这个守护进程将导致NN退出安全模式。
+    this.nnrmthread = new Daemon(new NameNodeResourceMonitor());
+    nnrmthread.start();
+    // 保持 DN和JT与NN 和 TT的连接
+    this.hostsReader = new HostsFileReader(conf.get(&ldquo;dfs.hosts&rdquo;,&ldquo;&rdquo;), conf.get(&ldquo;dfs.hosts.exclude&rdquo;,&ldquo;&rdquo;));
+    // 初始化 DN节点的管理线程
+    this.dnthread = new Daemon(new DecommissionManager(this).new Monitor(
+        conf.getInt(&ldquo;dfs.namenode.decommission.interval&rdquo;, 30),
+        conf.getInt(&ldquo;dfs.namenode.decommission.nodes.per.interval&rdquo;, 5)));
+    dnthread.start();
+    // 设置 可插拔DNS-name/IP-address RackID解析器。
+    this.dnsToSwitchMapping = ReflectionUtils.newInstance(
+        conf.getClass(&ldquo;topology.node.switch.mapping.impl&rdquo;, ScriptBasedMapping.class, DNSToSwitchMapping.class),
+        conf);
+    // 如果DNS切换缓存映射支持，将这些主机包括列表中的网络位置存储在高速缓存中的映射，在后续的呼叫中能得到快速响应。
+    if (dnsToSwitchMapping instanceof CachedDNSToSwitchMapping) {
+        // 主机网络位置存储
+        dnsToSwitchMapping.resolve(new ArrayList<String>(hostsReader.getHosts()));
+    }
+    // 获取当前NN的通信地址
+    InetSocketAddress socAddr = NameNode.getAddress(conf);
+    // 设置FSN中的NN的位置信息
+    this.nameNodeHostName = socAddr.getHostName();
+}
+{% endcodeblock %}</p>
+
+<p>在 <code>NameNodeResourceChecker</code>中，主要检查的位置包括</p>
+
+<ol>
+<li><p>FSNamesystem.getNamespaceDirs(conf)</p>
+
+<p>监控元数据存储位置，也就是<code>dfs.name.dir</code>配置的位置，如果没有配置，默认监控<code>/tmp/hadoop/dfs/name</code></p></li>
+
+<li><p>FSNamesystem.getNamespaceEditsDirs(conf)</p>
+
+<p>监控HDFS的事物文件存储，也就是editlog日志存储位置，即<code>dfs.name.edits.dir</code>配置的位置，如果没有设置，同样默认监控<code>/tmp/hadoop/dfs/name</code></p></li>
+
+<li><p><code>dfs.namenode.resource.checked.volumes</code>配置的卷</p></li>
+</ol>
+
+<p>{% codeblock FSNamesystem#setConfigurationParameters lang:java %}
+private void setConfigurationParameters(Configuration conf)
+                                          throws IOException {
+    // 内部位置静态的 FSNamesystem
+    fsNamesystemObject = this;
+    // 设置文件所有者
+    fsOwner = UserGroupInformation.getCurrentUser();
+    // 授权用户组，如果没有配置，则默认为supergroup
+    this.supergroup = conf.get(&ldquo;dfs.permissions.supergroup&rdquo;, &ldquo;supergroup&rdquo;);
+    // 默认启动授权权限，如果配置dfs.permissions为false，则不启动
+    this.isPermissionEnabled = conf.getBoolean(&ldquo;dfs.permissions&rdquo;, true);
+    // 这里的授权和Unix/Linux下一致，如果没有配置dfs.upgrade.permission，则默认为777
+    short filePermission = (short)conf.getInt(&ldquo;dfs.upgrade.permission&rdquo;, 00777);
+    // 存储授权信息
+    this.defaultPermission = PermissionStatus.createImmutable(
+        fsOwner.getShortUserName(), supergroup, new FsPermission(filePermission));
+    //
+    this.replicator = new ReplicationTargetChooser(
+                         conf.getBoolean(&ldquo;dfs.replication.considerLoad&rdquo;, true),
+                         this,
+                         clusterMap);
+    // 默认的数据块的存储拷贝数量，如果没有设置，默认为3
+    this.defaultReplication = conf.getInt(&ldquo;dfs.replication&rdquo;, 3);
+    // 最大拷贝数量，默认为512
+    this.maxReplication = conf.getInt(&ldquo;dfs.replication.max&rdquo;, 512);
+    //  最小拷贝数量，默认为1
+    this.minReplication = conf.getInt(&ldquo;dfs.replication.min&rdquo;, 1);
+    … //一些判断
+    //
+    this.maxReplicationStreams = conf.getInt(&ldquo;dfs.max-repl-streams&rdquo;, 2);
+    //
+    long heartbeatInterval = conf.getLong(&ldquo;dfs.heartbeat.interval&rdquo;, 3) * 1000;
+    //
+    this.heartbeatRecheckInterval = conf.getInt( &ldquo;heartbeat.recheck.interval&rdquo;, 5 * 60 * 1000);
+    this.heartbeatExpireInterval = 2 * heartbeatRecheckInterval + 10 * heartbeatInterval;
+    this.replicationRecheckInterval =  conf.getInt(&ldquo;dfs.replication.interval&rdquo;, 3) * 1000L;
+    this.defaultBlockSize = conf.getLong(&ldquo;dfs.block.size&rdquo;, DEFAULT_BLOCK_SIZE);
+    this.maxFsObjects = conf.getLong(&ldquo;dfs.max.objects&rdquo;, 0);
+    //default limit
+    this.blockInvalidateLimit = Math.max(this.blockInvalidateLimit,
+                                         20*(int)(heartbeatInterval/1000));
+    //use conf value if it is set.
+    this.blockInvalidateLimit = conf.getInt( DFSConfigKeys.DFS_BLOCK_INVALIDATE_LIMIT_KEY, this.blockInvalidateLimit);
+    this.blocksInvalidateWorkPct = conf.getFloat( DFSConfigKeys.DFS_NAMENODE_INVALIDATE_WORK_PCT_PER_ITERATION,
+      DFSConfigKeys.DFS_NAMENODE_INVALIDATE_WORK_PCT_PER_ITERATION_DEFAULT);
+    Preconditions.checkArgument(
+      (this.blocksInvalidateWorkPct &gt; 0),
+      DFSConfigKeys.DFS_NAMENODE_INVALIDATE_WORK_PCT_PER_ITERATION +
+      &ldquo; = &lsquo;&rdquo; + this.blocksInvalidateWorkPct + &ldquo;&rsquo; is invalid. &rdquo; +
+      &ldquo;It should be a positive, non-zero float value &rdquo; +
+      &ldquo;indicating a percentage.&rdquo;);
+    this.blocksReplWorkMultiplier = conf.getInt(
+      DFSConfigKeys.DFS_NAMENODE_REPLICATION_WORK_MULTIPLIER_PER_ITERATION,
+      DFSConfigKeys.DFS_NAMENODE_REPLICATION_WORK_MULTIPLIER_PER_ITERATION_DEFAULT);
+    Preconditions.checkArgument(
+        (this.blocksReplWorkMultiplier &gt; 0),
+        DFSConfigKeys.DFS_NAMENODE_REPLICATION_WORK_MULTIPLIER_PER_ITERATION +
+        &ldquo; = &lsquo;&rdquo; + this.blocksReplWorkMultiplier + &ldquo;&rsquo; is invalid. &rdquo; +
+        &ldquo;It should be a positive, non-zero integer value.&rdquo;);
+    this.accessTimePrecision = conf.getLong(&ldquo;dfs.access.time.precision&rdquo;, 0);
+    this.allowBrokenAppend = conf.getBoolean(&ldquo;dfs.support.broken.append&rdquo;, false);
+    if (conf.getBoolean(&ldquo;dfs.support.append&rdquo;, false)) {
+      LOG.warn(&ldquo;The dfs.support.append option is in your configuration, &rdquo; +
+               &ldquo;however append is not supported. This configuration option &rdquo; +
+               &ldquo;is no longer required to enable sync.&rdquo;);
+    }
+    this.isAccessTokenEnabled = conf.getBoolean( DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, false);
+    if (isAccessTokenEnabled) {
+      this.accessKeyUpdateInterval = conf.getLong( DFSConfigKeys.DFS_BLOCK_ACCESS_KEY_UPDATE_INTERVAL_KEY, 600) * 60 * 1000L;           this.accessTokenLifetime = conf.getLong( DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_LIFETIME_KEY, 600) * 60 * 1000L; // 10 hrs
+    }
+    LOG.info(&ldquo;isAccessTokenEnabled=&rdquo; + isAccessTokenEnabled
+        + &ldquo; accessKeyUpdateInterval=&rdquo; + accessKeyUpdateInterval / (60 * 1000)
+        + &ldquo; min(s), accessTokenLifetime=&rdquo; + accessTokenLifetime / (60 * 1000)
+        + &ldquo; min(s)&rdquo;);
+}
+{% endcodeblock %}</p>
+
+<h2>FSImage类</h2>
+
+<p>可以通过 <code>FSImage#loadFSImage</code>中得到这些结果</p>
+
+<ol>
+<li><p>首先是一个image head，其中包含：</p>
+
+<ul>
+<li>imgVersion(int)：当前image的版本信息</li>
+<li>namespaceID(int)：用来确保别的HDFS instance中的datanode不会误连上当前NN。</li>
+<li>numFiles(long)：整个文件系统中包含有多少文件和目录</li>
+<li>genStamp(long)：生成该image时的时间戳信息。</li>
+</ul></li>
+
+<li><p>对每个文件或目录的源数据信息</p>
+
+<p>主要在<code>FSImage#saveCurrent</code>中可以查看到如下逻辑</p>
+
+<ol>
+<li><p>如果是目录，则包含如下信息</p>
+
+<ul>
+<li>path(String)：该目录的路径，如<code>/user/build/build-index</code></li>
+<li>replications(short)：副本数（目录虽然没有副本，但这里记录的目录副本数也为3）</li>
+<li>mtime(long)：该目录的修改时间的时间戳信息</li>
+<li>atime(long)：该目录的访问时间的时间戳信息</li>
+<li>blocksize(long)：目录的blocksize都为0</li>
+<li>numBlocks(int)：实际有多少个文件块，目录的该值都为-1，表示该item为目录</li>
+<li>nsQuota(long)：namespace Quota值，若没加Quota限制则为-1</li>
+<li>dsQuota(long)：disk Quota值，若没加限制则也为-1</li>
+<li>username(String)：该目录的所属用户名</li>
+<li>group(String)：该目录的所属组</li>
+<li>permission(short)：该目录的permission信息，如644等，有一个short来记录。</li>
+</ul></li>
+
+<li><p>如果是文件，则包含如下信息</p>
+
+<ul>
+<li>blockid(long)：属于该文件的block的blockid，</li>
+<li>numBytes(long)：该block的大小</li>
+<li>genStamp(long)：该block的时间戳</li>
+</ul></li>
+</ol></li>
+</ol>
+
+<blockquote>
+<p>在 《Hadoop权威指南》中对NameNode存储元数据的大小做了个预计：每个文件、目录和数据块的存储信息大约占150个字节。注意它是放在内存中的。</p>
+
+<p>HDFS的块(block)，默认大小为64MB，与单一磁盘上的文件系统相似；</p>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2013/03/19-raspberry-pi-gpio-port-naming.html" title="Raspberry Pi GPIO的编号规范">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2013/03/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html" title="如何使用Raspberry Pi测量室内温度和湿度并绘制曲线">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2013-03-18</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#Hadoop-ref">Hadoop <span>4</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#hadoop-ref">hadoop <span>4</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

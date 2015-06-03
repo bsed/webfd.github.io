@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>xmemcached主要用法及与Spring集成 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="介绍xMemcached的主要方法，以及在Spring中使用时的配置 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>xmemcached主要用法及与Spring集成 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>xMemcached是memcached的一个java客户端，基于java nio，支持memcached的所有协议。本文简要介绍xMemcached的基本用法，以及与Spring的集成配置。</p>
+
+<h2>xMemcached的主要方法示例</h2>
+
+<pre><code>/**
+ * XMemcachedClientBuilder是MemcachedClientBuilder的一个实现类，XMemcachedClient是MemcachedClient的一个实现类；
+ * 在实际使用中，应该使用接口，利用多态特性，这里直接使用实现类，是为了方便查看实现类的源码。
+ */
+/**
+ * MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil.getAddresses(&quot;192.168.56.200:11211&quot;));
+ * MemcachedClient memcachedClient = null;
+ */
+
+XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil.getAddresses(&quot;192.168.56.200:11211 192.168.56.200:11212&quot;));
+XMemcachedClient xMemcachedClient = null;
+
+// 注意处理相关异常
+
+// 默认是采用余数哈希，可以修改为一致性哈希
+builder.setSessionLocator(new KetamaMemcachedSessionLocator());
+// 启用二进制协议，getAndTouch等方法仅在二进制协议中支持
+builder.setCommandFactory(new BinaryCommandFactory());
+
+// build the memcached client
+xMemcachedClient = (XMemcachedClient) builder.build();
+
+// set: 第一个参数是key，第二个参数是超时时间，第三个参数是value
+xMemcachedClient.set(&quot;first&quot;, 0, &quot;tianjin&quot;);
+xMemcachedClient.add(&quot;second&quot;, 20, &quot;chengdu&quot;);
+xMemcachedClient.replace(&quot;first&quot;, 0, &quot;Beijing&quot;);
+
+// get：根据key获取value，第一个参数为key，第二个为超时；
+String firstValue = xMemcachedClient.get(&quot;first&quot;, new StringTranscoder());
+logger.info(&quot;get first value: {}&quot;, xMemcachedClient.get(&quot;first&quot;));
+
+// delete: 删除item
+xMemcachedClient.delete(&quot;second&quot;);
+xMemcachedClient.set(&quot;third&quot;, 20, &quot;xian&quot;);
+xMemcachedClient.deleteWithNoReply(&quot;third&quot;);
+
+// touch：修改item过期时间
+xMemcachedClient.touch(&quot;first&quot;, 0);
+firstValue = xMemcachedClient.getAndTouch(&quot;first&quot;, 10);
+logger.info(&quot;getAndTouch op, first value: {}&quot;, firstValue);
+
+// append, prepend: 追加数据
+xMemcachedClient.append(&quot;first&quot;, &quot;, come on&quot;);
+xMemcachedClient.prepend(&quot;first&quot;, &quot;hello &quot;);
+logger.info(&quot;append and prepend op, first value: {}&quot;, xMemcachedClient.get(&quot;first&quot;));
+
+/**
+ * cas: 通过gets操作返回GetResponse，其中包括value值和cas值
+ */
+GetsResponse&lt;String&gt; response = xMemcachedClient.gets(&quot;first&quot;);
+long cas = response.getCas();
+if (!xMemcachedClient.cas(&quot;first&quot;, 0, &quot;guangzhou&quot;, cas)) {
+    logger.info(&quot;cas error&quot;);
+}
+
+// cas: 重试更方便；第一个方法表示重试次数，第二个方法表示更新的值
+xMemcachedClient.cas(&quot;first&quot;, 0, new CASOperation&lt;String&gt;() {
+    @Override
+    public int getMaxTries() {
+        return 1;
+    }
+
+    @Override
+    public String getNewValue(long currentCAS, String currentValue) {
+        return &quot;xian&quot;;
+    }
+});
+logger.info(&quot;cas op, first value: {}&quot;, xMemcachedClient.get(&quot;first&quot;));
+
+// incr/decr: 值的增加减少
+xMemcachedClient.incr(&quot;id&quot;, 3, 0);
+xMemcachedClient.incr(&quot;id&quot;, 5);
+xMemcachedClient.decr(&quot;id&quot;, 2);
+logger.info(&quot;incr/decr op, value: {}&quot;, xMemcachedClient.get(&quot;id&quot;));
+
+// namespace: set时指定命名空间，get时也需要指定，可以使命名空间中的所有items失效
+String nsSohu = &quot;sohu&quot;;
+xMemcachedClient.withNamespace(nsSohu, new MemcachedClientCallable&lt;Object&gt;() {
+    @Override
+    public Object call(MemcachedClient client) throws MemcachedException, InterruptedException, TimeoutException {
+        client.set(&quot;typeTv&quot;, 0, &quot;tv&quot;);
+        client.set(&quot;typeMv&quot;, 0, &quot;mv&quot;);
+        client.set(&quot;typeDrama&quot;, 0, &quot;drama&quot;);
+        return null;
+    }
+});
+
+logger.info(&quot;namespace op, typeTv: {}&quot;, xMemcachedClient.withNamespace(nsSohu, new MemcachedClientCallable&lt;String&gt;() {
+    @Override
+    public String call(MemcachedClient client) throws MemcachedException, InterruptedException, TimeoutException {
+        return client.get(&quot;typeTv&quot;);
+    }
+}));
+xMemcachedClient.invalidateNamespace(nsSohu);
+
+// stats: 获取统计，也可以根据items获取统计
+Map&lt;InetSocketAddress, Map&lt;String, String&gt;&gt; stats = xMemcachedClient.getStats();
+for (InetSocketAddress addr: stats.keySet()) {
+    logger.info(&quot;stats map: {}: {}&quot;, addr, stats.get(addr).toString());
+}
+
+// flush_all: 是所有item都过期
+xMemcachedClient.flushAll(&quot;192.168.56.200:11211&quot;);
+
+// 删除一个server
+xMemcachedClient.removeServer(&quot;192.168.56.200:11212&quot;);
+</code></pre>
+
+<h2>xMemcached与Spring集成</h2>
+
+<blockquote>
+<p>applicationContext.xml的配置：</p>
+</blockquote>
+
+<pre><code>&lt;!--定义一个server--&gt;
+&lt;bean name=&quot;server1&quot; class=&quot;java.net.InetSocketAddress&quot;&gt;
+    &lt;constructor-arg&gt;&lt;value&gt;192.168.56.200&lt;/value&gt;&lt;/constructor-arg&gt;
+    &lt;constructor-arg&gt;&lt;value&gt;11211&lt;/value&gt;&lt;/constructor-arg&gt;
+&lt;/bean&gt;
+
+&lt;!--定义XMemcachedClientBuilder实例，第一个参数设置server，第二个参数设置权重--&gt;
+&lt;bean id=&quot;memcachedClientBuilder&quot; class=&quot;net.rubyeye.xmemcached.XMemcachedClientBuilder&quot;&gt;
+    &lt;constructor-arg&gt;
+        &lt;list&gt;
+            &lt;bean class=&quot;java.net.InetSocketAddress&quot;&gt;
+                &lt;constructor-arg&gt;&lt;value&gt;192.168.56.200&lt;/value&gt;&lt;/constructor-arg&gt;
+                &lt;constructor-arg&gt;&lt;value&gt;11211&lt;/value&gt;&lt;/constructor-arg&gt;
+            &lt;/bean&gt;
+            &lt;bean class=&quot;java.net.InetSocketAddress&quot;&gt;
+                &lt;constructor-arg&gt;&lt;value&gt;192.168.56.200&lt;/value&gt;&lt;/constructor-arg&gt;
+                &lt;constructor-arg&gt;&lt;value&gt;11212&lt;/value&gt;&lt;/constructor-arg&gt;
+            &lt;/bean&gt;
+        &lt;/list&gt;
+    &lt;/constructor-arg&gt;
+    &lt;constructor-arg&gt;
+        &lt;list&gt;
+            &lt;value&gt;1&lt;/value&gt;
+            &lt;value&gt;2&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/constructor-arg&gt;
+
+    &lt;!--&amp;lt;!&amp;ndash;设置验证信息&amp;ndash;&amp;gt;--&gt;
+    &lt;!--&lt;property name=&quot;authInfoMap&quot;&gt;--&gt;
+        &lt;!--&lt;map&gt;--&gt;
+            &lt;!--&lt;entry key-ref=&quot;server1&quot;&gt;--&gt;
+                &lt;!--&lt;bean class=&quot;net.rubyeye.xmemcached.auth.AuthInfo&quot; factory-method=&quot;typical&quot;&gt;--&gt;
+                    &lt;!--&lt;constructor-arg index=&quot;0&quot;&gt;&lt;value&gt;index&lt;/value&gt;&lt;/constructor-arg&gt;--&gt;
+                    &lt;!--&lt;constructor-arg index=&quot;1&quot;&gt;&lt;value&gt;index-pd&lt;/value&gt;&lt;/constructor-arg&gt;--&gt;
+                &lt;!--&lt;/bean&gt;--&gt;
+            &lt;!--&lt;/entry&gt;--&gt;
+        &lt;!--&lt;/map&gt;--&gt;
+    &lt;!--&lt;/property&gt;--&gt;
+
+    &lt;!--设置线程池--&gt;
+    &lt;property name=&quot;connectionPoolSize&quot; value=&quot;2&quot;&gt;&lt;/property&gt;
+
+    &lt;!--使用二进制协议--&gt;
+    &lt;property name=&quot;commandFactory&quot;&gt;
+        &lt;bean class=&quot;net.rubyeye.xmemcached.command.BinaryCommandFactory&quot;&gt;&lt;/bean&gt;
+    &lt;/property&gt;
+
+   &lt;!--设置序列化方式--&gt;
+    &lt;property name=&quot;transcoder&quot;&gt;
+        &lt;bean class=&quot;net.rubyeye.xmemcached.transcoders.SerializingTranscoder&quot;&gt;&lt;/bean&gt;
+    &lt;/property&gt;
+
+    &lt;!--设置一致性哈希--&gt;
+    &lt;property name=&quot;sessionLocator&quot;&gt;
+        &lt;bean class=&quot;net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator&quot;&gt;&lt;/bean&gt;
+    &lt;/property&gt;
+
+&lt;/bean&gt;
+
+&lt;!--定义memcachedClient，通过memcachedClientBuilder的build方法--&gt;
+&lt;bean name=&quot;memcachedClient&quot; factory-bean=&quot;memcachedClientBuilder&quot;
+      factory-method=&quot;build&quot; destroy-method=&quot;shutdown&quot;&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<blockquote>
+<p>java测试类：</p>
+</blockquote>
+
+<pre><code>MemcachedClient memcachedClient = null;
+ApplicationContext applicationContext = new ClassPathXmlApplicationContext(&quot;applicationContext.xml&quot;);
+try {
+    memcachedClient = (MemcachedClient) applicationContext.getBean(&quot;memcachedClient&quot;);
+    memcachedClient.set(&quot;spring&quot;, 0, &quot;3.0.0.RELEASE&quot;);
+    logger.info(&quot;spring: {}&quot;, memcachedClient.get(&quot;spring&quot;));
+    memcachedClient.replace(&quot;spring&quot;, 0, &quot;4.0.0.RELEASE is coming&quot;);
+    logger.info(&quot;spring, {}&quot;, memcachedClient.get(&quot;spring&quot;));
+} catch (Exception e) {
+    logger.info(&quot;spring test&quot;, e);
+}
+</code></pre>
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="https://code.google.com/p/xmemcached/wiki/User_Guide_zh">xmemcached user_guide_zh</a></li>
+</ul>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/02/elasticsearch-install-config.html" title="分布式搜索引擎ElasticSearch安装与配置">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/02/memcached-usage-parameters-commands.html" title="memcached用法：参数和命令详解">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-02-16</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#memcached-ref">memcached <span>2</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#xmemcached-ref">xmemcached <span>1</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

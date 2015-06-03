@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Quartz教程三：Job与JobDetail介绍 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="Quartz系列教程的第三篇，关于Job和JobDetail 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>Quartz教程三：Job与JobDetail介绍 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <blockquote>
+<p><a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-03">原文链接</a>
+| <a href="http://nkcoder.github.io/blog/20140627/quartz-tutorial-job-jobdetail/">译文链接</a>
+| 编译、校对：<a href="http://nkcoder.github.io/">nkcoder</a></p>
+
+<p>本系列教程由<a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials">quartz-2.2.x官方文档</a>翻译、整理而来，希望给同样对quartz感兴趣的朋友一些参考和帮助，有任何不当或错误之处，欢迎指正；有兴趣研究源码的同学，可以参考<a href="https://github.com/nkcoder/quartz-explained">我对quartz-core源码的注释(进行中)</a>。</p>
+</blockquote>
+
+<p>正如在[教程二]中讲到的，Job实现起来很容易，该接口只有一个“execute”方法。本节主要关注：Job的特点、Job接口的execute方法以及JobDetail。</p>
+
+<p>你定义了一个实现Job接口的类，这个类仅仅表明该job需要完成什么类型的任务，除此之外，Quartz还需要知道该Job实例所包含的属性；这将由JobDetail类来完成。</p>
+
+<p>JobDetail实例是通过JobBuilder类创建的，导入该类下的所有静态方法，会让你编码时有DSL的感觉：</p>
+
+<pre><code>import static org.quartz.JobBuilder.*;
+</code></pre>
+
+<p>让我们先看看Job的特征（nature）以及Job实例的生命期。不妨先回头看看[教程一]中的代码片段：</p>
+
+<pre><code>// define the job and tie it to our HelloJob class
+JobDetail job = newJob(HelloJob.class)
+  .withIdentity(&quot;myJob&quot;, &quot;group1&quot;) // name &quot;myJob&quot;, group &quot;group1&quot;
+  .build();
+
+// Trigger the job to run now, and then every 40 seconds
+Trigger trigger = newTrigger()
+  .withIdentity(&quot;myTrigger&quot;, &quot;group1&quot;)
+  .startNow()
+  .withSchedule(simpleSchedule()
+      .withIntervalInSeconds(40)
+      .repeatForever())            
+  .build();
+
+// Tell quartz to schedule the job using our trigger
+sched.scheduleJob(job, trigger);
+</code></pre>
+
+<p>“HelloJob”类可以如下定义：</p>
+
+<pre><code>public class HelloJob implements Job {
+
+    public HelloJob() {
+    }
+
+    public void execute(JobExecutionContext context)
+      throws JobExecutionException
+    {
+      System.err.println(&quot;Hello!  HelloJob is executing.&quot;);
+    }
+}
+</code></pre>
+
+<p>可以看到，我们传给scheduler一个JobDetail实例，因为我们在创建JobDetail时，将要执行的job的类名传给了JobDetail，所以scheduler就知道了要执行何种类型的job；每次当scheduler执行job时，在调用其execute(&hellip;)方法之前会创建该类的一个新的实例；执行完毕，对该实例的引用就被丢弃了，实例会被垃圾回收；这种执行策略带来的一个后果是，job必须有一个无参的构造函数（当使用默认的JobFactory时）；另一个后果是，在job类中，不应该定义有状态的数据属性，因为在job的多次执行中，这些属性的值不会保留。</p>
+
+<p>那么如何给job实例增加属性或配置呢？如何在job的多次执行中，跟踪job的状态呢？答案就是:JobDataMap，JobDetail对象的一部分。</p>
+
+<h2>JobDataMap</h2>
+
+<p>JobDataMap中可以包含不限量的（序列化的）数据对象，在job实例执行的时候，可以使用其中的数据；JobDataMap是Java Map接口的一个实现，额外增加了一些便于存取基本类型的数据的方法。</p>
+
+<p>将job加入到scheduler之前，在构建JobDetail时，可以将数据放入JobDataMap，如下示例：</p>
+
+<pre><code>JobDetail job = newJob(DumbJob.class)
+  .withIdentity(&quot;myJob&quot;, &quot;group1&quot;) // name &quot;myJob&quot;, group &quot;group1&quot;
+  .usingJobData(&quot;jobSays&quot;, &quot;Hello World!&quot;)
+  .usingJobData(&quot;myFloatValue&quot;, 3.141f)
+  .build();
+</code></pre>
+
+<p>在job的执行过程中，可以从JobDataMap中取出数据，如下示例：</p>
+
+<pre><code>public class DumbJob implements Job {
+
+    public DumbJob() {
+    }
+
+    public void execute(JobExecutionContext context)
+        throws JobExecutionException
+    {
+        JobKey key = context.getJobDetail().getKey();
+
+        JobDataMap dataMap = context.getJobDetail().getJobDataMap();
+
+        String jobSays = dataMap.getString(&quot;jobSays&quot;);
+        float myFloatValue = dataMap.getFloat(&quot;myFloatValue&quot;);
+
+        System.err.println(&quot;Instance &quot; + key + &quot; of DumbJob says: &quot; + jobSays + &quot;, and val is: &quot; + myFloatValue);
+    }
+}
+</code></pre>
+
+<p>如果你使用的是持久化的存储机制（本教程的JobStore部分会讲到），在决定JobDataMap中存放什么数据的时候需要小心，因为JobDataMap中存储的对象都会被序列化，因此很可能会导致类的版本不一致的问题；Java的标准类型都很安全，如果你已经有了一个类的序列化后的实例，某个时候，别人修改了该类的定义，此时你需要确保对类的修改没有破坏兼容性；更多细节，参考<a href="http://java.sun.com/developer/TechTips/2000/tt0229.html">现实中的序列化问题</a>。另外，你也可以配置JDBC-JobStore和JobDataMap，使得map中仅允许存储基本类型和String类型的数据，这样可以避免后续的序列化问题。</p>
+
+<p>如果你在job类中，为JobDataMap中存储的数据的key增加set方法（如在上面示例中，增加setJobSays(String val)方法），那么Quartz的默认JobFactory实现在job被实例化的时候会自动调用这些set方法，这样你就不需要在execute()方法中显式地从map中取数据了。</p>
+
+<p>在Job执行时，JobExecutionContext中的JobDataMap为我们提供了很多的便利。它是JobDetail中的JobDataMap和Trigger中的JobDataMap的并集，但是如果存在相同的数据，则后者会覆盖前者的值。</p>
+
+<p>下面的示例，在job执行时，从JobExecutionContext中获取合并后的JobDataMap：</p>
+
+<pre><code>public class DumbJob implements Job {
+
+    public DumbJob() {
+    }
+
+    public void execute(JobExecutionContext context)
+      throws JobExecutionException
+    {
+        JobKey key = context.getJobDetail().getKey();
+
+        JobDataMap dataMap = context.getMergedJobDataMap();  // Note the difference from the previous example
+
+        String jobSays = dataMap.getString(&quot;jobSays&quot;);
+        float myFloatValue = dataMap.getFloat(&quot;myFloatValue&quot;);
+        ArrayList state = (ArrayList)dataMap.get(&quot;myStateData&quot;);
+        state.add(new Date());
+
+        System.err.println(&quot;Instance &quot; + key + &quot; of DumbJob says: &quot; + jobSays + &quot;, and val is: &quot; + myFloatValue);
+    }
+}
+</code></pre>
+
+<p>如果你希望使用JobFactory实现数据的自动“注入”，则示例代码为：</p>
+
+<pre><code>public class DumbJob implements Job {
+
+    String jobSays;
+    float myFloatValue;
+    ArrayList state;
+
+    public DumbJob() {
+    }
+
+    public void execute(JobExecutionContext context)
+      throws JobExecutionException
+    {
+        JobKey key = context.getJobDetail().getKey();
+
+        JobDataMap dataMap = context.getMergedJobDataMap();  // Note the difference from the previous example
+
+        state.add(new Date());
+
+        System.err.println(&quot;Instance &quot; + key + &quot; of DumbJob says: &quot; + jobSays + &quot;, and val is: &quot; + myFloatValue);
+    }
+
+    public void setJobSays(String jobSays) {
+        this.jobSays = jobSays;
+    }
+
+    public void setMyFloatValue(float myFloatValue) {
+        myFloatValue = myFloatValue;
+    }
+
+    public void setState(ArrayList state) {
+        state = state;
+    }
+
+}
+</code></pre>
+
+<p>你也许发现，整体上看代码更多了，但是execute()方法中的代码更简洁了。而且，虽然代码更多了，但如果你的IDE可以自动生成setter方法，你就不需要写代码调用相应的方法从JobDataMap中获取数据了，所以你实际需要编写的代码更少了。当前，如何选择，由你决定。</p>
+
+<h2>Job实例</h2>
+
+<p>很多用户对于Job实例到底由什么构成感到很迷惑。我们在这里解释一下，并在接下来的小节介绍job状态和并发。</p>
+
+<p>你可以只创建一个job类，然后创建多个与该job关联的JobDetail实例，每一个实例都有自己的属性集和JobDataMap，最后，将所有的实例都加到scheduler中。</p>
+
+<p>比如，你创建了一个实现Job接口的类“SalesReportJob”。该job需要一个参数（通过JobdataMap传入），表示负责该销售报告的销售员的名字。因此，你可以创建该job的多个实例（JobDetail），比如“SalesReportForJoe”、“SalesReportForMike”，将“joe”和“mike”作为JobDataMap的数据传给对应的job实例。</p>
+
+<p>当一个trigger被触发时，与之关联的JobDetail实例会被加载，JobDetail引用的job类通过配置在Scheduler上的JobFactory进行初始化。默认的JobFactory实现，仅仅是调用job类的newInstance()方法，然后尝试调用JobDataMap中的key的setter方法。你也可以创建自己的JobFactory实现，比如让你的IOC或DI容器可以创建/初始化job实例。</p>
+
+<p>在Quartz的描述语言中，我们将保存后的JobDetail称为“job定义”或者“JobDetail实例”,将一个正在执行的job称为“job实例”或者“job定义的实例”。当我们使用“job”时，一般指代的是job定义，或者JobDetail；当我们提到实现Job接口的类时，通常使用“job类”。</p>
+
+<h2>Job状态与并发</h2>
+
+<p>关于job的状态数据（即JobDataMap）和并发性，还有一些地方需要注意。在job类上可以加入一些注解，这些注解会影响job的状态和并发性。</p>
+
+<p>@DisallowConcurrentExecution：将该注解加到job类上，告诉Quartz不要并发地执行同一个job定义（这里指特定的job类）的多个实例。请注意这里的用词。拿前一小节的例子来说，如果“SalesReportJob”类上有该注解，则同一时刻仅允许执行一个“SalesReportForJoe”实例，但可以并发地执行“SalesReportForMike”类的一个实例。所以该限制是针对JobDetail的，而不是job类的。但是我们认为（在设计Quartz的时候）应该将该注解放在job类上，因为job类的改变经常会导致其行为发生变化。</p>
+
+<p>@PersistJobDataAfterExecution：将该注解加在job类上，告诉Quartz在成功执行了job类的execute方法后（没有发生任何异常），更新JobDetail中JobDataMap的数据，使得该job（即JobDetail）在下一次执行的时候，JobDataMap中是更新后的数据，而不是更新前的旧数据。和 @DisallowConcurrentExecution注解一样，尽管注解是加在job类上的，但其限制作用是针对job实例的，而不是job类的。由job类来承载注解，是因为job类的内容经常会影响其行为状态（比如，job类的execute方法需要显式地“理解”其”状态“）。</p>
+
+<p>如果你使用了@PersistJobDataAfterExecution注解，我们强烈建议你同时使用@DisallowConcurrentExecution注解，因为当同一个job（JobDetail）的两个实例被并发执行时，由于竞争，JobDataMap中存储的数据很可能是不确定的。</p>
+
+<h2>Job的其它特性</h2>
+
+<p>通过JobDetail对象，可以给job实例配置的其它属性有：</p>
+
+<ul>
+<li>Durability：如果一个job是非持久的，当没有活跃的trigger与之关联的时候，会被自动地从scheduler中删除。也就是说，非持久的job的生命期是由trigger的存在与否决定的；</li>
+<li>RequestsRecovery：如果一个job是可恢复的，并且在其执行的时候，scheduler发生硬关闭（hard shutdown)（比如运行的进程崩溃了，或者关机了），则当scheduler重新启动的时候，该job会被重新执行。此时，该job的JobExecutionContext.isRecovering() 返回true。</li>
+</ul>
+
+<h2>JobExecutionException</h2>
+
+<p>最后，是关于Job.execute(..)方法的一些额外细节。execute方法中仅允许抛出一种类型的异常（包括RuntimeExceptions），即JobExecutionException。因此，你应该将execute方法中的所有内容都放到一个&rdquo;try-catch&rdquo;块中。你也应该花点时间看看JobExecutionException的文档，因为你的job可以使用该异常告诉scheduler，你希望如何来处理发生的异常。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/06/46-async-android.html" title="Android异步编程">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/06/quartz-tutorial-02-api-job-trigger.html" title="Quartz教程二：API、Job与Trigger">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-06-27</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#quartz-ref">quartz <span>9</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#quartz-ref">quartz <span>7</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

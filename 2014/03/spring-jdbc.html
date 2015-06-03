@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Spring持久化之JDBC - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="Spring持久化策略之一，使用Spring JDBC 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>Spring持久化之JDBC </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>这个小系列介绍Spring的持久化策略，主要关注当前应用最广泛的三种方式：Spring JDBC， MyBatis以及Hibernate。
+使用JDBC的优劣如下：</p>
+
+<ul>
+<li>优势：相对于持久化框架，使用JDBC，不需要掌握其它框架的查询语言，允许我们在更低的层次上处理数据，能够访问数据库中单独的列，而且能够更好地对数据访问的性能进行调优。</li>
+<li>劣势：随着项目的规模和复杂度的提升，使用JDBC会非常繁琐，同时不易于处理复杂的问题。</li>
+<li>Spring JDBC：提供数据访问模板，简化JDBC编程，同时提供了平台无关的持久化异常体系。</li>
+</ul>
+
+<h2>1. 配置数据源</h2>
+
+<p>在生产环境，考虑到性能，应该使用数据库连接池。以commons dbcp配置为例，配置如下：</p>
+
+<pre><code>&lt;context:property-placeholder location=&quot;classpath:jdbc.properties&quot;/&gt;
+
+&lt;bean id=&quot;vrsDataSource&quot; class=&quot;org.apache.commons.dbcp.BasicDataSource&quot; destroy-method=&quot;close&quot;&gt;
+    &lt;property name=&quot;driverClassName&quot; value=&quot;${jdbc.drvier}&quot;/&gt;
+    &lt;property name=&quot;url&quot; value=&quot;${jdbc.videodb.url}&quot;/&gt;
+    &lt;property name=&quot;username&quot; value=&quot;${jdbc.videodb.username}&quot;/&gt;
+    &lt;property name=&quot;password&quot; value=&quot;${jdbc.videodb.password}&quot;/&gt;
+    &lt;property name=&quot;maxActive&quot; value=&quot;${jdbc.videodb.maxActive}&quot;/&gt;
+    &lt;property name=&quot;initialSize&quot; value=&quot;${jdbc.videodb.initialSize}&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<blockquote>
+<p>主要属性参数说明：</p>
+</blockquote>
+
+<ul>
+<li>driverClassName: JDBC驱动的全限定类名，如mysql就是：com.mysql.jdbc.Driver；</li>
+<li>url：JDBC的url，如使用mysql的url：jdbc:mysql://10.11.132.193:3306/vrs；</li>
+<li>username, password: 连接该数据源的用户名和密码；</li>
+<li>initialSize：表示初始大小，即连接池启动时创建的连接数量；</li>
+<li>maxActive：表示同一时间可从池中分配的最大连接数，0表示无限制；</li>
+<li>maxIdle：池里不会被释放的最大连接数，0表示无限制；</li>
+<li>minIdle：在不创建新连接的情况下，池中保持空闲的最小连接数；</li>
+<li>maxWait：没有可用连接时，在抛出异常之前，池等待连接回收的最大时间；-1表示无线等待；</li>
+<li>validationQuery：验证连接的sql查询，至少返回一行；
+更多属性参考<a href="http://commons.apache.org/proper/commons-dbcp/configuration.html">wiki页</a></li>
+</ul>
+
+<blockquote>
+<p>其它推荐的连接池有：</p>
+</blockquote>
+
+<ul>
+<li><a href="http://www.mchange.com/projects/c3p0/">c3p0</a>: 适合多线程环境；</li>
+<li><a href="https://github.com/alibaba/druid">druid</a>：完善的监控功能；</li>
+</ul>
+
+<h2>2. 使用JdbcTemplate</h2>
+
+<p>使用JdbcTemplate类，在sql语句中，以?作为参数的占位符，传入的参数的顺序与sql语句中?的顺序必须是一一对应的。</p>
+
+<p>首先在xml配置文件里添加jdbcTemplate的bean，其参数<code>dataSource</code>引用之前定义的数据源：</p>
+
+<pre><code>&lt;bean id=&quot;jdbcTemplate&quot; class=&quot;org.springframework.jdbc.core.JdbcTemplate&quot;&gt;
+    &lt;property name=&quot;dataSource&quot; ref=&quot;vrsDataSource&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<p>然后，在dao类中引用JdbcTemplate类，并注入：</p>
+
+<pre><code>@Resource(name = &quot;jdbcTemplate&quot;)
+JdbcTemplate jdbcTemplate;
+</code></pre>
+
+<p>查询
+返回基本类型：</p>
+
+<pre><code>String getUserById = &quot;select name from students where id = ?&quot;;
+String userName = jdbcTemplate.queryForObject(getUserById, new Object[]{3}, String.class);
+</code></pre>
+
+<p>返回<code>Map&lt;String, Object&gt;</code>，key为列名，value为对应列的值，此时返回值只能有一行，否则报错：</p>
+
+<pre><code>String getStudentByNumber = &quot;select * from students where number = ?&quot;;
+Map&lt;String, Object&gt; studentMap = jdbcTemplate.queryForMap(getStudentByNumber, 111);
+</code></pre>
+
+<p>返回<code>List&lt;Map&lt;String, Object&gt;&gt;</code>, 可以返回多列：</p>
+
+<pre><code>String getStudentsByCity = &quot;select * from students where city = ?&quot;;
+List&lt;Map&lt;String, Object&gt;&gt; studentList = jdbcTemplate.queryForList(getStudentsByCity, &quot;tianjin&quot;);
+</code></pre>
+
+<p>返回自定义class的对象，需要实现RowMapper接口，定义列名和属性的映射：
+首先实现RowMapper接口：</p>
+
+<pre><code>public class StudentRowMapper implements RowMapper&lt;Students&gt; {
+    @Override
+    public Students mapRow(ResultSet rs, int rowNum) throws SQLException {
+        Students students = new Students();
+        students.setId(rs.getInt(&quot;id&quot;));
+        students.setName(rs.getString(&quot;name&quot;));
+        students.setSex(rs.getString(&quot;sex&quot;));
+        students.setNumber(rs.getInt(&quot;number&quot;));
+        students.setEnable(rs.getInt(&quot;enable&quot;));
+        students.setCity(rs.getString(&quot;city&quot;));
+        return students;
+    }
+}
+</code></pre>
+
+<p>然后，使用query或者queryForObject查询多行或一行：</p>
+
+<pre><code>String getStudentsByCity = &quot;select * from students where city = ?&quot;;
+List&lt;Students&gt; studentsList = jdbcTemplate.query(getStudentsByCity, new StudentRowMapper(), &quot;tianjin&quot;);
+</code></pre>
+
+<h2>2. 使用NamedParameterJdbcTemplate</h2>
+
+<p>使用NamedParameterJdbcTemplate类，sql语句中的参数是以命名的变量来表示，传入参数时，只要参数名一致即可，索引位置不必一一对应。
+首先在xml配置文件里定义NamedParameterJdbcTemplate的bean：</p>
+
+<pre><code>&lt;bean id=&quot;namedParameterJdbcTemplate&quot; class=&quot;org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate&quot;&gt;
+    &lt;constructor-arg name=&quot;dataSource&quot; ref=&quot;feedbackDataSource&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<p>然后将namedParameterJdbcTemplate bean注入到dao中，</p>
+
+<pre><code>@Resource(name = &quot;namedParameterJdbcTemplate&quot;)
+NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+</code></pre>
+
+<p>定义sql，参数以(:变量名)形式给出即可，如：</p>
+
+<pre><code>String getStudentByNumber = &quot;select * from students where number = (:number) and city = (:city)&quot;;
+NamedParameterJdbcTemplate namedParameterJdbcTemplate = (NamedParameterJdbcTemplate) context.getBean(&quot;namedParameterJdbcTemplate&quot;);
+Map&lt;String, Object&gt; queryMap = new HashMap&lt;String, Object&gt;();
+queryMap.put(&quot;number&quot;, 333);
+queryMap.put(&quot;city&quot;, &quot;tianjin&quot;);
+List&lt;Map&lt;String, Object&gt;&gt; mapList = namedParameterJdbcTemplate.queryForList(getStudentByNumber, queryMap);
+</code></pre>
+
+<blockquote>
+<p>除了使用命名参数外，NamedParameterJdbcTemplate与JdbcTempate的主要用法都是一致的。</p>
+</blockquote>
+
+<h2>3. 使用JdbcDaoSupport</h2>
+
+<p>JdbcDaoSupport是一个父类，如果有多个dao类，通过继承JdbcDaoSupport，可以更方便地获取jdbcTemplate。
+首先让dao类继承JdbcDaoSupport类：</p>
+
+<pre><code>public class InfoJdbcImpl extends JdbcDaoSupport implements VideoInfoDao {
+</code></pre>
+
+<p>然后在定义dao类的bean时，注入一个<code>jdbcTemplate</code>属性，或者直接注入一个<code>dataSource</code>属性（这两个属性来自于JdbcDaoSupport）：</p>
+
+<pre><code>&lt;bean id=&quot;infoJdbcImpl&quot; class=&quot;com.sohu.tv.dao.impl.InfoJdbcImpl&quot;&gt;
+    &lt;property name=&quot;dataSource&quot; ref=&quot;feedbackDataSource&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<p>然后通过getJdbcTemplate()获取jdbcTemplate，实现dao层的逻辑：</p>
+
+<pre><code>String getStudentByNumber = &quot;select * from students where number = ?&quot;;
+Map&lt;String, Object&gt; studentMap = getJdbcTemplate().queryForMap(getStudentByNumber, 111);
+</code></pre>
+
+<blockquote>
+<p><code>NamedParameterJdbcDaoSupport</code>与<code>JdbcDaoSupport</code>的用法类似。</p>
+</blockquote>
+
+<h3>参考资料</h3>
+
+<ul>
+<li><a href="http://www.amazon.cn/Spring%E5%AE%9E%E6%88%98-%E6%B2%83%E5%B0%94%E6%96%AF/dp/B00CY6UD2I/ref=sr_1_1?ie=UTF8&amp;qid=1394943496&amp;sr=8-1&amp;keywords=spring+in+action">Spring实战(第3版)</a></li>
+<li><a href="http://docs.spring.io/spring/docs/3.2.8.RELEASE/javadoc-api/">spring-javadoc-api</a></li>
+</ul>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/03/elasticsearch-term-query.html" title="elasticsearch查询api：term query">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/03/spring-aop-example.html" title="Spring AOP之入门实例">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-03-16</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#Spring-ref">Spring <span>5</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

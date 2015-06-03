@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>redis-toolkit：Java实现的redis工具(一) - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>redis-toolkit：Java实现的redis工具(一) </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>redis作者提供了redis-trib.rb工具，用来与redis cluster进行交互，该工具使用ruby实现；对该工具提供的主要功能，我在redis的java客户端jedis的基础上进行了对应的实现，希望给同样使用java与redis交互的朋友一些参考。</p>
+
+<h2>1. 创建集群</h2>
+
+<p>使用作者在<a href="http://redis.io/topics/cluster-tutorial">cluster-tutorial</a>上的示例，即在localhost的7000、7001、7002、7003、7004、7005启动6个redis实例，且都启用cluster模式，使用redis-trib创建集群的命令为：</p>
+
+<pre><code>./redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+</code></pre>
+
+<p>上述命令表示使用这6个实例创建集群，3主3从；</p>
+
+<p>实际上，这一条命令，如果拆分为原生的redis命令来实现，则主要有以下4个过程：</p>
+
+<pre><code>1. 使用`CLUSTER MEET`命令将所有节点构建成一个集群；
+2. 使用`CLUSTER REPLICATE`命令设置master/slave结构；
+3. 使用`CLUSTER SETSLOTS`命令将16384个slot分配到集群中的master中；
+4. 等待集群的状态变为OK；
+</code></pre>
+
+<p>对于以上原生命令，jedis都是支持的，所以根据以上4个步骤，使用jedis创建集群就不难了；
+在redis-tookit中整个创建的过程被封装到Create#create()方法中了，示例代码：</p>
+
+<pre><code>/* 构建一个3主3从的集群 */
+ArrayListMultimap&lt;HostAndPort, HostAndPort&gt; clusterNodes = ArrayListMultimap.create();
+clusterNodes.put(HostAndPort.fromString(&quot;127.0.0.1:7000&quot;), HostAndPort.fromString(&quot;127.0.0.1:7001&quot;));
+clusterNodes.put(HostAndPort.fromString(&quot;127.0.0.1:7002&quot;), HostAndPort.fromString(&quot;127.0.0.1:7003&quot;));
+clusterNodes.put(HostAndPort.fromString(&quot;127.0.0.1:7004&quot;), HostAndPort.fromString(&quot;127.0.0.1:7005&quot;));
+Create.create(clusterNodes);
+</code></pre>
+
+<h2>2. 数据迁移(reshard)</h2>
+
+<p>在beta8之前，使用redis-trib.rb做reshard时，仅支持交互时模式，beta8之后，开始支持非交互式模式。比如，从源节点38807bd0262d99f205ebd0eb3e483cc09e927731上迁移100个slot到目标节点47ef6c293bb3f9763d421f56c63f00cf06ef5b3f的非交互式命令为：</p>
+
+<pre><code>redis-trib.rb reshard --from 38807bd0262d99f205ebd0eb3e483cc09e927731 --to 47ef6c293bb3f9763d421f56c63f00cf06ef5b3f --slots 100 --yes 127.0.0.1:7000
+</code></pre>
+
+<p>那么，使用redis的原生命令如何完成数据的reshard呢？其实，在数据reshard时，slot是逐个迁移的，redis迁移一个slot的步骤为：</p>
+
+<pre><code>1. 对目标节点发送`CLUSTER SETSLOT &lt;slot&gt; IMPORTING &lt;source_node_id&gt;`命令，表示目标节点将从源节点迁移slot；
+2. 对源节点发送`CLUSTER SETSLOT &lt;slot&gt; MIGRATING &lt;target_node_id&gt;`命令，表示源节点将向目标节点迁移slot；
+3. 对源节点发送`CLUSTER GETKEYSINSLOT &lt;slot&gt; &lt;count&gt;`命令，表示从slot中取出count个key/value对的key；
+4. 对源节点发送`CLUSTER MIGRATE &lt;target_ip&gt; &lt;target_port&gt; &lt;key_name&gt; 0 &lt;timeout&gt;`命令，表示将key迁移到目标节点，对步骤3中的每个key都会执行该命令；
+5. 重复执行步骤3和4，直到该slot中所有的key都被迁移完毕；
+6. 向集群中的任一节点发送`CLUSTER SETSLOT &lt;slot&gt; NODE &lt;target_node_id&gt;`，表示告诉集群，将该slot分配给目标节点；
+7. 等待集群的状态变为OK；
+</code></pre>
+
+<p>使用java实现时，也是通过jedis调用redis原生命令，根据以上步骤来实现的。在redis-toolkit中，封装了两个方法，Reshard#migrateSlots()表示迁移一个slot，Reshard#migrate()表示批量迁移，批量迁移时，从源节点的slot索引，从低到高依次迁移，使用示例：</p>
+
+<pre><code>/** 将slot 9189从节点7002迁移到节点7006 **/
+HostAndPort srcNodeInfo = HostAndPort.fromString(&quot;10.7.40.49:7002&quot;);
+HostAndPort destNodeInfo = HostAndPort.fromString(&quot;10.7.40.49:7006&quot;);
+Reshard.migrateSlots(srcNodeInfo, destNodeInfo, 9189);
+
+/** 从节点7000迁移100个slot到节点7004 **/
+HostAndPort srcNodeInfo = HostAndPort.fromString(&quot;10.7.40.49:7000&quot;);
+HostAndPort destNodeInfo = HostAndPort.fromString(&quot;10.7.40.49:7004&quot;);
+Reshard.migrate(srcNodeInfo, destNodeInfo, 100);
+</code></pre>
+
+<h2>3. 节点的增加/删除</h2>
+
+<h3>3.1 增加节点</h3>
+
+<p>无论要添加的是master节点还是slave节点，首先都需要将该节点加入到集群中，然后，如果是master节点，则迁移一部分数据到该节点上，如果是slave节点，则使该节点成为其master节点的slave。</p>
+
+<p>通过redis-trib.rb工具，增加一个master节点命令为：</p>
+
+<pre><code>./redis-trib.rb add-node 127.0.0.1:7006 127.0.0.1:7000
+</code></pre>
+
+<p>然后通过<code>redis-trib.rb reshard</code>命令迁移数据到新节点7006上；</p>
+
+<p>增加一个slave节点，redis-trib.rb提供了两种方式：</p>
+
+<pre><code>./redis-trib.rb add-node --slave 127.0.0.1:7006 127.0.0.1:7000
+
+./redis-trib.rb add-node --slave --master-id 3c3a0c74aae0b56170ccb03a76b60cfe7dc1912e 127.0.0.1:7006
+</code></pre>
+
+<p>第一种方式将该slave节点随机分配给集群中具有最少slave的master节点，第二种方式是将slave节点分配给指定的master节点；更通用的方式，则是先将该节点作为空的master节点加入集群，然后通过<code>CLUSTER REPLICATE</code>命令使其成为一个master节点的slave。</p>
+
+<p>对redis集群进行扩容时，可分为垂直扩容和水平扩容，垂直扩容即通过<code>CONFIG SET</code>命令在线修改redis实例的<code>maxmemory</code>的大小，水平扩容即增加新的master节点，然后迁移一部分数据到新的节点上。</p>
+
+<p>向集群中添加一个master节点，则相当于水平扩容，给集群中的一个节点增加一个slave节点，则不是扩容。</p>
+
+<p>所以，增加节点的步骤为：</p>
+
+<pre><code>- 使用`CLUSTER MEET`命令将节点加入到当前集群；
+- 如果要加入的是master节点，则迁移slot到新节点上(参考第2步的“数据迁移”)；
+- 如果要加入的是slave节点，则使用`CLUSTER REPLICATE`命令建立master/slave关系；
+</code></pre>
+
+<p>redis-tookit中提供的增加节点的方法为Manage#addNewNode()，支持增加master节点和slave节点；如果增加的是master节点，则会迁移数据到新的master节点，为了迁移操作更均衡，根据每个master节点上的slot数等比例地迁移，即从slot更多的节点上迁移更多的slot，从slot少的节点上迁移更少的slot，使用示例：</p>
+
+<pre><code>/** 向集群中增加一个master节点7006 **/
+HostAndPort clusterNodeInfo = HostAndPort.fromString(&quot;10.7.40.49:7000&quot;);
+HostAndPort newMaster = HostAndPort.fromString(&quot;10.7.40.49:7006&quot;);
+Manage.addNewNode(clusterNodeInfo, newMaster, null);
+
+/** 给集群中增加一个slave节点8001，作为master节点7002的slave **/
+HostAndPort clusterNodeInfo = HostAndPort.fromString(&quot;10.7.40.49:7000&quot;);
+HostAndPort master = HostAndPort.fromString(&quot;10.7.40.49:7002&quot;);
+HostAndPort newSlave = HostAndPort.fromString(&quot;10.7.40.49:8001&quot;);
+Manage.addNewNode(clusterNodeInfo, newSlave, master);
+</code></pre>
+
+<h2>3.2 删除节点</h2>
+
+<p>从集群中删除一个节点，如果要删除的是slave节点，直接将节点从集群中剔除即可，如果要删除的是master节点，则需要先将所有的slot迁移走，然后删除节点。</p>
+
+<p>redis-trib.rb工具提供的删除一个节点的命令为：</p>
+
+<pre><code>./redis-trib del-node 127.0.0.1:7000 3c3a0c74aae0b56170ccb03a76b60cfe7dc1912e
+</code></pre>
+
+<p>删除节点，就是调用<code>CLUSTER FORGET</code>命令，将要删除的节点从当前集群中踢掉，需要注意的是：</p>
+
+<pre><code>- 需要对集群中的每一个节点(无论是master还是slave)都调用`CLUSTER FORGET`来“忘记”该节点，因为如果集群中有一个节点还“认识”待删除的节点，则通过消息，不久集群中的所有节点都”认识“待删除的节点了；
+- 一个slave节点不能”忘记“它的master节点；
+- 一个节点不能”忘记“它自己；
+</code></pre>
+
+<p>所以，删除一个节点的步骤为：</p>
+
+<pre><code>- 如果节点是master节点，先将节点上的slot迁移，然后从集群中删除该master节点以及它的所有slave节点；
+- 如果节点是slave节点，则直接从集群中删除即可；
+</code></pre>
+
+<p>redis-tookit中提供了删除master节点和slave节点的方法，删除master节点时，需要迁移数据，当前的实现是将待删除的master节点上的所有slot平均分配给集群中的其它master；使用示例：</p>
+
+<pre><code>/* 从集群中删除一个节点，删除时，集群会判断待删除的节点是master还是slave */
+HostAndPort oneNode = HostAndPort.fromString(&quot;10.7.40.49:7000&quot;);
+HostAndPort nodeToDelete = HostAndPort.fromString(&quot;10.7.40.49:7006&quot;);
+Manage.removeNode(oneNode, nodeToDelete);
+</code></pre>
+
+<p>redis-tookit代码在<a href="https://github.com/nkcoder/redis-toolkit">https://github.com/nkcoder/redis-toolkit</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://redis.io/topics/cluster-tutorial">Redis cluster tutorial</a></li>
+<li><a href="http://book.douban.com/subject/25900156/">Redis设计与实现</a></li>
+</ul>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/11/vim-basic-usage.html" title="vim 常用的基本操作">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/11/algorithm-find-continue-sum.html" title="算法练习：求和为s的连续正整数序列">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-11-05</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#redis-ref">redis <span>4</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#redis-ref">redis <span>5</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

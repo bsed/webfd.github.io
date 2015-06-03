@@ -5,8 +5,6 @@
   <meta charset="utf-8">
   <title>WebFD Page 7 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="Useful Liunx Command 树莓派">
-  
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
   <!--[if lt IE 9]>
@@ -130,69 +128,382 @@
         
         
       
+        
+        
+          <li><a href="../../posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/14/">14</a></li>
+        
+      
       </ul>
     </div>
 
 
     
       <div class="post">
-        <h1 class="title"><a href="/2013/02/25/Java%20properties%20to%20enviorment%20variables.html">将Java的Properties文件转换成环境变量</a> <span class="date">2013-02-25</span></h1>
+        <h1 class="title"><a href="/2014/04/jetty-as-linux-service.html">Jetty9作为Linux服务配置记录</a> <span class="date">2014-04-11</span></h1>
 
-        <h2>Overview</h2>
+        <p>最近将项目都升级到了Jetty 9 和JDK 7，记录一下配置的过程。以下配置基于的版本为：</p>
 
-<p>在Java程序中使用properties文件很方便，但有时候需要和脚本配合使用时，需要把properties文件内的多个变量转换成环境变量，本文提供一个转换脚本示范：</p>
+<ul>
+<li>Jetty：9.1.1.v20140108</li>
+<li>JDK：1.7.0_51</li>
+<li>官方文档版本：2014-03-17T10:14:41-05:00</li>
+</ul>
 
-<p>比如env.properties如下（=附近可以有空格，也可以有空行）</p>
+<h2>1. 作为root用户配置</h2>
 
-<pre><code>MYSQL_URL = jdbc:mysql://localhost:3306/test?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=gbk
-MYSQL_USER = root
-MYSQL_PASS = 
+<p>如果你希望以root用户启动jetty。并将jetty配置为服务，以下为快速通道：</p>
+
+<h3>1.1 将脚本jetty.sh拷贝init.d目录下</h3>
+
+<pre><code># cp bin/jetty.sh /etc/init.d/jetty
 </code></pre>
 
-<p>执行下面的脚本后就相当于</p>
+<blockquote>
+<p>jetty.sh是jetty的启动脚本。</p>
+</blockquote>
 
-<pre><code>export MYSQL_URL=&quot;//localhost:3306/test?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=gbk&quot;
-export MYSQL_USER=&quot;root&quot;
-export MYSQL_PASS=&quot;&quot; 
-</code></pre>
+<h3>1.2 配置/etc/default/jetty</h3>
 
-<p>env.sh脚本代码</p>
-
-<pre><code>#!/bin/bash
+<pre><code># vim /etc/default/jetty
+---------------------------------------------------
+PATH=$PATH:/usr/local/jdk1.7.0_51/bin 
+JETTY_HOME=/usr/local/jetty9.1 
+TMPDIR=/usr/local/jetty9.1/tmp
+---------------------------------------------------
 </code></pre>
 
 
         <div class="more">
-          <a href="/2013/02/25/Java%20properties%20to%20enviorment%20variables.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/04/jetty-as-linux-service.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2012/new-born.html">我的第一篇博客</a> <span class="date">2012-12-22</span></h1>
+        <h1 class="title"><a href="/2014/03/spring-hibernate-example.html">Spring持久化之Hibernate</a> <span class="date">2014-03-30</span></h1>
 
-        <h1>感谢使用Gor编写博客</h1>
+        <p>本文简要介绍Spring通过Hibernate实现持久化需要的基本配置，分别通过注解和xml配置来实现。</p>
 
-<h2>本文位于 posts/first-blog.md , 你可以任何删掉,修改这个文件</h2>
+<h2>1. 通过注解实现</h2>
 
-<p>文件开头是当前文章的元数据</p>
+<h3>1.1 添加pom依赖</h3>
 
-<ol>
-<li>date为自动生成, 当然,你可以修改,这是你的自由</li>
-<li>permalink 可以是固定地址,也可以由gor为你自动生成</li>
-<li>categories 就是分类, 可以多个</li>
-<li>tags 同理,多个标签也是很常见的</li>
-</ol>
+<p>在pom的xml里添加*Hibernate*相关的依赖，如：</p>
 
-<p>请确保文件使用UTF8 without BOM编码</p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.hibernate&lt;/groupId&gt;
+    &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;
+    &lt;version&gt;3.6.10.Final&lt;/version&gt;
+&lt;/dependency&gt;
 
-<h2>你可以通过执行下面的语句来新建一篇博客:</h2>
-
-<pre><code>gor post 文章标题
+&lt;dependency&gt;
+    &lt;groupId&gt;javax.persistence&lt;/groupId&gt;
+    &lt;artifactId&gt;persistence-api&lt;/artifactId&gt;
+    &lt;version&gt;${javax.persist}&lt;/version&gt;
+&lt;/dependency&gt;
 </code></pre>
 
 
         <div class="more">
-          <a href="/2012/new-born.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/03/spring-hibernate-example.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/elasticsearch-match-query.html">elasticsearch查询api：match query</a> <span class="date">2014-03-23</span></h1>
+
+        <h2>1. match query</h2>
+
+<ul>
+<li>与<strong>term query</strong>不同，<strong>match query</strong>的查询词是被分词处理的（analyzed），即首先分词，然后构造相应的查询，所以应该确保查询的分词器和索引的分词器是一致的；</li>
+<li>与<strong>terms query</strong>相似，提供的查询词之间默认是or的关系，可以通过<code>operator</code>属性指定；</li>
+<li><strong>match query</strong>有两种形式，一种是简单形式，一种是bool形式；</li>
+</ul>
+
+<h2>2. REST API</h2>
+
+<pre><code># curl -XGET 'localhost:9200/video/video_info/_search?pretty' -d @match_query.json
+</code></pre>
+
+<p>简单形式的<strong>match query</strong>：</p>
+
+<pre><code>{
+    &quot;query&quot;: {
+        &quot;match&quot;: {
+            &quot;tvName&quot;: &quot;决战&quot;
+        }
+    }
+}
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/elasticsearch-match-query.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/spring-mybatis.html">Spring持久化之MyBatis</a> <span class="date">2014-03-22</span></h1>
+
+        <p>MyBatis是一个优秀的轻量级持久化框架，本文主要介绍MyBatis与Spring集成的配置与用法。</p>
+
+<h2>1. Spring MyBatis配置</h2>
+
+<h3>1.1 添加Maven依赖</h3>
+
+<p>在pom.xml文件里添加mybatis-spring和mybatis的依赖：</p>
+
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.mybatis&lt;/groupId&gt;
+    &lt;artifactId&gt;mybatis-spring&lt;/artifactId&gt;
+    &lt;version&gt;${mybatis.spring.version}&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.mybatis&lt;/groupId&gt;
+    &lt;artifactId&gt;mybatis&lt;/artifactId&gt;
+    &lt;version&gt;${mybatis.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/spring-mybatis.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/elasticsearch-terms-query.html">elasticsearch查询api：terms query</a> <span class="date">2014-03-20</span></h1>
+
+        <h2>1. terms query查询</h2>
+
+<ul>
+<li>提供多个查询词，以数组形式出现，查询指定的字段是否包含其中一个或者多个查询词；</li>
+<li>功能与：<strong>bool query</strong>通过对多个term进行<code>should</code>操作的功能是一致的，是更简单的一种语法形式；</li>
+<li>提供的查询词也是不分词的，只有完全包含才算匹配；可以通过<code>minimum_should_match</code>属性指定最少匹配的个数；</li>
+</ul>
+
+<h2>2. REST API</h2>
+
+<p><strong>terms query</strong>的REST API示例如下：</p>
+
+<pre><code>{
+    &quot;query&quot;: {
+        &quot;terms&quot;: {
+            &quot;tvName&quot;: [&quot;日本&quot;, &quot;停电&quot;],
+            &quot;minimum_should_match&quot;: 1
+        }
+    }
+}
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/elasticsearch-terms-query.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/elasticsearch-term-query.html">elasticsearch查询api：term query</a> <span class="date">2014-03-18</span></h1>
+
+        <h2>1. term query查询</h2>
+
+<ul>
+<li>在给定的字段里查询词或者词组；</li>
+<li>提供的查询词是不分词的(not analyzed)，即只有完全包含才算匹配；</li>
+<li>支持boost属性，boost可以提高field和document的相关性；</li>
+</ul>
+
+<h2>2. REST API</h2>
+
+<pre><code>$ curl -XGET 'localhost:9200/video/video_info/_search?pretty' -d @term_query.json
+</code></pre>
+
+<p>term_query.json
+简单的字段查询：</p>
+
+<pre><code>{
+    &quot;query&quot;: {
+        &quot;term&quot;: {
+            &quot;tvName&quot;: &quot;童年&quot;
+        }
+    }
+}
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/elasticsearch-term-query.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/spring-jdbc.html">Spring持久化之JDBC</a> <span class="date">2014-03-16</span></h1>
+
+        <p>这个小系列介绍Spring的持久化策略，主要关注当前应用最广泛的三种方式：Spring JDBC， MyBatis以及Hibernate。
+使用JDBC的优劣如下：</p>
+
+<ul>
+<li>优势：相对于持久化框架，使用JDBC，不需要掌握其它框架的查询语言，允许我们在更低的层次上处理数据，能够访问数据库中单独的列，而且能够更好地对数据访问的性能进行调优。</li>
+<li>劣势：随着项目的规模和复杂度的提升，使用JDBC会非常繁琐，同时不易于处理复杂的问题。</li>
+<li>Spring JDBC：提供数据访问模板，简化JDBC编程，同时提供了平台无关的持久化异常体系。</li>
+</ul>
+
+<h2>1. 配置数据源</h2>
+
+<p>在生产环境，考虑到性能，应该使用数据库连接池。以commons dbcp配置为例，配置如下：</p>
+
+<pre><code>&lt;context:property-placeholder location=&quot;classpath:jdbc.properties&quot;/&gt;
+
+&lt;bean id=&quot;vrsDataSource&quot; class=&quot;org.apache.commons.dbcp.BasicDataSource&quot; destroy-method=&quot;close&quot;&gt;
+    &lt;property name=&quot;driverClassName&quot; value=&quot;${jdbc.drvier}&quot;/&gt;
+    &lt;property name=&quot;url&quot; value=&quot;${jdbc.videodb.url}&quot;/&gt;
+    &lt;property name=&quot;username&quot; value=&quot;${jdbc.videodb.username}&quot;/&gt;
+    &lt;property name=&quot;password&quot; value=&quot;${jdbc.videodb.password}&quot;/&gt;
+    &lt;property name=&quot;maxActive&quot; value=&quot;${jdbc.videodb.maxActive}&quot;/&gt;
+    &lt;property name=&quot;initialSize&quot; value=&quot;${jdbc.videodb.initialSize}&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/spring-jdbc.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/spring-aop-example.html">Spring AOP之入门实例</a> <span class="date">2014-03-13</span></h1>
+
+        <p>依赖注入（DI）有助于应用对象之间的解耦，而面向切面编程（AOP）有助于横切关注点与所影响的对象之间的解耦。所谓横切关注点，即影响应用多处的功能，这些功能各个应用模块都需要，但又不是其主要关注点，常见的横切关注点有日志、事务和安全等。</p>
+
+<p>将横切关注点抽离形成独立的类，即形成了切面。切面主要由切点和通知构成，通知定义了切面是什么，以及何时执行何种操作；切点定义了在何处执行通知定义的操作。</p>
+
+<p>下面以简单的日志作为切面，分别介绍通过xml配置和注解实现AOP。</p>
+
+<h2>0. 添加依赖</h2>
+
+<p>因为Spring AOP用到AspectJ的相关对象和注解，需要添加AspectJ的依赖：</p>
+
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.aspectj&lt;/groupId&gt;
+    &lt;artifactId&gt;aspectjrt&lt;/artifactId&gt;
+    &lt;version&gt;1.7.4&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.aspectj&lt;/groupId&gt;
+    &lt;artifactId&gt;aspectjweaver&lt;/artifactId&gt;
+    &lt;version&gt;1.7.4&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-aop&lt;/artifactId&gt;
+    &lt;version&gt;${spring.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/spring-aop-example.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/centos-zsh-install.html">CentOS Install Zsh 5.0.5</a> <span class="date">2014-03-11</span></h1>
+
+        <blockquote>
+<p>前提条件：</p>
+
+<ol>
+<li><code>sudo yum install git</code></li>
+<li><code>sudo yum install ncurses-devel</code></li>
+</ol>
+</blockquote>
+
+<ol>
+<li><p>编译安装</p>
+
+<ol>
+<li><code>[usr@dev01 zsh-5.0.5]$ wget http://sourceforge.net/projects/zsh/files/zsh/5.0.5/zsh-5.0.5.tar.bz2/download &amp;&amp; mv download zsh-5.0.5.tar.bz2</code></li>
+<li><code>[usr@dev01 zsh-5.0.5]$ tar xvjf zsh-5.0.5.tar.bz2</code></li>
+<li><code>[usr@dev01 zsh-5.0.5]$ cd zsh-5.0.5</code></li>
+<li><code>[usr@dev01 zsh-5.0.5]$ ./configure</code></li>
+<li><code>[usr@dev01 zsh-5.0.5]$ make</code></li>
+<li><code>[usr@dev01 zsh-5.0.5]$ sudo make install</code></li>
+</ol></li>
+</ol>
+
+<p>2， 修改默认Shell</p>
+
+<pre><code>1. `echo &quot;/usr/local/bin/zsh&quot; | tee -a /etc/shells`
+2. `chsh -s /usr/local/bin/zsh`
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/centos-zsh-install.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/03/spring-di-annotation.html">Spring依赖注入之注解注入</a> <span class="date">2014-03-09</span></h1>
+
+        <h2>1. bean的自动装配和自动检测的区别</h2>
+
+<p>启用注解装配，在xml配置文件里添加：</p>
+
+<pre><code>&lt;context:annotation-config/&gt;
+</code></pre>
+
+<p>启用自动扫描注解，在xml配置文件里添加：</p>
+
+<pre><code>&lt;context:component-scan base-package=&quot;org.yousharp.base&quot;/&gt;
+</code></pre>
+
+<blockquote>
+<p>二者的区别：
+自动装配表示通过@Autowired, @Inject, @Resource等实现对属性或构造函数的自动注入；仍然需要在配置文件里定义bean，只是通过自动装配省去了<code>property</code>和<code>constructor-arg</code>的配置。
+自动检测是扫描特定的注解（包括：@Component, @Controller, @Service, @Repository)，将注解过的类自动定义为bean，自动检测是自动装配的超集，通过自动检测，可以省去在xml配置文件里定义<code>bean</code>了。</p>
+</blockquote>
+
+<h2>2. 通过自动装配和注解实现注入</h2>
+
+<p>在xml配置文件里启动注解装配：</p>
+
+<pre><code>&lt;context:annotation-config/&gt;
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/03/spring-di-annotation.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
@@ -233,6 +544,41 @@ export MYSQL_PASS=&quot;&quot;
         
           <li class="active"><a href="/posts/7/">7</a></li>
         
+        
+      
+        
+        
+          <li><a href="/posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/14/">14</a></li>
         
       
       </ul>

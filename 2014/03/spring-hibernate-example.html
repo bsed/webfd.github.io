@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Spring持久化之Hibernate - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="简要介绍Spring通过Hibernate实现持久化的基本配置 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>Spring持久化之Hibernate </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>本文简要介绍Spring通过Hibernate实现持久化需要的基本配置，分别通过注解和xml配置来实现。</p>
+
+<h2>1. 通过注解实现</h2>
+
+<h3>1.1 添加pom依赖</h3>
+
+<p>在pom的xml里添加*Hibernate*相关的依赖，如：</p>
+
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.hibernate&lt;/groupId&gt;
+    &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;
+    &lt;version&gt;3.6.10.Final&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;javax.persistence&lt;/groupId&gt;
+    &lt;artifactId&gt;persistence-api&lt;/artifactId&gt;
+    &lt;version&gt;${javax.persist}&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;javassist&lt;/groupId&gt;
+    &lt;artifactId&gt;javassist&lt;/artifactId&gt;
+    &lt;version&gt;3.12.1.GA&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h3>1.2 实体类的注解定义</h3>
+
+<p>先定义一个实体类StudentEntity.java，映射到数据库中的表students：</p>
+
+<pre><code>@Entity
+@Table(name = &quot;students&quot;)
+public class StudentEntity {
+    @Id
+    @Column(name = &quot;id&quot;, nullable = false)
+    @GeneratedValue
+    private int id;
+
+    @Column(name = &quot;name&quot;, nullable = false)
+    private String name;
+
+    @Column(name = &quot;sex&quot;, nullable = true)
+    private String sex;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
+
+    public StudentEntity() {}
+
+    public StudentEntity(String name, String sex) {
+        this.name = name;
+        this.sex = sex;
+    }
+}
+</code></pre>
+
+<blockquote>
+<p><strong>@Entity</strong>表示这是一个实体类，<strong>@Table(name = &ldquo;students&rdquo;)</strong>表示映射到数据源指定的数据库中的一个名为*students*的表；<strong>@Id</strong>表示该字段是主键，<strong>@Column(name = &ldquo;id&rdquo;, nullable = false)</strong>表示该属性映射到表中名为*id*的属性，且不能为空；<strong>@GeneratedValue</strong>表示该字段是自增的；这样定义之后，该实体类便与表*students*完成了一一对应。</p>
+</blockquote>
+
+<h3>1.3 定义dao实现类</h3>
+
+<p>我们的dao实现类为HibernateDaoImpl.java，依赖一个属性，即*SessionFactory*的实例，我们通过注解实现注入：</p>
+
+<pre><code>@Repository (value = &quot;hibernateDaoImpl&quot;)
+public class HibernateDaoImpl implements StudentDao {
+
+    @Resource(name = &quot;sessionFactory&quot;)
+    SessionFactory sessionFactory;
+
+    @Override
+    @Transactional
+    public StudentEntity getUserNameById(int id) {
+        StudentEntity studentEntity = (StudentEntity) sessionFactory.getCurrentSession().get(StudentEntity.class, id);
+        return studentEntity;
+    }
+
+    @Override
+    @Transactional
+    public void saveStudents(StudentEntity studentEntity) {
+        sessionFactory.getCurrentSession().persist(studentEntity);
+    }
+}
+</code></pre>
+
+<blockquote>
+<p><strong>Repository</strong>注解表示该类会被Spring的注解扫描器自动定义为bean，bean的名字为<em>hibernateDaoImpl*，同时实现异常转换，将Hibernate的检查型异常，转换为Spring的非检查型异常，这是通过在Spring配置文件里配置<strong>PersistenceExceptionTranslationPostProcessor</strong>的ban实现的。通过*sessionFactory*的*getCurrentSession*方法获取当前的*session*，实现对数据库的持久化操作。Hibernate还要求这些操作是与事务绑定的，因此需要在dao层或者service层添加事务的注解，即</em>@Transactional*。</p>
+</blockquote>
+
+<h3>1.4 添加Spring配置</h3>
+
+<p>在Spring配置文件applicationContext.xml主要是添加<strong>SessionFactory</strong>的配置，以及配置事务，与*Hibernate*相关的配置如下：</p>
+
+<pre><code>&lt;bean name=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean&quot;&gt;
+    &lt;property name=&quot;dataSource&quot; ref=&quot;feedbackDataSource&quot;/&gt;
+    &lt;property name=&quot;packagesToScan&quot; value=&quot;com.sohu.tv.bean&quot;/&gt;
+    &lt;property name=&quot;hibernateProperties&quot;&gt;
+        &lt;props&gt;
+            &lt;prop key=&quot;hibernate.dialect&quot;&gt;org.hibernate.dialect.MySQL5Dialect&lt;/prop&gt;
+            &lt;prop key=&quot;hibernate.show_sql&quot;&gt;true&lt;/prop&gt;
+        &lt;/props&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean class=&quot;org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor&quot;/&gt;
+
+&lt;bean id=&quot;tx&quot; class=&quot;org.springframework.orm.hibernate3.HibernateTransactionManager&quot;&gt;
+    &lt;property name=&quot;sessionFactory&quot; ref=&quot;sessionFactory&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;tx:annotation-driven transaction-manager=&quot;tx&quot;/&gt;
+</code></pre>
+
+<blockquote>
+<p>在定义<em>sessionFactory*的bean时，因为是基于注解的，所以引用的class为：<strong>AnnotationSessionFactoryBean</strong>；属性*dataSource*即配置的数据源；属性*packagesToScan*即要扫描的包名，在这个包下的所有类，如果使用了</em>@Entity<em>、</em>@Column<em>等注解，都会被扫描器处理；</em>@hibernateProperties<em>属性定义了Hibernate相关的属性，如使用的dialect，是否显示输出sql语句等。<strong>PersistenceExceptionTranslationPostProcessor</strong>定义的bean是进行异常转换的；*HibernateTransactionManager*用于定义事务；</em><tx:annotation-driven /><em>类似于</em><context:component-scan />*，扫描事务类型的注解。</p>
+</blockquote>
+
+<h2>2. 通过xml映射文件实现</h2>
+
+<p>通过xml映射文件与通过注解实现的区别就在于实体类与数据库之间的映射的定义，所以其它相同的部分就不重复了。</p>
+
+<h3>2.1 定义映射文件</h3>
+
+<p>这个映射文件定义实体类与数据库的表之间的映射，即属性与字段的映射，如hibernate.xml文件内容可以如下定义：</p>
+
+<pre><code>&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;!DOCTYPE hibernate-mapping PUBLIC
+        &quot;-//Hibernate/Hibernate Mapping DTD 3.0//EN&quot;
+        &quot;http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd&quot;&gt;
+&lt;hibernate-mapping&gt;
+    &lt;class name=&quot;com.sohu.tv.bean.Students&quot; table=&quot;students&quot;&gt;
+
+        &lt;id name=&quot;id&quot; type=&quot;int&quot;&gt;
+            &lt;column name=&quot;id&quot; /&gt;
+            &lt;generator class=&quot;identity&quot; /&gt;
+        &lt;/id&gt;
+        &lt;property name=&quot;name&quot; type=&quot;string&quot;&gt;
+            &lt;column name=&quot;name&quot; length=&quot;255&quot; not-null=&quot;true&quot; /&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;sex&quot; type=&quot;string&quot;&gt;
+            &lt;column name=&quot;sex&quot; not-null=&quot;false&quot; /&gt;
+        &lt;/property&gt;
+    &lt;/class&gt;
+&lt;/hibernate-mapping&gt;
+</code></pre>
+
+<h3>2.2 修改Spring配置文件</h3>
+
+<p>需要修改的是*sessionFactory*的bean的定义，如：</p>
+
+<pre><code>&lt;bean name=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.LocalSessionFactoryBean&quot;&gt;
+    &lt;property name=&quot;dataSource&quot; ref=&quot;feedbackDataSource&quot;/&gt;
+    &lt;property name=&quot;mappingLocations&quot;&gt;
+        &lt;list&gt;
+            &lt;value&gt;classpath*:hibernate.xml&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+    &lt;property name=&quot;hibernateProperties&quot;&gt;
+        &lt;props&gt;
+            &lt;prop key=&quot;hibernate.dialect&quot;&gt;org.hibernate.dialect.MySQL5Dialect&lt;/prop&gt;
+            &lt;prop key=&quot;hibernate.show_sql&quot;&gt;true&lt;/prop&gt;
+        &lt;/props&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<blockquote>
+<p>将<strong>AnnotationSessionFactoryBean</strong>修改为<strong>LocalSessionFactoryBean</strong>，同时，需要将属性*packagesToScan*修改为*mappingLocations*，即xml映射文件的位置。</p>
+</blockquote>
+
+<h3>参考：</h3>
+
+<ul>
+<li><a href="http://book.douban.com/subject/24714203/">Spring 实战</a></li>
+<li><a href="http://www.mkyong.com/struts/struts-spring-hibernate-integration-example/">Struts + Spring + Hibernate Integration Example</a></li>
+</ul>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/04/jetty-as-linux-service.html" title="Jetty9作为Linux服务配置记录">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/03/elasticsearch-match-query.html" title="elasticsearch查询api：match query">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-03-30</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#Spring-ref">Spring <span>5</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#Spring%2C-ref">Spring, <span>1</span></a>
+</li>
+      
+        <li>
+  <a href="/tags/#Hibernate-ref">Hibernate <span>1</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

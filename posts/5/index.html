@@ -5,8 +5,6 @@
   <meta charset="utf-8">
   <title>WebFD Page 5 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="Useful Liunx Command 树莓派">
-  
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
   <!--[if lt IE 9]>
@@ -130,488 +128,415 @@
           <li><a href="../../posts/7/">7</a></li>
         
       
+        
+        
+          <li><a href="../../posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/14/">14</a></li>
+        
+      
       </ul>
     </div>
 
 
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/21-realtime-online-user-counter.html">个人网站实时在线人数接口</a> <span class="date">2013-03-27</span></h1>
+        <h1 class="title"><a href="/2014/06/quartz-tutorial-01-using-quartz.html">Quartz教程一：使用quartz</a> <span class="date">2014-06-23</span></h1>
 
-        <p>感觉把个人网站正在访问的在线人数显示在Nokia 5110液晶屏挺好玩，就稍微研究了一下如何提取实时在线人数。</p>
+        <blockquote>
+<p><a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-01">原文链接</a>
+| <a href="http://nkcoder.github.io/blog/20140623/quartz-tutorial-using-quartz/">译文链接</a>
+| 编译、校对：<a href="http://nkcoder.github.io/">nkcoder</a></p>
 
-<h1>实现方法</h1>
+<p>本系列教程由<a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials">quartz-2.2.x官方文档</a>翻译、整理而来，希望给同样对quartz感兴趣的朋友一些参考和帮助，有任何不当或错误之处，欢迎指正；有兴趣研究源码的同学，可以参考<a href="https://github.com/nkcoder/quartz-explained">我对quartz-core源码的注释(进行中)</a>。</p>
+</blockquote>
 
-<h2>Google Analytics</h2>
+<p>Scheduler在使用之前需要实例化。一般通过SchedulerFactory来创建一个实例。有些用户将factory的实例保存在JNDI中，但直接初始化，然后使用该实例也许更简单（见下面的示例）。</p>
 
-<p>Google Analytics具有很强大的实时流量分析功能，不过网站主必须登陆到后台才能看，但并没有提供Open API，所以就不能用这个服务了。</p>
+<p>scheduler实例化后，可以启动(start)、暂停(stand-by)、停止(shutdown)。注意：scheduler被停止后，除非重新实例化，否则不能重新启动；只有当scheduler启动后，即使处于暂停状态也不行，trigger才会被触发（job才会被执行）。</p>
 
-<h2>日志分析</h2>
+<p>下面的代码片段，实例化并启动一个scheduler，调度执行一个job：</p>
 
-<p>不修改网站通过web服务器的日志分析，用一个脚本统计15分钟内日志的Unique IP可以粗略的获得一个在线人数。
-但多个用户可能通过一个IP过来，这种做法肯定不精确。一般我们可以通过在页面上部署Javascript脚本，由Javascript为每一个浏览器产生一个独特的持久化Cookie，用这个Cookie代替IP来统计。但用Raspberry Pi来做这件事情会拖慢网站，于是一种方案是采用免费的Google App Engine来实现，打算有空来实现一个。</p>
+<pre><code> SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
 
-<h2>CNZZ</h2>
+  Scheduler sched = schedFact.getScheduler();
 
-<p>CNZZ也提供了15分钟内的在线人数统计功能。分析CNZZ的计数器代码后发现如下方法可以提取到在线人数:</p>
+  sched.start();
 
-<p>```</p>
-
-
-        <div class="more">
-          <a href="/2013/03/21-realtime-online-user-counter.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/20-raspberry-pi-drive-nokia-5110.html">升级版电子钟 - 如何使用Raspberry Pi驱动Nokia 5110液晶屏</a> <span class="date">2013-03-24</span></h1>
-
-        <p>Nokia 5110屏比前面介绍过的<a href="http://hugozhu.myalert.info/2013/03/23/19-raspberry-pi-drive-1602-lcd.html">1602液晶屏</a>功能好很多，淘宝上买价格相差不大（二手5110 12块左右, 全新1602 8块左右），Nokia 5110最少只需要占用4个GPIO引脚：</p>
-
-<ol>
-<li>带蓝色背光</li>
-<li>使用Philips PCD8544 LCD控制器（通过SPI接口）</li>
-<li>84x48点阵，可显示100多个字符</li>
-</ol>
-
-<h1>硬件准备</h1>
-
-<ol>
-<li><a href="http://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.6.nGxekg&amp;id=17337394004&amp;is_b=1&amp;cat_id=2&amp;q=%CA%F7%DD%AE%C5%C9&amp;rn=4004716f9ba818c1d69b5eb7818891b5">树莓派</a></li>
-<li><a href="http://item.taobao.com/item.htm?id=3125173573&amp;ali_trackid=2:mm_12926928_3484851_11423954:1364118594_4k1_653822857&amp;clk1=0b755dfca67112cd1b605914b40146e7&amp;spm=a230z.1.5634029.2.foR1Yu">Nokia 5110 拆机屏</a> 或 <a href="http://item.taobao.com/item.htm?spm=a230r.1.10.154.SdjftL&amp;id=13361097288&amp;_u=oqa31997">焊好的？</a> 注意不要买裸屏，需要带电路板的</li>
-<li><a href="http://list.tmall.com/search_product.htm?q=%B6%C5%B0%EE%CF%DF&amp;user_action=initiative&amp;at_topsearch=1&amp;sort=st&amp;type=p&amp;cat=&amp;style=">杜邦线</a> 母对母8条</li>
-<li>8P排针 用来焊接5110屏幕PCB板</li>
-<li><a href="http://detail.tmall.com/item.htm?id=22096296909&amp;ali_trackid=2:mm_12926928_3484851_11423954:1364118800_4k4_1229281314&amp;clk1=c7335b2dcbad93f47eaf5cd4d1cc140b&amp;spm=a230z.1.5634029.66.6xxdfN">电烙铁</a></li>
-</ol>
-
-<h1>电路</h1>
-
-<p>5110电路板有8个引脚，使用排针（如下图）将其焊上，方便后面用杜邦线连接，如果不会焊也可以买焊接好的。</p>
-
-
-        <div class="more">
-          <a href="/2013/03/20-raspberry-pi-drive-nokia-5110.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/19-raspberry-pi-drive-1602-lcd.html">如何使用Raspberry Pi在1602液晶屏上显示当前时间--电子钟</a> <span class="date">2013-03-23</span></h1>
-
-        <h1>硬件准备</h1>
-
-<p>需要以下硬件：</p>
-
-<ol>
-<li><a href="http://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.6.nGxekg&amp;id=17337394004&amp;is_b=1&amp;cat_id=2&amp;q=%CA%F7%DD%AE%C5%C9&amp;rn=4004716f9ba818c1d69b5eb7818891b5">树莓派</a></li>
-<li><a href="http://list.tmall.com//search_product.htm?q=%C3%E6%B0%FC%B0%E5&amp;type=p&amp;style=&amp;cat=all">面包板</a></li>
-<li><a href="http://s.taobao.com/search?spm=a230r.1.8.2.RvXL2p&amp;q=1602+%D2%BA%BE%A7&amp;commend=all&amp;source=haiwaigou&amp;ssid=s5-e&amp;pid=mm_14507416_2297358_8935934&amp;newpre=null&amp;tab=mall">1602液晶屏</a>一块</li>
-<li><a href="http://s.taobao.com/search?source=suggest&amp;haiwaifrom=1&amp;q=%B5%E7%CE%BB%C6%F7+10k&amp;initiative_id=staobaoz_20130323&amp;suggest_query=%B5%E7%CE%BB%C6%F7+10k&amp;sb_id=10&amp;suggest=0_2&amp;wq=%B5%E7%CE%BB%C6%F7&amp;tab=mall">10K电位器</a></li>
-<li><a href="http://list.tmall.com/search_product.htm?q=%B6%C5%B0%EE%CF%DF&amp;user_action=initiative&amp;at_topsearch=1&amp;sort=st&amp;type=p&amp;cat=&amp;style=">杜邦线</a></li>
-<li><a href="http://s.taobao.com/search?source=haiwaigou&amp;haiwaifrom=1&amp;q=%C5%C5%D5%EB&amp;initiative_id=staobaoz_20130323&amp;tab=mall">排针</a></li>
-<li><a href="http://list.tmall.com//search_product.htm?q=%C3%E6%B0%FC%B0%E5+%B5%E7%D4%B4&amp;type=p&amp;style=&amp;cat=all">面包板电源</a></li>
-</ol>
-
-<h1>1602 LCD液晶屏</h1>
-
-<p>LCD1602液晶屏提供了16列x2行的ASCII字符显示能力，工作电压5V，提供4位数据与8位数据两种工作模式，因为Raspberry Pi的GPIO口数量很有限，所以使用4位数据模式。LCD1602液晶屏模块提供了16个引脚，我们只需接其中的12个即可&ndash;请参考<a href="http://hugozhu.myalert.info/2013/03/22/19-raspberry-pi-gpio-port-naming.html">GPIO命名规则</a>：</p>
-
-<ol>
-<li>VSS，接地，RPi PIN 6</li>
-<li>VDD，接5V电源，PRi PIN 2</li>
-<li>VO，液晶对比度调节，接电位器中间的引脚</li>
-<li>RS，寄存器选择，接GPIO 14，RPi PIN 8</li>
-<li>RW，读写选择，接地，表示写模式，PRi PIN 6</li>
-<li>EN，使能信号，接GPIO 15，RPi PIN 10</li>
-<li>D0，数据位0，4位工作模式下不用，不接</li>
-<li>D1，数据位1，4位工作模式下不用，不接</li>
-<li>D2，数据位2，4位工作模式下不用，不接</li>
-<li>D3，数据位3，4位工作模式下不用，不接</li>
-<li>D4，数据位4，接GPIO 17，RPi PIN 11</li>
-<li>D5，数据位5，接GPIO 18，RPi PIN 12</li>
-<li>D6，数据位6，接GPIO 27，RPi PIN 13</li>
-<li>D7，数据位7，接GPIO 22，RPi PIN 15</li>
-<li>A，液晶屏背光+，接5V，RPi PIN 2</li>
-<li>K，液晶屏背光-，接地，RPi PIN 6</li>
-</ol>
-
-
-        <div class="more">
-          <a href="/2013/03/19-raspberry-pi-drive-1602-lcd.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/19-raspberry-pi-gpio-port-naming.html">Raspberry Pi GPIO的编号规范</a> <span class="date">2013-03-22</span></h1>
-
-        <p>树莓派和普通电脑不一样的地方在于它还带了17个可编程的<a href="http://en.wikipedia.org/wiki/General_Purpose_Input/Output">GPIO</a>（General Purpose Input/Output），可以用来驱动各种外设（如传感器，步进电机等）。但GPIO的编号方法有些混乱，不同的API（如wiringPi，RPi.GPIO等）对GPIO的端口号编号并不一样，下面则用图表标明了对应的叫法，这样在看程序例子的时候可以确定物理是哪个接口。</p>
-
-<h1>GPIO库</h1>
-
-<ol>
-<li><a href="https://github.com/WiringPi/WiringPi">wiringPi</a> C，有Perl, PHP, Ruby, Node.JS和<strong><a href="http://github.com/hugozhu/rpi">Golang</a></strong>的扩展，支持wiringPi Pin和BCM GPIO两种编号</li>
-<li><a href="https://pypi.python.org/pypi/RPi.GPIO">RPi.GPIO</a> Python，支持Board Pin和BCM GPIO两种编号</li>
-<li><a href="http://code.google.com/p/webiopi/">Webiopi</a>，Python, 使用BCM GPIO编号</li>
-<li><a href="http://github.com/hugozhu/rpi">WiringPi-Go</a>, Go语言，支持以上三种编号</li>
-</ol>
-
-<h1>编号规范</h1>
-
-<ol>
-<li>第一列是wiringPi API中的缺省编号，<code>wiringPiSetup()</code>采用这列编号</li>
-<li>第二列（Name）往往是转接板的编号</li>
-<li>第三列是树莓派板子上的自然编号（左边引脚为1-15，右边引脚为2-26），<code>RPi.GPIO.setmode(GPIO.BOARD)</code>采用这列编号</li>
-<li>树莓派主芯片提供商Broadcom的编号方法，相当于调用了<code>WiringPiSetupGpio()</code>或<code>RPi.GPIO.setmode(GPIO.BCM)</code>采用这列编号</li>
-</ol>
-
-<table>
-<thead>
-<tr>
-<th>wiringPi Pin</th>
-<th>Name</th>
-<th>Board Pin</th>
-<th>BCM GPIO</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>0</td>
-<td>GPIO 0</td>
-<td>11</td>
-<td>17</td>
-</tr>
-
-<tr>
-<td>1</td>
-<td>GPIO 1</td>
-<td>12</td>
-<td>18</td>
-</tr>
-
-<tr>
-<td>2</td>
-<td>GPIO 2</td>
-<td>13</td>
-<td>21</td>
-</tr>
-
-<tr>
-<td>3</td>
-<td>GPIO 3</td>
-<td>15</td>
-<td>22</td>
-</tr>
-
-<tr>
-<td>4</td>
-<td>GPIO 4</td>
-<td>16</td>
-<td>23</td>
-</tr>
-
-<tr>
-<td>5</td>
-<td>GPIO 5</td>
-<td>18</td>
-<td>24</td>
-</tr>
-
-<tr>
-<td>6</td>
-<td>GPIO 6</td>
-<td>22</td>
-<td>25</td>
-</tr>
-
-<tr>
-<td>7</td>
-<td>GPIO 7</td>
-<td>7</td>
-<td>4</td>
-</tr>
-
-<tr>
-<td>8</td>
-<td>SDA</td>
-<td>3</td>
-<td>0</td>
-</tr>
-
-<tr>
-<td>9</td>
-<td>SCL</td>
-<td>5</td>
-<td>1</td>
-</tr>
-
-<tr>
-<td>10</td>
-<td>CE0</td>
-<td>24</td>
-<td>8</td>
-</tr>
-
-<tr>
-<td>11</td>
-<td>CE1</td>
-<td>26</td>
-<td>7</td>
-</tr>
-
-<tr>
-<td>12</td>
-<td>MOSI</td>
-<td>19</td>
-<td>10</td>
-</tr>
-
-<tr>
-<td>13</td>
-<td>MISO</td>
-<td>21</td>
-<td>9</td>
-</tr>
-
-<tr>
-<td>14</td>
-<td>SCLK</td>
-<td>23</td>
-<td>11</td>
-</tr>
-
-<tr>
-<td>15</td>
-<td>TXD</td>
-<td>8</td>
-<td>14</td>
-</tr>
-
-<tr>
-<td>16</td>
-<td>RXD</td>
-<td>10</td>
-<td>15</td>
-</tr>
-</tbody>
-</table>
-
-
-        <div class="more">
-          <a href="/2013/03/19-raspberry-pi-gpio-port-naming.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html">如何使用Raspberry Pi测量室内温度和湿度并绘制曲线</a> <span class="date">2013-03-17</span></h1>
-
-        <h1>硬件准备</h1>
-
-<p>需要以下硬件：</p>
-
-<ol>
-<li>可以工作的<a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHo44Chb01aWIu4ho12MwdcCLV6ff8kJMg0iz0FTGXaJAqMvt94sTe0NIrCAdd8LW">树莓派</a>一个</li>
-<li><a href="http://list.tmall.com/search_product.htm?q=%C3%E6%B0%FC%B0%E5&amp;type=p&amp;style=&amp;cat=all&amp;ali_trackid=2:mm_12926928_3484851_11423971:1364041941_4k1_1171281511&amp;upsid=8daf4a561f161cd669d949c6bf367733&amp;clk1=8daf4a561f161cd669d949c6bf367733">面包板</a>和<a href="http://list.tmall.com//search_product.htm?q=%B6%C5%B0%EE%CF%DF&amp;type=p&amp;style=&amp;cat=all">公对母杜邦线</a></li>
-<li><a href="http://list.tmall.com/search_product.htm?q=10K+%B5%E7%CE%BB%C6%F7&amp;user_action=initiative&amp;at_topsearch=1&amp;sort=st&amp;type=p&amp;cat=&amp;style=">10K 电位器</a>一个</li>
-<li><a href="http://list.tmall.com//search_product.htm?q=DHT11&amp;type=p&amp;style=&amp;cat=all">DHT11</a>温度和湿度传感器一个或<a href="http://s.taobao.com/search?q=DHT22&amp;keyword=&amp;commend=all&amp;ssid=s5-e&amp;search_type=item&amp;atype=&amp;tracelog=&amp;sourceId=tb.index&amp;rt=1364041904459&amp;source=haiwaigou&amp;pid=mm_14507416_2297358_8935934&amp;unid=">DHT22</a></li>
-</ol>
-
-<h1>传感器电路及原理</h1>
-
-<h2>DHT11传感器外观</h2>
-
-<p><img src="http://learn.adafruit.com/system/products/images/000/000/386/medium225/dht11_MED.jpg?1342023044"/></p>
-
-<h2>参数</h2>
-
-
-        <div class="more">
-          <a href="/2013/03/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/03-16-use-raspberry-pi-control-step-motor-rotate-webcam.html">如何使用Raspberry Pi控制步进电机旋转高清摄像头并拍照</a> <span class="date">2013-03-16</span></h1>
-
-        <h1>硬件准备</h1>
-
-<p>需要以下硬件：</p>
-
-<ol>
-<li>可以工作的<a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHo44Chb01aWIu4ho12MwdcCLV6ff8kJMg0iz0FTGXaJAqMvt94sTe0NIrCAdd8LW">树莓派</a>一个</li>
-<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHoWKV0kwS8Wy16Cg6qBM%2BZAOnJCqNG%2BPJAy9U15g8TwJiq5U3GGcJ8eTvC7%2F6APShw%3D%3D">母对母1P杜邦线</a>6根</li>
-<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CFcRfH0GoT805sipKjxjSLt%2BsmFEpvY8zQ4WXjoTHsLWTKD4gnL0sndE3qVPXd4UC6NUEZOQAryYUWhO7gt10i%2FUQ%3D%3D">DC 5V4相28YBJ-48步进电机</a>一个</li>
-<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CFcRfH0GoT805sipKjxjSLuXQmw2TUIlWTNRCvS2wo483pjZyXspPuvkTH5pg4vQUqrztOAoNz2Gfp8MmwKPg%2FbQb8%3D">UL2003芯片步进电机驱动板</a>一块</li>
-</ol>
-
-<h1>安装</h1>
-
-<p>按下图将步进电机接到驱动板上，也就是白色的接口</p>
-
-<p><img src="http://img04.taobaocdn.com/bao/uploaded/i4/T10lS4XnXfXXaZhKrX_115008.jpg_310x310.jpg"/></p>
-
-<p><img src="http://img02.taobaocdn.com/imgextra/i2/49873130/T2534HXoBXXXXXXXXX_!!49873130.jpg" width="600"/></p>
-
-
-        <div class="more">
-          <a href="/2013/03/03-16-use-raspberry-pi-control-step-motor-rotate-webcam.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/vistor-on-homepage-led-indicator.html">如何在Raspberry Pi上用LED闪烁提示网站首页新访客</a> <span class="date">2013-03-13</span></h1>
-
-        <p>本方法只适合小网站，主要是好玩。Raspberry Pi不是很合适需要实时控制的系统（比如，飞行器，遥控小车），因为Linux内核要多任务，应用程序的优先级不能保持最高，会带来延时，但做些实时性要求不高的系统还是可以的。</p>
-
-<h1>硬件安装</h1>
-
-<p>需要以下硬件：</p>
-
-<ol>
-<li>可以工作的<a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHo44Chb01aWIu4ho12MwdcCLV6ff8kJMg0iz0FTGXaJAqMvt94sTe0NIrCAdd8LW">树莓派</a>一个</li>
-<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHoWKV0kwS8Wy16Cg6qBM%2BZAOnJCqNG%2BPJAy9U15g8TwJiq5U3GGcJ8eTvC7%2F6APShw%3D%3D">1P杜邦线2条</a></li>
-<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CFcRfH0GoT805sipKjxiNm9RKSkRargJCPYP6KVEIQUWKzMUFn1hvlcbkMSKk3m2pVJo%2BqQDYKVz%2Bt1%2FjL7Iywe7g%3D%3D">面包板</a>一个</li>
-<li><a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHKxVk7v382jKYSyD7qi5ltcqvLWmWBL7lxLB2%2BsaWLuet8Ik65QHyGWV5mRTheUA">面包板跳线</a> 或 <a href="http://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.166.XlEzyw&amp;id=15208013820&amp;_u=nqa35596&amp;is_b=1&amp;cat_id=2&amp;q=%C5%C5%D5%EB&amp;rn=bb53adf333ca7517208da34346ac3ffb">单排针</a> 两根</li>
-<li><a href="http://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.30.wnPTNf&amp;id=14576731464&amp;_u=nqa35af3&amp;is_b=1&amp;cat_id=2&amp;q=%B7%A2%B9%E2%B6%FE%BC%AB%B9%DC&amp;rn=b12ffd48699547ed9cb982a88014a0aa">发光二极管</a>一个</li>
-<li>300欧姆的<a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CFcRfH0GoT805sipKjxiNm80QgaIDkojjQIBhc4L8WmRpaGVVBVD9DpAt8wKPZTmbzvVp4EIdCD2Ow2DOQmdPtlV8g%3D">电阻</a>一个</li>
-</ol>
-
-<h2>GPIO接口</h2>
-
-<p><img src="http://ww1.sinaimg.cn/large/6bc40342gw1e2o2uls7wlj.jpg" width="630"/></p>
-
-<p>用杜邦线将上图的3.3V输出和GPIO 23引出（板子正面朝上，GPIO引脚在左上角），将电阻和LED串联起来（电阻防止LED电流过大烧掉），注意二极管的两根脚不一样长，长脚的接正级，这样GPIO 23如果输出高电平，二极管就不发光了，输出低电平就亮啦！</p>
-
-
-        <div class="more">
-          <a href="/2013/03/vistor-on-homepage-led-indicator.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/setup-archliunx-on-raspberry-pi.html">在Raspberry Pi上安装ArchLinux</a> <span class="date">2013-03-09</span></h1>
-
-        <h1>介绍</h1>
-
-<p>之前买的Raspberry Pi因为要跑<a href="http://hugozhu.myalert.info">这个网站</a>，不能经常拔下来玩别的，所以又买了一个，这次安装的是<a href="https://www.archlinux.org">Arch Linux</a>。这个发行版安装好后非常基础，占用的空间也只有600M不到，比较合适已有Linux基础的同学玩。初学者可以玩官方推荐的<a href="http://www.raspbian.org">Raspbian</a>。</p>
-
-<p>Arch Linux特点：</p>
-
-<ol>
-<li>启动快，上电后只要3s完成启动</li>
-<li>安装完没有图形界面，干净</li>
-<li>面向开发者的系统</li>
-<li>包管理系统pacman很好用，一个命令就可以完成各种操作</li>
-<li>ArchLinux缺省账号和密码是root/root，弄好了后要记得修改root密码</li>
-<li>从中国用下载包很快，比Raspbian的源快多了</li>
-</ol>
-
-<h1>增加sudo用户</h1>
-
-<pre><code>   useradd hugo
-   passwd hugo
-   mkdir /home/hugo
-   chown hugo:hugo /home/hugo   
-   pacman -S sudo
-   visudo   
-   
+  // define the job and tie it to our HelloJob class
+  JobDetail job = newJob(HelloJob.class)
+      .withIdentity(&quot;myJob&quot;, &quot;group1&quot;)
+      .build();
 </code></pre>
 
 
         <div class="more">
-          <a href="/2013/03/setup-archliunx-on-raspberry-pi.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/06/quartz-tutorial-01-using-quartz.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/block_failed_ssh_attempts_with_iptable.html">如何封杀尝试Raspberry Pi SSH密码的来源IP</a> <span class="date">2013-03-08</span></h1>
+        <h1 class="title"><a href="/2014/06/quartz-tutorial-quickstart.html">quartz教程：快速入门</a> <span class="date">2014-06-22</span></h1>
 
-        <p>Raspberry Pi整天开着，如果用缺省SSH端口对外开放，就会经常遇到扫描SSH密码的肉鸡。虽然密码不是很简单，但还是感觉很不安全的。</p>
+        <blockquote>
+<p><a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/quick-start">原文链接</a>
+| <a href="http://nkcoder.github.io/blog/20140622/quartz-tutorial-quickstart/">译文链接</a>
+| 编译、校对：<a href="http://nkcoder.github.io/">nkcoder</a></p>
 
-<p>系统的ssh登录日志文件在：/var/log/auth.log，登录失败时会记录以下格式的日志：</p>
+<p>本系列教程由<a href="http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials">quartz-2.2.x官方文档</a>翻译、整理而来，希望给同样对quartz感兴趣的朋友一些参考和帮助，有任何不当或错误之处，欢迎指正；有兴趣研究源码的同学，可以参考<a href="https://github.com/nkcoder/quartz-explained">我对quartz-core源码的注释(进行中)</a>。</p>
+</blockquote>
 
-<pre><code>Mar  7 10:31:51 raspberrypi sshd[24510]: Failed password for root from 221.8.19.129 port 4066 ssh2
-Mar  7 10:31:55 raspberrypi sshd[24514]: Failed password for root from 221.8.19.129 port 4079 ssh2
-Mar  7 10:31:56 raspberrypi sshd[24518]: Failed password for sshd from 221.8.19.129 port 4080 ssh2
-Mar  7 10:32:26 raspberrypi sshd[24522]: Failed password for sshd from 221.8.19.129 port 4149 ssh2
-</code></pre>
+<p>欢迎来到quartz快速入门教程。阅读本教程，你将会了解：</p>
 
-<p>用最简单的Shell脚本来解决这个问题：</p>
+<ul>
+<li>quartz下载</li>
+<li>quartz安装</li>
+<li>根据你的需要，配置Quartz</li>
+<li>开始一个示例应用</li>
+</ul>
 
-<h3>guard.sh</h3>
+<p>当熟悉了quratz调度的基本功能后，可以尝试一些更高级的特性，比如<a href="http://terracotta.org/documentation/quartz-scheduler/quartz-scheduler-where">Where</a>，这个一个企业级功能，可以让job和trigger运行在指定的，而不是随机的Terracotta客户端上。</p>
 
-<pre><code>#!/bin/bash
+<h2>下载和安装</h2>
 
-last_ip=&quot;&quot;
-tail -f /var/log/auth | while read LINE; do
-{
-    if [[ &quot;${LINE}&quot; =~ &quot;Failed&quot; ]]; then            
-        ip=&quot;$(echo ${LINE} | awk '{print $(NF-3)}')&quot;
-        if [[ &quot;$last_ip&quot; == &quot;$ip&quot; ]]; then
-             echo &quot;block $ip&quot;
-             #curl -s --data-ascii &quot;uuid=&lt;my iphone's uuid&gt;&quot; --data &quot;body=${LINE}&quot; http://raspberrypi/pushme                 
-             iptables -A INPUT -s &quot;$ip&quot; -j DROP
-        fi
-        last_ip=$ip
-        echo $LINE
-    fi
-}
-done
-</code></pre>
+<p>首先，<a href="http://quartz-scheduler.org/downloads/">下载最新的稳定版</a> - 不用注册。解压并安装。</p>
 
 
         <div class="more">
-          <a href="/2013/03/block_failed_ssh_attempts_with_iptable.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/06/quartz-tutorial-quickstart.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/raspberry-pi-with-xmbc.html">Raspberry Pi做BT下载机+高清播放器</a> <span class="date">2013-03-06</span></h1>
+        <h1 class="title"><a href="/2014/06/jetty-deploy-help.html">jetty9 部署指南</a> <span class="date">2014-06-18</span></h1>
 
-        <h2>介绍</h2>
+        <h2>1. 简单有效的方式</h2>
 
-<p>首先高清播放器功能只是Raspberry Pi的一个小功能，如果你只需要高清播放功能又不想折腾，那还是买个<a href="http://s.taobao.com/search?q=%B8%DF%C7%E5%B2%A5%B7%C5%C6%F7&amp;commend=all&amp;ssid=s5-e&amp;search_type=item&amp;sourceId=tb.index&amp;initiative_id=tbindexz_20130306">山寨的</a>的更简单。。。</p>
+<p>把要部署的工程（war包、工程目录或者xml描述文件）放到${JETTY_HOME}的webapps目录下即可；</p>
 
-<p>Raspberry Pi的图形处理器规格：Broadcom VideoCore IV, OpenGL ES 2.0, 1080p 30 h.264/MPEG-4 AVC 高清解码器，内存和CPU共享（可设置成256M），性能还是很强劲的。HDMI支持640x350和1920×1200（1080P）的分辨率。安装了<a href="http://xbmc.org">XBMC</a>，基本上可以实现包括Airplay在内的Apple TV上的大部分功能，但价格只有其一半不到，可以播放下载的视频或观看在线视频，如<a href="http://yisou.com">一搜</a>，优酷，搜狐视频，奇艺等。</p>
+<p>需要注意的是：
+&gt; jetty会对webapps目录下的几乎所有war包、目录、xml文件（有一些例外，如隐藏文件和.d结尾的目录等会被忽略）进行自动部署。
+&gt; 如果war包、目录和xml文件<strong>同名</strong>，则部署的顺序为xml文件 &gt; war包 &gt; 目录 。比如，webapps目录下有：rank.war，rank目录以及rank.xml，其中rank目录为rank.war解压后的目录，rank.xml中引用的是rank.war包或者rank目录，则此时，仅有xml文件被部署，这里成立的前提是<strong>同名</strong>，如果不同名，但它们是同一个工程，则会导致工程被重复部署，切记！（关于重复部署，参考前一篇博文：<a href="http://nkcoder.github.io/blog/20140522/jetty-avoid-repeat-deploy/">Jetty9避免重复部署</a>）</p>
 
-<h2>外设</h2>
+<p>我建议的做法是：将war包或解压后的目录放在webapps目录下，或者将xml描述文件放在webapps目录下，将war包或目录放在单独的目录里。</p>
 
-<p>除了Pi单片机外，你还需要以下外设附件：</p>
+<h2>2. 配置context path</h2>
 
-<ol>
-<li>5V-1A左右的电源，可以用iPhone或iPad的充电电源，或手机的充电器，电流最少要800毫安</li>
-<li>micro USB线一根，和Kindle以及大多数android手机充电USB线一样</li>
-<li>HDMI线一根，接电视机</li>
-<li>SD卡一张，最少2G</li>
-</ol>
+<p>默认，jetty将webapps目录下的工程名作为context path，如果工程名称为ROOT，则context path为/；比如，将rank.war（或rank目录）放在webapps目录下，则context path为/rank，如果将rank.war重命名为ROOT.war，则context path为/；</p>
 
-<h2>Raspbmc</h2>
+<p>如果通过文件名来配置context path无法满足要求，则可以通过xml文件来配置，如将rank.xml放在webapps目录下，添加如下内容：</p>
 
-<p><a href="http://www.raspbmc.com/">Raspbmc</a> 是专为在Raspberry Pi上运行<a href="http://xbmc.org">XBMC</a>的定制Linux。最小化的安装，减少了不必要的软件和资源占用，简化了安装和配置，没有Linux知识也可以上手。这个版本的维护者是一个19岁的小朋友Sam Nazarko。有时间折腾的同学可以自己编译XMBC安装。</p>
-
-<h3>特点：</h3>
-
-<ol>
-<li>免费，开源</li>
-<li>支持多语言</li>
-<li>支持1080P回放</li>
-<li>支持直接播放NFS，SMB，FTP,HTTP或USB硬盘的有视频文件，支持大多数格式</li>
-<li>支持AirPlay或AirTune功能，可以把iPhone/iPad上的视频或音乐通过Pi投放到电视上，这点和Apple TV功能一样</li>
-<li>支持GPIO</li>
-<li>基于Debian，可以从Debian的软件源安装其它软件</li>
-<li>支持1080P DTS软解，这个不少播放器是不支持的，需要额外License</li>
-<li>内置了以下服务:
-
-<ol>
-<li>Samba</li>
-<li>TVHeadend Server</li>
-<li>FTP Server</li>
-<li>SSH Server</li>
-</ol></li>
-</ol>
+<pre><code>&lt;?xml version=&quot;1.0&quot;  encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE Configure PUBLIC &quot;-//Jetty//Configure//EN&quot; &quot;http://www.eclipse.org/jetty/configure_9_0.dtd&quot;&gt;
+</code></pre>
 
 
         <div class="more">
-          <a href="/2013/03/raspberry-pi-with-xmbc.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/06/jetty-deploy-help.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/06/algorithm-straight-poker.html">算法练习：扑克牌构成顺子</a> <span class="date">2014-06-04</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>从扑克牌里抽出任意5张牌，其中J, Q, K分表表示11, 12, 13，A表示1，大小王可以表示任意点数。求该5张牌是否可以构成顺子。</p>
+</blockquote>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>思路：
+思路一：首先求出抽出的5张牌中，大小王的数量，然后将其它的牌按点数排序，计算它们之间的空隙，
+如果空隙数小于王牌的数量，则表示可以构成顺子；否则，不能构成顺子。复杂度O(n)。
+思路二：特殊牌做特殊处理，将大小王的点数当做0，求出最大点数和最小点数（非0），如果最大点数
+和最小点数之间的差值小于5（抽出的牌的总数量），则表示可以构成顺子，否则不能；注意：为了方便
+排重，因为牌的数量小，可以先排序，然后排重，最后比较。复杂度O(n)。</p>
+</blockquote>
+
+<h2>3. Java参考代码</h2>
+
+<p>/**
+     * 检查抽出的n张牌是否可以构成顺子
+     * @param cards 表示抽出的牌的数组
+     * @param length    抽出的牌的数量
+     * @return  是否可以构成顺子
+     */
+    public boolean checkStraightPoker(int[] cards, int length) {
+        // 桶排序
+        int[] allCards = new int[ALL_CARDS_SIZE];
+        for (int i = 0; i &lt; length; i++) {
+            allCards[cards[i]]++;
+        }</p>
+
+
+        <div class="more">
+          <a href="/2014/06/algorithm-straight-poker.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-merge-two-sorted-list.html">算法练习：合并两个有序单链表</a> <span class="date">2014-05-25</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>给定两个单链表，都是递增有序的，将它们合并，使合并后的链表仍然有序。</p>
+</blockquote>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>思路：
+先比较两个单链表的第一个节点，值小的的节点作为合并后新链表的第一个节点；值小的节点的下一个
+节点作为该单链表的新的头节点。相当于第一个节点已排好序，剩下的问题仍然是对两个有序链表进行
+合并，则可以用递归的思路解决。</p>
+</blockquote>
+
+<h2>3. Java参考代码</h2>
+
+<pre><code>/**
+ * 合并两个有序单链表
+ * @param firstHead     第一个单链表的头节点
+ * @param secondHead    第二个单链表的头节点
+ * @return  合并后的链表的头节点
+ */
+public static ListNode merge(ListNode firstHead, ListNode secondHead) {
+    // 退出条件
+    if (firstHead == null) {
+        return secondHead;
+    }
+    if (secondHead == null) {
+        return firstHead;
+    }
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-merge-two-sorted-list.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/jetty-avoid-repeat-deploy.html">Jetty9避免重复部署</a> <span class="date">2014-05-22</span></h1>
+
+        <p>jetty是一个轻量级的web容器，部署简单，同时高度可定制化。由于刚接触，对其约定和配置不太熟练，在自动部署时，跳过一次重复部署的坑，这里简要说明一下，希望给同样打算在项目中使用jetty9的朋友一个参考。</p>
+
+<p>默认情况下，jetty会对根目录(也可以配置jetty.base)下webapps/目录下的内容实现自动部署，部署的规则如下：</p>
+
+<ol>
+<li>隐藏文件(.开头)和.d结尾的目录被忽略；</li>
+<li>CVS目录如&rdquo;CVS&rdquo;和&rdquo;CVSROOT&rdquo;被忽略；</li>
+<li>任何war包都会被自动部署；</li>
+<li>任何xml描述文件被认为是可部署的；</li>
+<li>任何目录都被认为是可部署的；</li>
+<li>同名的war包和目录同时存在，目录不被部署，仅war包部署，且认为war包引用该目录；</li>
+<li>同名的war包和xml文件同时存在，war包不被部署，仅xml文件描述符被部署，且认为该xml文件引用该war包；</li>
+<li>同名的目录和xml文件同时存在，目录不被部署，xml文件被部署，且认为xml文件引用该目录；<br /></li>
+</ol>
+
+<p>关于更详细的说明，请参考官方文档的<a href="http://www.eclipse.org/jetty/documentation/current/deployment-architecture.html">这里</a>。我主要提醒的是：在webapps目录中，如果存在同名的目录、war包和xml文件，它们会被当做同一个工程，部署的优先级是<code>xml文件&gt;war包&gt;目录</code>。一定要注意同名，如果不同名，在webapps下存在一个war包，同时存在一个引用该war包的xml文件，则会导致重复部署，这就是我跳的坑。</p>
+
+<p>部署时，推荐的做法是，将xml描述文件放到自动部署的webapps目录下，里面定义war包的路径、上下文路径、是否解压、临时目录、日志文件等，然后将war包放在自定义的固定目录下，项目更新，只需要备份和替换war包，重启jetty即可。</p>
+
+<p>参考：
+1. <a href="http://www.eclipse.org/jetty/documentation/current/deployment-architecture.html">Deployment Architecture</a></p>
+
+
+        <div class="more">
+          <a href="/2014/05/jetty-avoid-repeat-deploy.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-last-num-in-circle.html">算法练习：环中最后的数字</a> <span class="date">2014-05-22</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>有n个数，从0到n-1，形成环状，即n-1后的数字为0；从0开始，每次从环中删除第m个数，然后
+将删除元素的下一个元素作为第一个元素。如此循环，求最后剩下的数。</p>
+</blockquote>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>思路：</p>
+
+<p>*思路一*：构造环形链表，每个节点有两个属性，一个是值，另一个是指向下一个元素的指针。每次从
+环中删除第m个元素，直到链表中剩下一个元素。复杂度O(m*n)；</p>
+
+<p>*思路二*：也是用链表模拟环，使用标准库的LinkedList，每次遍历到最后一个元素后，继续遍历链表
+第一个元素；</p>
+
+<p>*思路三*：寻找规律：f(n,m)表示从n个数(0,1,2,&hellip;,n-1)的环中删除第m个数后剩下的数；第一
+次删掉了的元素为k（显然，k=m-1），剩下的元素为(k+1,k+2,&hellip;,n-1, 0, 1, &hellip;,k-1)，此时
+的序列有n-1个元素，但排列不同，从该序列每次删除第m个元素后最后剩下的元素记为f&rsquo;(n-1,m)，则有
+<code>f(n,m)=f'(n-1,m)</code>，但是我们将<code>f'(n-1,m)与f(n-1,m)</code>（序列为0,1,2,&hellip;,n-2)做一下映射，找规律：</p>
+</blockquote>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-last-num-in-circle.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-find-kth-node.html">算法练习：返回链表中倒数第k个节点</a> <span class="date">2014-05-18</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>返回链表中倒数第k个节点。</p>
+</blockquote>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>思路：
+使用两个指针，第一个指针先走(k-1)步，第二个指针不动，此时两个指针相差k个节点；然后两个指针同时向前走，直到第一个指针
+到达链表尾节点，此时第二个指针即为链表的倒数第k个节点。
+注意：需要考虑到链表不够k个节点的情况。</p>
+</blockquote>
+
+<h2>3. Java参考代码</h2>
+
+<pre><code>/**
+ * 查找链表中倒数第k个节点
+ * @param head  链表的头节点
+ * @param k 倒数第k个节点
+ * @return
+ */
+public static ListNode find(ListNode head, int k) {
+    if (head == null || k &lt;= 0) {
+        return null;
+    }
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-find-kth-node.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-print-matrix-diagonally.html">算法练习：根据对角线打印矩阵</a> <span class="date">2014-05-16</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>输入一个矩阵，从右上角开始按照斜对角线打印矩阵的值，如矩阵为：</p>
+</blockquote>
+
+<pre><code>1, 2,  3,  4
+5, 6,  7,  8
+9, 10, 11, 12
+13,14, 15, 16
+</code></pre>
+
+<blockquote>
+<p>输出：</p>
+</blockquote>
+
+<pre><code>4, 3, 8, 2, 7, 12, 1, 6, 11, 16, 5, 10, 15, 9, 14, 13
+</code></pre>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>思路：
+将整个输出以最长的斜对角线分为两部分：右上部分和左下部分。
+右上部分：对角线的起点在第一行，列数递减，对角线上相邻元素之间横坐标和纵坐标均相差1；
+左下部分：对角线的起点在第一列上，行数递减，对角线上相邻元素之间横坐标和纵坐标均相差1；
+复杂度：O(n^2)</p>
+</blockquote>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-print-matrix-diagonally.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-del-one-node-from-linklist.html">算法练习：从链表中删除一个节点</a> <span class="date">2014-05-16</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>给定一个链表和其中一个节点，删除该节点；</p>
+</blockquote>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>思路：
+节点的差异体现在节点对象的内容不同。要删除当前节点，可以将当前节点与下一节点的值互换，然后删除下一个节点即可。
+需要注意的是，如果要删除的节点是最后一个节点，没有下一个节点，此时需要从头遍历了。如果要删除的节点不是最后一
+个节点，复杂度为O(1)，否则复杂度为O(n)，平均复杂度为O(1)。</p>
+</blockquote>
+
+<h2>3. Java参考代码</h2>
+
+<pre><code>/**
+ * 从链表中删除某一个节点
+ * @param head  链表的头节点
+ * @param toDelete  要删除的节点
+ * @return 头节点
+ */
+public static ListNode delete(ListNode head, ListNode toDelete) {
+    // param error
+    if (head == null || toDelete == null) {
+        return head;
+    }
+    // 最后一个节点
+    if (toDelete.next == null) {
+        // 也是头节点
+        if (head == toDelete) {
+            return null;
+        }
+        // 遍历查找前一个节点
+        ListNode node = head;
+        while (node.next != toDelete) {
+            node = node.next;
+        }
+        node.next = node.next.next;
+        return head;
+    }
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-del-one-node-from-linklist.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
@@ -652,6 +577,41 @@ done
         
         
           <li><a href="/posts/7/">7</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/14/">14</a></li>
         
       
       </ul>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>算法练习：打印从1到最大的n位数 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>算法练习：打印从1到最大的n位数 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>输入整数n，打印从1到最大的n位数，比如n为4，输出1，2，3一直到最大的4位数，即9999；</p>
+</blockquote>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>n值可能较大，所以此题为大数问题。大数问题一般可通过字符串或者数组来模拟解决。</p>
+
+<p>思路一：通过使用字符数组来模拟整数的加1操作。即每次在当前字符串表示的整数上加1，从最低位到最高位，记录进位。复杂度
+为O(10^n)；</p>
+
+<p>思路二：使用整数数组通过递归实现，即打印i位表示的整数，假设i-1表示的整数可列举，则只需将第i位从0到9遍历，同时与i-1位
+表示的整数序列组合即可。复杂度为O(10^n)；注意，递归可能会导致栈溢出。</p>
+</blockquote>
+
+<h2>3. Java参考代码</h2>
+
+<blockquote>
+<p>方法一：字符串模拟加1</p>
+</blockquote>
+
+<pre><code>/**
+ * 【方法一】：用字符串（字符数组）模拟整数的加1操作：在字符数组表示的整数上加一，同时记录进位，进位从低位向高位传递，
+ *      该操作在两种情况下退出：1. 在某一位上没有发生进位；2. 在最高位（字符数组第一位）发生了进位；
+ * @param data  字符数组，表示当前整数
+ * @param length   字符串数组的长度
+ * @return  是否发生了溢出
+ */
+public static boolean addByOne(char[] data, int length) {
+    boolean isOverflow = false;     // 溢出标志
+    int carry = 0;                  // 进位标志
+    // 从低位向高位遍历
+    for (int i = length - 1; i &gt;= 0; i--) {
+        int sum = data[i] - '0' + carry;
+        // 如果是最后一位，则加1
+        if (i == length - 1) {
+            sum++;
+        }
+        // 是否发生进位
+        if (sum &gt;= 10) {
+            if (i == 0) {   // 如果最高位发生了进位，表示溢出
+                isOverflow = true;
+                break;
+            }
+            // 发生了进位，需要向更高一位加1
+            data[i] = '0';
+            carry = 1;
+        } else {
+            // 没有发生进位，加1操作结束
+            data[i] = (char)(sum + '0');
+            break;
+        }
+    }
+    return isOverflow;
+}
+
+/**
+ * 【方法一】：将字符数组表示的整数打印出来，去掉前缀0
+ * @param data  字符数组表示的整数值
+ * @param length    字符数组的长度
+ */
+public static void printNumber(char[] data, int length) {
+    boolean zeroPrefix = true;
+    for (int i = 0; i &lt; length; i++) {
+        if (zeroPrefix) {
+            if (data[i] != '0') {
+                zeroPrefix = false;
+                System.out.print(data[i]);
+            }
+        } else {
+            System.out.print(data[i]);
+        }
+    }
+    System.out.println();
+}
+
+/**
+ * 【方法一】：循环模拟加1操作，直到发生溢出，则遍历了所有的整数
+ * @param data  字符数组，各位初始化为'0'
+ * @param length  数组的长度
+ */
+public static void stringMethod(char[] data, int length) {
+    for (int i = 0; i &lt; length; i++) {
+        data[i] = '0';
+    }
+    while (!addByOne(data, length)) {
+        printNumber(data, length);
+    }
+}
+</code></pre>
+
+<blockquote>
+<p>方法二：通过整数数组递归实现</p>
+</blockquote>
+
+<pre><code>/**
+ * 【方法二】：使用整数数组递归实现，数组索引较小表示整数的高位，比如要求第i位开始的所有整数，假设i-1位开始的所有
+ *      整数都已经排列好，则只需将第i位从0到9遍历一遍即可。
+ * @param data  整数数组
+ * @param length    数组的长度
+ * @param index     当前索引
+ */
+public static void recursionMethod(int[] data, int length, int index) {
+    // 如果遍历过了最后一位，则遍历结束，打印当前数组表示的整数
+    if (index == length) {
+        printNumber(data, length);
+        return;
+    }
+    // 每一位都从0到9递归遍历
+    for (int i = 0; i &lt;= 9; i++) {
+        data[index] = i;
+        recursionMethod(data, length, index + 1);
+    }
+}
+
+/**
+ * 【方法二】：打印数组表示的整数值，去掉前缀0
+ * @param data  数组表示的整数值
+ * @param length    数组的长度
+ */
+public static void printNumber(int[] data, int length) {
+    boolean zeroPrefix = true;
+    for (int i = 0; i &lt; length; i++) {
+        if (zeroPrefix == true) {
+            if (data[i] != 0) {
+                zeroPrefix = false;
+                System.out.print(data[i]);
+            }
+        } else {
+            System.out.print(data[i]);
+        }
+    }
+    System.out.println();
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/05/algorithm-search-sort-two-dim-array.html" title="算法练习：二维数组中查找元素">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/05/algorithm-print-matrix-clockwise.html" title="算法练习：顺时针打印矩阵">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-05-14</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#algorithm-ref">algorithm <span>16</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#algorithm-ref">algorithm <span>13</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

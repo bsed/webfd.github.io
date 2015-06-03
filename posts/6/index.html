@@ -5,8 +5,6 @@
   <meta charset="utf-8">
   <title>WebFD Page 6 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="Useful Liunx Command 树莓派">
-  
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
   <!--[if lt IE 9]>
@@ -130,361 +128,499 @@
           <li><a href="../../posts/7/">7</a></li>
         
       
+        
+        
+          <li><a href="../../posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="../../posts/14/">14</a></li>
+        
+      
       </ul>
     </div>
 
 
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/java-SynchronousQueue-notes.html">Java并发包中的同步队列SynchronousQueue实现原理</a> <span class="date">2013-03-05</span></h1>
+        <h1 class="title"><a href="/2014/05/algorithm-search-sort-two-dim-array.html">算法练习：二维数组中查找元素</a> <span class="date">2014-05-14</span></h1>
 
-        <h2>介绍</h2>
+        <h2>1. 问题描述：</h2>
 
-<p>Java 6的并发编程包中的<a href="http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/SynchronousQueue.html">SynchronousQueue</a>是一个没有数据缓冲的<a href="http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/BlockingQueue.html">BlockingQueue</a>，生产者线程对其的插入操作put必须等待消费者的移除操作take，反过来也一样。</p>
+<blockquote>
+<p>给定一个二维数组：每一行的元素从左到右递增，每一列的元素从上到下递增；输入一个整数，求该整数是否在该二位数组中。比如，输入的二位数组为：</p>
+</blockquote>
 
-<p>不像ArrayBlockingQueue或LinkedListBlockingQueue，SynchronousQueue内部并没有数据缓存空间，你不能调用peek()方法来看队列中是否有数据元素，因为数据元素只有当你试着取走的时候才可能存在，不取走而只想偷窥一下是不行的，当然遍历这个队列的操作也是不允许的。队列头元素是第一个排队要插入数据的<strong>线程</strong>，而不是要交换的数据。数据是在配对的生产者和消费者线程之间直接传递的，并不会将数据缓冲数据到队列中。可以这样来理解：生产者和消费者互相等待对方，握手，然后<strong>一起</strong>离开。</p>
+<pre><code>2   5   7   9   10
+3   8   9   11  13
+5   9   12  15  20
+9   11  32  40  50
+</code></pre>
 
-<p>SynchronousQueue的一个使用场景是在线程池里。Executors.newCachedThreadPool()就使用了SynchronousQueue，这个线程池根据需要（新任务到来时）创建新的线程，如果有空闲线程则会重复使用，线程空闲了60秒后会被回收。</p>
+<blockquote>
+<p>如果输入的整数为12，则输出true，输入23，则输出false；</p>
+</blockquote>
 
-<h2>实现原理</h2>
+<h2>2. 思路：</h2>
 
-<p>同步队列的实现方法有许多：</p>
+<blockquote>
+<p>因为数组的元素从左向右递增，从上到下递增，则以左下角的元素为例（右上角的元素亦可），如果被查找的整数比该元素大，由于该元素所在列的所有元素都比它小，因此该列可以去掉；如果被查找的整数比该元素小，则该元素所在的行可以去掉，这样每次比较都可以去掉一行或者一列。复杂度为O(m+n)（m、n分别为数组的行数和列数），该方法比直接遍历数组（复杂度O(mn)）要好。</p>
+</blockquote>
 
-<h3>阻塞算法实现</h3>
+<h2>3. Java参考代码</h2>
 
-<p>阻塞算法实现通常在内部采用一个锁来保证多个线程中的put()和take()方法是串行执行的。采用锁的开销是比较大的，还会存在一种情况是线程A持有线程B需要的锁，B必须一直等待A释放锁，即使A可能一段时间内因为B的优先级比较高而得不到时间片运行。所以在高性能的应用中我们常常希望规避锁的使用。</p>
-
-<pre><code>public class NativeSynchronousQueue&lt;E&gt; {
-    boolean putting = false;
-    E item = null;
-
-    public synchronized E take() throws InterruptedException {
-        while (item == null)
-            wait();
-        E e = item;
-        item = null;
-        notifyAll();
-        return e;
+<pre><code>/**
+ * 在二维数组中查找元素
+ * @param array  二维数组
+ * @param row    数组的行
+ * @param col 数组的列
+ * @param key    待查找的元素
+ * @return  存在则返回true，否则返回false
+ */
+private static boolean searchInTwoDimensionArray(int[][] array, int row, int col, int key) {
+    int i = row - 1, j = 0;
+    while (i &gt;= 0 &amp;&amp; j &lt;= col - 1) {
+        if (array[i][j] == key) {
+            return true;
+        } else if (array[i][j] &lt; key) {
+            j++;
+        } else {
+            i--;
+        }
     }
-
-    public synchronized void put(E e) throws InterruptedException {
-        if (e==null) return;
-        while (putting)
-            wait();
-        putting = true;
-        item = e;
-        notifyAll();
-        while (item!=null)
-            wait();
-        putting = false;
-        notifyAll();
-    }
+    return false;
 }
 </code></pre>
 
 
         <div class="more">
-          <a href="/2013/03/java-SynchronousQueue-notes.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/05/algorithm-search-sort-two-dim-array.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/03/openvpn-multiple-ports.html">OpenVPN使用多个端口</a> <span class="date">2013-03-02</span></h1>
+        <h1 class="title"><a href="/2014/05/algorithm-print-num-to-max.html">算法练习：打印从1到最大的n位数</a> <span class="date">2014-05-14</span></h1>
 
-        <p>Openvpn本身不能设置多个端口，使用iptables可以解决这个问题 （假设openvpn本来56788端口）：</p>
+        <h2>1. 问题描述：</h2>
 
-<pre><code>for port in {56780..56787}
-do 
-    iptables -t nat -A PREROUTING -p tcp -d &lt;your_external_ip&gt; --dport $port -j REDIRECT --to-port 56788
-done
-</code></pre>
+<blockquote>
+<p>输入整数n，打印从1到最大的n位数，比如n为4，输出1，2，3一直到最大的4位数，即9999；</p>
+</blockquote>
 
+<h2>2. 思路：</h2>
 
-        <div class="more">
-          <a href="/2013/03/openvpn-multiple-ports.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/setup-l2tp-pptp-openvpn-on-ubuntu.html">在Ubuntu上配置L2TP，PPTP和OpenVPN服务</a> <span class="date">2013-03-01</span></h1>
+<blockquote>
+<p>n值可能较大，所以此题为大数问题。大数问题一般可通过字符串或者数组来模拟解决。</p>
 
-        <h2>Overview</h2>
+<p>思路一：通过使用字符数组来模拟整数的加1操作。即每次在当前字符串表示的整数上加1，从最低位到最高位，记录进位。复杂度
+为O(10^n)；</p>
 
-<p>MacOS, Windows, iOS都内置支持PPTP，L2TP；OpenVPN需要安装客户端，手机上一般不支持。</p>
+<p>思路二：使用整数数组通过递归实现，即打印i位表示的整数，假设i-1表示的整数可列举，则只需将第i位从0到9遍历，同时与i-1位
+表示的整数序列组合即可。复杂度为O(10^n)；注意，递归可能会导致栈溢出。</p>
+</blockquote>
 
-<p>先打开内核的IP转发，修改 /etc/sysctl.conf</p>
+<h2>3. Java参考代码</h2>
 
-<pre><code>net.ipv4.ip_forward=1
-</code></pre>
+<blockquote>
+<p>方法一：字符串模拟加1</p>
+</blockquote>
 
-<p>执行下面命令以生效</p>
-
-<pre><code>sudo sysctl -p
-</code></pre>
-
-<h2>PPTP</h2>
-
-<p>安装pptpd</p>
-
-<pre><code>apt-get install pptpd
-</code></pre>
-
-
-        <div class="more">
-          <a href="/2013/03/setup-l2tp-pptp-openvpn-on-ubuntu.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/resource-management-in-java.html">Java的资源管理</a> <span class="date">2013-03-01</span></h1>
-
-        <h2>Overview</h2>
-
-<p>Java程序中的常见的资源有：文件，Socket，数据库连接。在使用这些资源时候要分外小心，因为操作系统可同时操作的资源是有限的，比如默认情况下系统允许同时打开的文件数为1024个，Mysql服务器默认允许的最大连接数是100，所以操作这些资源时候要注意即使在遇到错误时也要让系统能正确回收资源。如果发生错误时候，打开的文件描述符没关闭或数据库连接没关闭，积累到一定程度后，应用将会变得不可用，只能重启。</p>
-
-<h2>try-catch-finally</h2>
-
-<p>Java提供了try-catch-finally来保证程序遇到异常时总是有机会可以处理资源的关闭 &ndash; 调用资源对象的close()方法。但经验不足的Java程序员还是会错误的管理资源，而造成资源的泄露，静态代码分析工具，如<a href="http://findbugs.sourceforge.net"><strong>FindBugs</strong></a>可以帮助发现此类问题。</p>
-
-<p>首先我们来看一段文件操作代码：</p>
-
-<pre><code>private void copy(String from, String to) throws IOException {
-    FileInputStream in = null;  
-    FileOutputStream out = null;  
-    in = new FileInputStream(from);  
-    out = new FileOutputStream(to);  
-    int c;  
-    while ((c = in.read()) != -1)
-        out.write(c);  
-    in.close();
-    out.close();
+<pre><code>/**
+ * 【方法一】：用字符串（字符数组）模拟整数的加1操作：在字符数组表示的整数上加一，同时记录进位，进位从低位向高位传递，
+ *      该操作在两种情况下退出：1. 在某一位上没有发生进位；2. 在最高位（字符数组第一位）发生了进位；
+ * @param data  字符数组，表示当前整数
+ * @param length   字符串数组的长度
+ * @return  是否发生了溢出
+ */
+public static boolean addByOne(char[] data, int length) {
+    boolean isOverflow = false;     // 溢出标志
+    int carry = 0;                  // 进位标志
+    // 从低位向高位遍历
+    for (int i = length - 1; i &gt;= 0; i--) {
+        int sum = data[i] - '0' + carry;
+        // 如果是最后一位，则加1
+        if (i == length - 1) {
+            sum++;
+        }
+        // 是否发生进位
+        if (sum &gt;= 10) {
+            if (i == 0) {   // 如果最高位发生了进位，表示溢出
+                isOverflow = true;
+                break;
+            }
+            // 发生了进位，需要向更高一位加1
+            data[i] = '0';
+            carry = 1;
+        } else {
+            // 没有发生进位，加1操作结束
+            data[i] = (char)(sum + '0');
+            break;
+        }
+    }
+    return isOverflow;
 }
 </code></pre>
 
 
         <div class="more">
-          <a href="/2013/03/resource-management-in-java.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/05/algorithm-print-num-to-max.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/02/the-evolution-of-online-advertsing-system.html">在线广告系统架构变迁</a> <span class="date">2013-02-28</span></h1>
+        <h1 class="title"><a href="/2014/05/algorithm-print-matrix-clockwise.html">算法练习：顺时针打印矩阵</a> <span class="date">2014-05-12</span></h1>
 
-        <h1>Overview</h1>
+        <h2>1. 问题描述：</h2>
 
-<p><strong><em>（未完）</em></strong></p>
+<blockquote>
+<p>输入一个矩阵（二维数组），按照顺时针的方向打印矩阵中的元素；比如，输入：</p>
+</blockquote>
 
-<p>广告按业务划分有以下几类：</p>
-
-<ol>
-<li>展示广告（Banner广告）</li>
-<li>搜索广告（关键词广告）</li>
-</ol>
-
-<p>按计费模式有：</p>
-
-<ol>
-<li>CPT: 按有效广告展示天数计费，可定价或竞价；</li>
-<li>CPM: 按有效广告展现次数计费，可定价或竞价；</li>
-<li>CPC: 按有效点击次数计费；</li>
-<li>CPS: 按效果计费，如，按成交订单额，按流量带来的有效下载或安装次数计费；</li>
-</ol>
-
-<p>广告系统按结构可划分为以下子系统：</p>
-
-
-        <div class="more">
-          <a href="/2013/02/the-evolution-of-online-advertsing-system.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/02/logging-in-java.html">Java程序的日志</a> <span class="date">2013-02-28</span></h1>
-
-        <h2>Overview</h2>
-
-<p>一个在生产环境里运行的程序如果没有日志是很让维护者提心吊胆的，有太多杂乱又无意义的日志也是令人伤神。程序出现问题时候，从日志里如果发现不了问题可能的原因是很令人受挫的。本文想讨论的是如何在Java程序里写好日志。大多数的Web服务器（如Apache，Nginx）都有access日志和error日志，分别记录在不同的文件内；我们使用的服务器操作系统Linux有Syslog日志, /var/log目录下也有很多基础应用和服务的日志文件；桌面Windows有事件查看器, Mac有Console应用可以查看和管理日志；这些成熟的系统及工具方法都值得我们学习并在自己的项目中应用。</p>
-
-<p>一般来说日志分为两种：业务日志和异常日志。使用日志我们希望能达到以下目标：</p>
-
-<ol>
-<li>对程序运行情况的记录和监控；</li>
-<li>在必要时可详细了解程序内部的运行状态；</li>
-<li>对系统性能的影响尽量小；</li>
-</ol>
-
-<h2>日志规范</h2>
-
-<p>程序框架应该提供统一的日志记录接口，日志格式也需要有一定的规范，方便利用日志工具来分析日志。
-首先我们有必要了解一下Linux普遍使用的<a href="http://en.wikipedia.org/wiki/Syslog">Syslog</a>标准协议，协议规定日志中应包含产生日志的模块(Facility)，严重性（Severity Level），时间，主机名或IP，进程名，进程ID和日志内容，根据模块和严重性可以配置相应的动作：是否需要记录，日志存储路径（文件或网络）。</p>
-
-<p>下面是部分常见的Syslog模块类型：</p>
-
-<table>
-<thead>
-<tr>
-<th><strong>模块ID</strong></th>
-<th><strong>关键词</strong></th>
-<th><strong>描述</strong></th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>0</td>
-<td>kern</td>
-<td>内核消息</td>
-</tr>
-
-<tr>
-<td>1</td>
-<td>user</td>
-<td>用户级别消息</td>
-</tr>
-
-<tr>
-<td>2</td>
-<td>mail</td>
-<td>邮件系统</td>
-</tr>
-
-<tr>
-<td>3</td>
-<td>daemon</td>
-<td>系统后台守护程序</td>
-</tr>
-
-<tr>
-<td>4</td>
-<td>auth</td>
-<td>安全/鉴权消息</td>
-</tr>
-
-<tr>
-<td>5</td>
-<td>syslog</td>
-<td>syslogd内部产生的日志消息</td>
-</tr>
-
-<tr>
-<td>…</td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-
-
-        <div class="more">
-          <a href="/2013/02/logging-in-java.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/02/27/%E5%9C%A8Pi%E5%92%8CGithub%E4%B8%8A%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2.html">在Pi和Github上搭建自己的个人博客</a> <span class="date">2013-02-27</span></h1>
-
-        <h1>方法如下：</h1>
-
-<p>本站同时托管在家里的<a href="http://www.raspberrypi.org">Raspberry Pi</a>和<a href="http://pages.github.com/">Github Pages</a>上，并同步保持更新，海外用户会访问Github，国内用户则会访问Pi，不同线路解析域名<strong>hugozhu.myalert.info</strong>到不同的服务器是通过<a href="http://dnspod.cn">DnsPod</a>的服务实现的，这么好的服务还是免费的，这里推荐一下。</p>
-
-<p>因为Github Pages只能支持静态网页，你需要一个能生成静态网页的博客生成引擎。我使用的是<a href="http://github.com/wendal/gor">gor</a> ， 也可以使用<a href="http://ruhoh.com">ruhoh</a>，<a href="https://www.google.com/search?q=static+blog+generator&amp;hl=en&amp;newwindow=1&amp;client=safari&amp;rls=en&amp;biw=1238&amp;bih=868&amp;ei=msAuUY-vDMKO2AWQ7IHoBQ&amp;sqi=2&amp;start=10&amp;sa=N">Google一下还有很多</a>。</p>
-
-<h2>静态页面博客的好处：</h2>
-
-<ol>
-<li>性能是最好的，很合适用Raspberry Pi来做服务器，节省资源；</li>
-<li>文章可以用Markdown格式来编写，采用Github来做版本控制，我的Blog仓库在 <a href="http://github.com/hugozhu/blog">http://github.com/hugozhu/blog</a> ，数据安全很好，误删除也不担心了；</li>
-<li>很容易找到托管环境，方便迁移；</li>
-<li>用Gor在Pi上生成速度很快；再用Nginx提供Web服务，可以直接在Pi上写Blog；</li>
-<li>大繁至简</li>
-</ol>
-
-<h2>Github设置</h2>
-
-<ol>
-<li>在你的仓库里增加一个your_github_id.github.com，比如我的github ID是hugozhu，相应的仓库名就是<a href="https://github.com/hugozhu/hugozhu.github.com">hugozhu.github.com</a>，这个仓库也就是网站的根目录了，在这里放生成好的静态文件</li>
-<li>如果你需要用自己的域名，而不是Github提供的，可以在根目录下增加一个<a href="https://github.com/hugozhu/hugozhu.github.com/blob/master/CNAME">CNAME</a>文件,文件内容则是你的域名，在DnsPod上需要建一个CNAME记录，将你的域名指向your_github_id.github.com. 也就是github原来分配给你的，完成这个设置后，访问your_github_id.github.com会跳转到你的域名；</li>
-<li>每次更新后，Github会在10分钟内生效。</li>
-</ol>
-
-
-        <div class="more">
-          <a href="/2013/02/27/%E5%9C%A8Pi%E5%92%8CGithub%E4%B8%8A%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/02/collaborating-development-with-github.html">使用Github合作开发项目</a> <span class="date">2013-02-27</span></h1>
-
-        <p>本文大部分内容来自： <a href="https://help.github.com/categories/63/articles">https://help.github.com/categories/63/articles</a></p>
-
-<p>Github上合作开发最好的方式是“<strong>Fork + Pull Request</strong>”。比如我最近需要一个静态Blog生成器，市面上有很多Ruby实现的，但我想要一个Go语言的实现，Github上找到了一个 <a href="https://github.com/wendal/gor">https://github.com/wendal/gor</a> ，测试了一下已有的功能基本能满足了，就用上了。</p>
-
-<p>但实际使用过程中发现了一个问题，如果在URL中有中文，生成的URL如下没有做URL安全编码：</p>
-
-<pre><code>http://hugozhu.myalert.info/2013/02/27/在Pi和Github上搭建自己的个人博客.html
+<pre><code>1   2   3   4   5
+6   7   8   9   10
+11  12  13  14  15
+16  17  18  19  20
 </code></pre>
 
-<p>还有一种情况是如果URL中有空格，如：</p>
+<blockquote>
+<p>输出：</p>
+</blockquote>
 
-<pre><code>http://hugozhu.myalert.info//2013//02/25/Java properties to enviorment variables.html
+<pre><code>1 2 3 4 5 10 15 20 19 18 17 16 11 6 7 8 9 14 13 12
 </code></pre>
 
-<p>浏览器遇到这种URL时，会主动进行编码，但这里有两个问题：</p>
+<h2>2. 思路：</h2>
 
-<ol>
-<li>遇到中文时，浏览器是用GBK还是UTF-8还是其它字符集编码后再发送给服务器呢？</li>
-<li>遇到空格时，编码成+还是%20呢？
-不同浏览器实现可能不一样，在不同操作系统上也可能不一样（可能和用户设置的缺省语言有关），这样有些用户可能会遭遇404错误了，实际上我在服务器的错误日志上的确看到这样的错误</li>
-</ol>
+<blockquote>
+<p>可以将顺时针打印分成四个步骤，从左到右的一行，从上到下的一列，从右到左的一行，从下到上的一列。打印时有两个条件限制：一是不能出界，二是不能重复打印。第一个条件，可以通过矩阵的行列值进行限制，第二个条件，可以设置一个与矩阵同样结构的标志数组，用于标记矩阵的每一个元素是否被遍历过。</p>
 
-<p>日志：</p>
+<p>这里有一个常用的技巧，即试探法，先试探下一个元素是否可遍历，如果是，则遍历，否则终止本轮遍历。如果不是使用试探法，直接通过边界值的限制，循环遍历，当越界时，需要回退。
++ 时间复杂度O(m*n)，空间复杂度O(m*n)，其中m、n分别表示矩阵的行数和列数。</p>
+</blockquote>
 
 
         <div class="more">
-          <a href="/2013/02/collaborating-development-with-github.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/05/algorithm-print-matrix-clockwise.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/02/linux_perf_tools.html">系统调试和分析工具</a> <span class="date">2013-02-26</span></h1>
+        <h1 class="title"><a href="/2014/05/algorithm-num-of-one-bit.html">算法练习：整数二进制中1的个数</a> <span class="date">2014-05-11</span></h1>
 
-        <p>Linux下的调试和分析工具集</p>
+        <h2>1. 问题描述：</h2>
 
-<hr />
+<blockquote>
+<p>给定一个整数num，求num的二进制表示中1的个数；
+输入：整数num；输出：num二进制表示中1的个数</p>
+</blockquote>
 
-<p><img src="/assets/media/tools.jpg" width="600"/></p>
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>可以判断整数的二进制表示中每一位是否为1，即每次将整数与1进行与操作，然后整数右移一位，如果整数是正数，没问题，移位直到整数值为0，移位的次数为整数二进制的有效位数；如果整数是负数，直接循环移位，会陷入无限循环（负数最高位为1，右移时高位补符号位），此时需要完整移动32位（整数由4个字节构成）。</p>
+
+<p>也是判断整数的每一位是否为1，但不是对整数移位，而是每次对1左移位，判断整数对应的位上是否为1；移位的次数为整数二进制的有效位数。</p>
+
+<p>n&amp;(n-1)：每次消掉n最低位上的1，直到结果为0，比较的次数为整数二进制中1的个数。此方位最优。</p>
+</blockquote>
+
+<h2>3. Java参考代码</h2>
+
+<pre><code>/**
+ * 通过n&amp;(n-1)，每次可以消掉n的二进制表示中最低位上的1，比较
+ * 的次数为n二进制中1的个数。
+ * @param num
+ * @return
+ */
+private int getOneBitNum(int num) {
+    int count = 0;
+    while (0 != num) {
+        num = (num &amp; (num - 1));
+        count++;
+    }
+    return count;
+}
+</code></pre>
 
 
         <div class="more">
-          <a href="/2013/02/linux_perf_tools.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/05/algorithm-num-of-one-bit.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
       <div class="post">
-        <h1 class="title"><a href="/2013/02/dynamic-dns-script.html">动态DNS程序</a> <span class="date">2013-02-26</span></h1>
+        <h1 class="title"><a href="/2014/05/algorithm-odd-before-even.html">算法练习：重排数组，使奇数位于偶数之前</a> <span class="date">2014-05-09</span></h1>
 
-        <h2>动态根据宽带public ip更新dnspod登记的域名</h2>
+        <h2>1. 问题描述</h2>
 
-<p>按照 <a href="https://gist.github.com/833369">https://gist.github.com/833369</a> 逻辑重新用Go实现了，用更少的内存开销在Raspberry Pi上跑。</p>
+<blockquote>
+<p>给定数组，调整数组中元素的顺序，使得所有的奇数都位于数组的前部分，所有的偶数都位于数组的后部分。
+输入：数组
+输出：重排后的数组</p>
+</blockquote>
 
-<p>替换上你的Email，密码，域名ID，记录ID等参数，就可以运行了。 会在后台一直运行，每隔30秒检查一遍IP，如果修改了就更新IP。</p>
+<h2>2. 思路</h2>
 
-<p>获得domain_id可以用：</p>
+<ul>
+<li>使用两个指针，第一个指针指向数组首元素，第二个指针指向数组尾元素，在两个指针相遇前，第一个指针向后移动，直到遇到偶数，第二个指针向前移动，直到遇到奇数，然后两个指针指向的元素交换；重复上述步骤，直到两个指针相遇为止；复杂度O(n)。</li>
+<li>这里，奇偶重排只是同类型问题中的一种，因此可以奇偶判断提取成一个方法，降低耦合度，可以提高代码的重用性。</li>
+</ul>
 
-<pre><code>curl curl -k https://dnsapi.cn/Domain.List -d &quot;login_email=xxx&amp;login_password=xxx&quot; 
+<h2>3. java参考代码</h2>
+
+<pre><code>/**
+ * 调整数组中元素的顺序，使所有的奇数位于数组的前部分，偶数位于数组的后部分；
+ * 定义首尾指针，首指针前进，尾指针后退，当首指针遇到偶数且尾指针遇到奇数时，元素互换。
+ * @param data  输出数组
+ * @param length    数组的长度
+ */
+public static int[] adjust(int[] data, int length) {
+    int first = 0;
+    int last = length - 1;
+    while (first &lt; last) {
+        // 首指针寻找第一个偶数
+        while ((first &lt; last) &amp;&amp; (isOdd(data[first]))) {
+            first++;
+        }
+        // 尾指针寻找第一个奇数
+        while ((first &lt; last) &amp;&amp; (!isOdd(data[last]))) {
+            last--;
+        }
+        // 首尾元素互换
+        if (first &lt; last) {
+            int tmp = data[first];
+            data[first++] = data[last];
+            data[last++] = tmp;
+        }
+    }
+    return data;
+}
 </code></pre>
-
-<p>获得record_id：</p>
-
-<pre><code>curl -k https://dnsapi.cn/Record.List -d &quot;login_email=xxx&amp;login_password=xxx&amp;domain_id=xxx&quot;
-</code></pre>
-
-<script src="https://gist.github.com/hugozhu/6506189.js"></script>
 
 
         <div class="more">
-          <a href="/2013/02/dynamic-dns-script.html" class="btn btn-small">阅读全文</a>
+          <a href="/2014/05/algorithm-odd-before-even.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-rotated-array-min.html">算法练习：求旋转数组的最小值</a> <span class="date">2014-05-08</span></h1>
+
+        <h2>1. 问题描述</h2>
+
+<blockquote>
+<p>有一个递增排序的数组，将数组旋转（将前若干个元素移动数组的末尾）后，求旋转后数组的最小值；比如：
+有序数组为：2, 5, 8, 12, 21, 34, 50，旋转后为: 12,, 21, 34, 50, 2, 5, 8，求数组的最小值。
+输入：旋转后的的数组；
+输出：数组的最小值；</p>
+</blockquote>
+
+<h2>2. 思路</h2>
+
+<ul>
+<li>2.1 遍历整个数组寻找最小值，复杂度为O(n)；</li>
+<li>2.2 旋转后，数组部分有序，可以利用二分查找的思路，降低复杂度：
+
+<ul>
+<li>首先求中间元素，如果比首元素大，说明最小元素在后半区间；如果比尾元素小，说明最小元素在前半区间；调整二分查找的区间。</li>
+<li>二分的过程中，有一个特殊情况：即中间元素既大于等于首元素，又小于等于尾元素，亦即中间元素等于首元素，且等于尾元素，此时无法判断最小值
+位于哪个半区间，此时只能顺序查找。比如有两个旋转数组：[5, 5, 5, 5, 2, 2, 5]和[5, 2, 2, 5, 5, 5, 5]都可以看成数组
+[2, 2, 5, 5, 5, 5, 5]旋转得到的。</li>
+<li>还有一种特殊情况，即数组完全有序，亦即0个元素被旋转，此时不能直接二分，需要对这种情况做出处理；</li>
+</ul></li>
+</ul>
+
+<h3>3. java参考代码</h3>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-rotated-array-min.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-fibonacci.html">算法练习：求Fibonacci序列和</a> <span class="date">2014-05-07</span></h1>
+
+        <h2>1. 问题描述</h2>
+
+<blockquote>
+<p>求Fibonacci序列之和：f(n) = f(n-1) + f(n-2); 【n&gt;0, f(1)=f(2)=1】</p>
+</blockquote>
+
+<h2>2. 思路</h2>
+
+<ul>
+<li><p>2.1 根据公式递归求解，会有大量重复计算，效率低；复杂度（n的指数级）</p></li>
+
+<li><p>2.2 保存中间结果，迭代累加：</p>
+
+<ul>
+<li>f(3) = f(1) + f(2); f(1)和f(2)是已知的；</li>
+<li>f(4) = f(2) + f(3); f(2)和f(3)是已知的，可以将f(2)看作原来的f(1)，将f(3)看作原来的f(2)；</li>
+<li>&hellip;</li>
+<li>逐步累加即可，时间复杂度O(n);</li>
+</ul></li>
+</ul>
+
+<h3>3. 同类题目</h3>
+
+<blockquote>
+<p>3.1 青蛙跳台阶：一只青蛙一次可以跳一级台阶，也可以跳2级台阶，请问跳n级台阶，一共有多少中跳法？</p>
+</blockquote>
+
+<ul>
+<li>思路：
+
+<ul>
+<li>n级是f(n)，第一次跳一级，后面n-1级，f(n-1)；第一次跳二级，后面n-2级，f(n-2)，即满足：f(n) = f(n-1) + f(n-2) 【f(1) = 1, f(2) = 1, n &gt; 0】</li>
+</ul></li>
+</ul>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-fibonacci.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-calculate-pow.html">算法练习：实现库函数pow(double base, int exp)</a> <span class="date">2014-05-06</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>实现函数pow(double base, int exp)，即base的exp次方，不考虑大数问题，不能使用任何库函数。</p>
+</blockquote>
+
+<h2>2. 思路：</h2>
+
+<ul>
+<li><p>2.1 首先考虑正常情况，计算b^e，最简单的方法是循环累乘，优点是简单直观，缺点是循环次数较多, 复杂度为(n)；</p></li>
+
+<li><p>2.2 为了减少循环的次数，可以采取“折半平方”的思路，</p>
+
+<ul>
+<li>如<code>x^6=(x^3)^2，x^7=(x^3)^2*x</code>，可以使用递归实现，优点是减少幂乘的次数，缺点是如果递归层次太深，可能发生栈溢出；复杂度为O(logn)。（递归的本质也是栈，我们可以自己用栈来实现）</li>
+<li>异常处理：当指数e为负数的时候，需要判断底数b的值是否为0，而b是double类型，因此涉及到浮点数与0的比较问题；</li>
+</ul></li>
+</ul>
+
+<h3>3. java代码：</h3>
+
+<pre><code>private final double THRESHOLD = 1E-6;
+
+/**
+ * 计算浮点数base的exponent次幂，不考虑大数（溢出）问题
+ * @param base
+ * @param exponent
+ * @return  -1表示异常，否则，返回值为结果值
+ */
+public double getPow(double base, int exponent) {
+    if (isEqual(base, 0.0)) {
+        if (exponent &lt; 0) {
+            logger.info(&quot;error input&quot;);
+            return -1;
+        }
+        return 1.0;
+    }
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-calculate-pow.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/xshell-select-interrupt-dict.html">Xshell鼠标选中，终端立即中断(CTRL-C)的问题</a> <span class="date">2014-05-05</span></h1>
+
+        <h2>问题：</h2>
+
+<blockquote>
+<p>在Xshell中设置了“自动将选中的文字复制到粘贴板”，之前一直没有问题，最近发现，只要选中屏幕上的文字，复制上了，但shell终端立即被中断了，即向终端发送了CTRL-C；</p>
+</blockquote>
+
+<h2>原因：</h2>
+
+<blockquote>
+<p>很可能是“选中文字复制”与词典软件的“划词翻译”相冲突。我的原因是，最近安装了必应词典，且开启了“划词翻译”功能。
+我在网上求助时，发现也有一些朋友遇到和我一样的问题，都是由于与词典的冲突导致的，如有道词典，关掉划译功能即可。</p>
+</blockquote>
+
+
+        <div class="more">
+          <a href="/2014/05/xshell-select-interrupt-dict.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-practice-addbybit.html">算法练习：不使用加减乘除对两个整数求和</a> <span class="date">2014-05-04</span></h1>
+
+        <h2>1. 问题描述</h2>
+
+<blockquote>
+<p>不使用加法（+）、减法（-）、乘法（*）和除法（/）操作，求两个整数的和。</p>
+</blockquote>
+
+<h2>2. 思路</h2>
+
+<ul>
+<li><p>可以从位运算上考虑，将两个整数以二进制表示，两个数的加法，即对应位上的加法，如果两个数的某一位不同（一个为0，一个为1），则相加后该位为1；如果相同，分两种情况，同为0，则相加后还是0，如果同为1，相加后结果仍为0，但需要向更高位进位；</p></li>
+
+<li><p>于是我们发现，对位进行相加时，如果两个位相同，结果为0，不同，结果为1，这即位的异或运算；进位仅发生在两个位同为1的情况下，即位的与运算，与运算的结果，位为1的表示该位上发生了进位，进位实质上就是在更高位上加1，即左移一位，于是，最终的结果为异或的结果与进位的结果之和，问题又回到了求两个数之和，重复上述操作，直到进位为0为止；复杂度为O(n)。
+例如，求01100101和00101100的和：
+[xor: 01001001, and: 00100100, &lt;&lt;: 01001000]-&gt;[xor: 00000001, and: 01001000, &lt;&lt;: 10010000]-&gt;[xor: 10010001, and: 00000000, &lt;&lt;: 00000000]-&gt;[result: 10010001]</p></li>
+</ul>
+
+<h2>3. Java代码</h2>
+
+<pre><code>/**
+ * 输入两个整数，求它们的和（不能使用加减乘除四种运算）
+ * @param firstNum
+ * @param secondNum
+ * @return
+ */
+public int add(int firstNum, int secondNum) {
+    int bitXor = 0;
+    int bitAnd = 0;
+    while (0 != secondNum) {
+        bitXor = firstNum ^ secondNum;  // 异或，提取出不同位
+        bitAnd = firstNum &amp; secondNum;  // 与，提取进位
+        firstNum = bitXor;
+        secondNum = bitAnd &lt;&lt; 1;
+    }
+    return firstNum;
+}
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-practice-addbybit.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
@@ -525,6 +661,41 @@ done
         
         
           <li><a href="/posts/7/">7</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/8/">8</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/9/">9</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/10/">10</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/11/">11</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/12/">12</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/13/">13</a></li>
+        
+      
+        
+        
+          <li><a href="/posts/14/">14</a></li>
         
       
       </ul>

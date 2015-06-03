@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Redis 3.0.0 RC1的发布和更新 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>Redis 3.0.0 RC1的发布和更新 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>Redis 3.0.0 RC1在10月9日发布，这个版本具有重要的意义，说明Redis Cluster已经非常稳定了。</p>
+
+<p>我们来简单梳理一下RC1中的重要更新。</p>
+
+<h2>Redis 3.0.0 RC1的<a href="https://raw.githubusercontent.com/antirez/redis/3.0/00-RELEASENOTES">release notes</a></h2>
+
+<h3>常规更新</h3>
+
+<ul>
+<li>[修复] 对一些简单问题的修复汇总，修复列表可以参考<a href="https://github.com/antirez/redis/pull/1906">issue #1906</a>，修复的主要内容有：
+
+<ul>
+<li>将sds的size从2GB增加到4GB(即使用<code>unsigned int</code>替换<code>int</code>，其它不变)；</li>
+<li>如果redis在前台运行，Ctrl-C会将server优雅地<code>SHUTDOWN</code>，而不是仅仅将server进程kill掉；</li>
+<li>Sentinel支持<code>INFO ALL</code>命令；</li>
+<li>使用<code>redis-benchmark</code>命令测试时，新增<code>-a</code>参数用于验证；</li>
+<li>对代码的优化、重构等。<br /></li>
+</ul></li>
+<li>[修复] <code>SAVE</code> 命令不会蔓延到AOF文件和Slave实例；</li>
+<li>[修复] 当hash table处于异常状态时，限制<code>SCAN</code>操作的延迟(当数据库正在rehash时，可用的bucket数量很少)；</li>
+<li>[新增] redis在启动时可以加载被截断的AOF文件，而不需要先执行<code>redis-check-aof</code>工具，该功能可以在<code>redis.conf</code>中配置：<code>aof-load-truncated yes</code>；</li>
+<li>[新增] <code>INCR</code>：尽可能地在原地修改自增键，可以得到更好的性能；</li>
+</ul>
+
+<h3>Cluster更新</h3>
+
+<ul>
+<li>[修复] 即使连接断开，仍要求返回ping_sent时间；</li>
+<li>[修复] 判断是否处于少数节点构成的网络时，修复判断逻辑；</li>
+<li>[修复] 修复已加入集群的节点间的gossip通信逻辑；</li>
+<li>[新增] Redis Cluster运行稳定且通过了详尽的测试，因此从beta版晋升为stable版；</li>
+<li>[新增] 当slot没有被完全覆盖时，集群仍然可用；</li>
+<li>[新增] 当failover过程停顿的时候，slave会打印更详细的日志，包括原因；</li>
+</ul>
+
+<h3>Sentinel更新</h3>
+
+<ul>
+<li>[修复] 修复严重bug：在计算大多数(majority)节点时，之前的实现方式是错误的，而specification上说的是对的。大多数节点是针对master的所有sentinel，而不管它当前的状态。</li>
+<li>[修复] 修复hiredis库中的一个内存泄露问题：当一个被监控的实例或者另一个sentinel不可用的时候会导致内存泄露，每一次重连都会泄露少量的内存，但是如果持续累积，将会导致大量的内存泄露；</li>
+</ul>
+
+<h2>redis.conf更新</h2>
+
+<p>将redis-3.0.0-beta8中的redis.conf和redis-3.0.0-rc1中的redis.conf通过diff查看两者的区别。</p>
+
+<pre><code># diff redis-b8.conf redis-rc1.conf &gt; diff.conf
+</code></pre>
+
+<p>对比后发现，大部分的更新都是针对表述上的，功能上的更新主要有三点：</p>
+
+<ul>
+<li><code>unixsocketperm 700</code>: unixsocketperm的权限由755修改为700；</li>
+<li><code>aof-load-truncated yes</code>: redis在启动的时候可以加载被截断的AOF文件，默认启用；</li>
+<li><code>cluster-require-full-coverage yes</code>: rc1之前，如果至少有一个slot没有被节点覆盖，则整个集群不可用；现在，启用该配置，即使有部分slot没有被覆盖，被覆盖到的那部分slot构成的子集群仍然可用。</li>
+</ul>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/10/why-should-choose-gradle.html" title="为什么应该选择gradle">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/09/blockqueue-arrayblockingqueue.html" title="阻塞队列之ArrayBlockingQueue">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-10-21</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#redis-ref">redis <span>4</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#redis-ref">redis <span>5</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>SQL COOKBOOK阅读笔记 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="本系列记录阅读书籍《SQL COOKBOOK》的相关笔记 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>SQL COOKBOOK阅读笔记 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <h2>1. 尽量不要使用select *</h2>
+
+<p>返回表中的所有field时，使用<code>select *</code>确实很方便，但是不推荐这么做，应该在select后将所有的field都列出来：一是方便自己，清楚地知道返回了哪些field；而是方便他人，在看你的代码时，别人不一定知道表中有哪些列。
+这两种方式的性能是一样的。</p>
+
+<h2>2. 尽量使用as创建易读的别名</h2>
+
+<h3>2.1 尽量使用易读的别名</h3>
+
+<pre><code>mysql&gt; select sal as salary, empName as employName from employ;
+</code></pre>
+
+<blockquote>
+<p>使用易读的别名，可以让你的sql语句更容易被理解。</p>
+</blockquote>
+
+<h3>2.2 在where中使用别名：</h3>
+
+<pre><code>mysql&gt; select sal as salary from employ where salary &gt;= 10000;
+</code></pre>
+
+<blockquote>
+<p>该语句报错，因为salary字段未识别，可以将该语句包装成一个临时表：</p>
+</blockquote>
+
+<pre><code>mysql&gt; select * from (select sal as salary from employ) as t where salary &gt;= 10000;
+</code></pre>
+
+<blockquote>
+<p>为什么：因为where语句在select之前执行，所以在第一条语句中，salary还没有创建；而from语句在where语句之前执行，所以在第二条语句中，临时表t中有字段salary。</p>
+</blockquote>
+
+<h2>3. 使用concat函数进行字段值的连接</h2>
+
+<p>将字段值和字符串拼接起来，使用<code>concat()</code>函数：</p>
+
+<pre><code>mysql&gt; select concat(startIp, &quot; : &quot;, endIp) as ipSeg from ip_data limit 1;
++---------------------+
+| ipSeg               |
++---------------------+
+| 17563648 : 17825791 | 
++---------------------+
+</code></pre>
+
+<h2>4. 使用case when进行条件判断</h2>
+
+<p>在select语句中，可以对返回结果进行逻辑处理。使用case表达式，语法格式如下。else可以省略，如果所有的when
+都不匹配，默认返回null；</p>
+
+<pre><code>case
+    when ... then
+    when ... then
+    else ...
+end
+</code></pre>
+
+<blockquote>
+<p>注意，还有一个case表达式，用于存储过程，以<code>end case</code>结尾。</p>
+</blockquote>
+
+<pre><code>mysql&gt; select netId, areaId, case when netId &gt; 10 then 'big' when netId &lt; 5 then 'small' else 'normal' end as status from ip_data limit 5;
++-------+--------+--------+
+| netId | areaId | status |
++-------+--------+--------+
+|    11 |   4019 | big    | 
+|     2 |   2813 | small  | 
+|    10 |     35 | normal | 
+|     1 |   2110 | small  | 
+|    10 |     35 | normal | 
++-------+--------+--------+
+</code></pre>
+
+<h2>5. 使用rand返回随机的记录</h2>
+
+<p>可以使用<code>rand()</code>函数返回一个随机数，通过order by排序即可。rand()对每一条记录返回0.0到1.0之间的浮点数。
+当然也可以在order by之后跟一个常量浮点数，但此时结果是固定的。</p>
+
+<pre><code>mysql&gt; select ip_data.netId, ip_data.areaId from ip_data order by rand() limit 5;
++-------+--------+
+| netId | areaId |
++-------+--------+
+|     7 |   4019 | 
+|    10 |   1806 | 
+|     2 |   4608 | 
+|    13 |     42 | 
+|     3 |   4502 | 
++-------+--------+
+</code></pre>
+
+<h2>6. 使用is null判断字段是否为null</h2>
+
+<p>判断字段null值，不能使用=或者!=，即使null和null也不能通过=比较。应该使用 <code>is null</code>, 或者 <code>is not null</code>。</p>
+
+<pre><code>mysql&gt; select startIp, areaId from ip_data where netId  is null;
+</code></pre>
+
+<h2>7. 使用coalesce函数对字段进行默认处理</h2>
+
+<p>对字段的返回值进行合并，使用函数<code>coalesce(field, default)</code>：如果field不为null，取field的值，如果field值为null，取设置的默认值default。</p>
+
+<pre><code>mysql&gt; select number, coalesce(number, 1000) as new_number  from students;
++--------+------------+
+| number | new_number |
++--------+------------+
+|    111 |        111 | 
+|   NULL |       1000 | 
+|    333 |        333 | 
+|  12345 |      12345 | 
+|   NULL |       1000 | 
+|    777 |        777 | 
+|   NULL |       1000 | 
++--------+------------+
+</code></pre>
+
+<blockquote>
+<p>当然，在select里使用<code>case when end</code>也能达到同样的效果，但显然使用coalesce()更简洁。</p>
+</blockquote>
+
+<h2>8. 在order by之后通过数字指定字段进行排序</h2>
+
+<p>order by一般后跟字段名，表示根据字段名排序；也可以跟一个整数，该整数的值与select中的字段相对应，从1开始，表示根据select中的第几个字段排序，因此，该整数不能大于select中的字段个数。如下两种情况是等价的：</p>
+
+<pre><code>mysql&gt; select id, startIp, endIp, netId from ip_data order by id asc limit 5; 
+mysql&gt; select id, startIp, endIp, netId from ip_data order by 1 asc limit 5;
++----+----------+----------+-------+
+| id | startIp  | endIp    | netId |
++----+----------+----------+-------+
+|  1 | 17563648 | 17825791 |    11 | 
+|  2 | 18350080 | 18874367 |     2 | 
+|  3 | 19726336 | 19791871 |    10 | 
+|  4 | 19922944 | 20054015 |     1 | 
+|  5 | 20054016 | 20119551 |    10 | 
++----+----------+----------+-------+
+</code></pre>
+
+<p>另外，可以根据多个字段排序，优先级从左到右，即先根据第一个字段排序，如果第一个字段的值相等，然后根据第二个字段的值排序，依此类推：</p>
+
+<pre><code>&gt;&gt; select id, startIp, endIp, netId from ip_data order by netId asc, endIp desc limit 5;
++-------+------------+------------+-------+
+| id    | startIp    | endIp      | netId |
++-------+------------+------------+-------+
+| 17351 | 3757047808 | 3757572095 |     1 | 
+| 17348 | 3755737088 | 3755868159 |     1 | 
+| 17347 | 3755343872 | 3755474943 |     1 | 
+| 17341 | 3754295296 | 3754426367 |     1 | 
+| 17337 | 3750756352 | 3751804927 |     1 | 
++-------+------------+------------+-------+
+</code></pre>
+
+<h2>9. 通过substring函数对字段子串排序</h2>
+
+<p>使用函数<code>substring()</code>可以获取字符串的子串，使用<code>order by</code>可以根据该子串进行排序。
+注意：substring(str, pos)表示从pos开始的子串，其中位移从1开始，所以如果要表示
+取字符串的最后两个字符，应该是substring(str, length(str)-1).</p>
+
+<pre><code>mysql&gt; select file_path, file_name from file order by substr(file_name, length(file_name)-1) desc  limit 5;
++----------------+-----------------------+
+| file_path      | file_name             |
++----------------+-----------------------+
+| /opt/rankFile/ | phb_variety_day_issue | 
+| /opt/rankFile/ | catalog_variety       | 
+| /opt/rankFile/ | catalog_tv            | 
+| /opt/rankFile/ | catalog_cartoon       | 
+| /opt/rankFile/ | catalog_doc           | 
++----------------+-----------------------+
+</code></pre>
+
+<h2>10. 如何对含有null值的字段进行排序</h2>
+
+<p>mysql中字段的null值在排序时默认时按照最小值排序的，即升序时，null值在最前面，降序时在最后面。通过在select中使用<code>case when</code>对null值进行判断，然后定义排序顺序。
+如升序时将null值放在最后：</p>
+
+<pre><code>mysql&gt; select name, number from (select name, number, case when number is null then 0 else 1 end as is_null from students) as t order by is_null desc, number;
++----------+--------+
+| name     | number |
++----------+--------+
+| lingguo  |    111 | 
+| lisi     |    333 | 
+| guanyu   |    777 | 
+| wangwu   |  12345 | 
+| zhangsan |   NULL | 
+| zhangfei |   NULL | 
+| lingguo  |   NULL | 
++----------+--------+
+</code></pre>
+
+<h2>11. 字段值不同，排序的字段不同，如何实现？</h2>
+
+<p><code>case when</code>语句也可以在<code>order by</code>中，不同的条件，使用不同的字段进行排序。
+比如：如果number字段的值不为null，根据number排序，否则，根据enable排序：</p>
+
+<pre><code>mysql&gt; select name, number, enable from students order by case when number is null then enable else number end;
++----------+--------+--------+
+| name     | number | enable |
++----------+--------+--------+
+| zhangsan |   NULL |      0 | 
+| zhangfei |   NULL |      0 | 
+| lingguo  |   NULL |      1 | 
+| lingguo  |    111 |      1 | 
+| lisi     |    333 |      1 | 
+| guanyu   |    777 |      0 | 
+| wangwu   |  12345 |      0 | 
++----------+--------+--------+
+</code></pre>
+
+<h3>参考：</h3>
+
+<ul>
+<li><a href="http://book.douban.com/subject/1840666/">SQL Cookbook</a></li>
+</ul>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/02/45-android-development-productivity-tips.html" title="提高Android开发效率的小贴士">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/01/mysql-optimize-in-project.html" title="使用汇总表优化查询一则">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-01-19</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#mysql-ref">mysql <span>3</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

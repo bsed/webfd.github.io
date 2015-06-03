@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Google Guava的布隆过滤器 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="为了解决在网络抓取时，对于已经抓取过的URL， 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>Google Guava的布隆过滤器 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>为啥要写这个：</p>
+
+<ol>
+<li>看到了老外写的<a href="http://codingjunkie.net/guava-bloomfilter/">Google Guava BloomFilter</a></li>
+<li>第一次接触布隆过滤器是在2010年的时候，当时是为了解决在网络抓取时，对于已经抓取过的URL，如果进行判断已经抓取的问题，在项目中使用过布隆过滤器解决了这个问题，一直都想总结下。</li>
+<li>在新版的<a href="http://code.google.com/p/guava-libraries/">Google Guava</a>中，Google为我们提供了一个布隆过滤器的实现；</li>
+<li>一直在使用 <a href="http://code.google.com/p/guava-libraries/">Google Guava</a>，但是其他同事不是很了解。</li>
+</ol>
+
+<h2>布隆过滤器介绍</h2>
+
+<p>布隆过滤器是巴顿.布隆于1970年提出的。它实际上是一个很长的二进制向量和一系列随机映射函数。</p>
+
+<p>布隆过滤器是一种独特的数据结构，用以表明元素是否被保存在一个集合(<code>Set</code>)中。它最大的区别在于，布隆过滤器能够明确的指出元素<em>绝对不存在</em> 于一个集合中，或者可能存在于一个集合中。</p>
+
+<p>我们通过以下的例子来说明下：</p>
+
+<p>假定我们存储一亿个电子邮件地址，我们先建立一个十六亿二进制（比特），即两亿字节的向量，然后将这十六亿个二进制全部设置为0.对于每一个电子邮件地址X，我们用八个不同的随机数产生器(F1,F2,…,F8)产生八个信息指纹（f1,f2,…,f8）。在用一个随机数产生器G吧这八个信息指纹映射到1到十六亿中的八个自然数g1,g2,&hellip;,g8。现在我们把这八个位置的二进制全部设置为一。当我们对这一亿个email地址都进行这样的处理后。一个针对这些email地址的布隆过滤器就建成了。（见下图）</p>
+
+<p>{% img /images/blog/bloomfilter.jpg %}</p>
+
+<p>现在,让我们看看如何用布隆过滤器来检测一个可疑的电子 邮件地址 Y 是否在黑名单中。我们用相同的八个随机数产生器 (F1, F2, &hellip;, F8)对这个地址产生八个信息指纹 s1,s2,&hellip;,s8,然后将这八个指纹对应到布隆过滤器的八个二进 制位,分别是 t1,t2,&hellip;,t8。如果 Y 在黑名单中,显然, t1,t2,..,t8 对应的八个二进制一定是一。这样在遇到任何在黑 名单中的电子邮件地址,我们都能准确地发现。</p>
+
+<p>布隆过滤器决不会漏掉任何一个在黑名单中的可疑地址。但是,它有一条不足之处。也就是它有极小的可能将一个不在黑名单中的电子邮件地址判定为在黑名单中,因为有可能某个好的邮 件地址正巧对应个八个都被设置成一的二进制位。好在这种可能性很小。我们把它称为误识概率。在上面的例子中,误识概率在万分之一以下。
+布隆过滤器的好处在于快速,省空间。但是有一定的误识别率。常见的补救办法是在建立一个小的白名单,存储那些可能别误判的邮件地址。</p>
+
+<p>从维基百科的介绍来看，Goolge在BigTable中就使用了BloomFilter，以避免在硬盘中寻找不存在的条目。</p>
+
+<p>另外还有个应用场景：<a href="http://asemanfar.com/Using-a-bloom-filter-to-optimize-a-SQL-query">使用布隆过滤器优化SQL查询</a></p>
+
+<h2>使用Guava的布隆过滤器</h2>
+
+<p>Guava的布隆过滤器通过调用BloomFilter类的静态函数创建，传递一个<a href="http://docs.guava-libraries.googlecode.com/git-history/v11.0.2/javadoc/com/google/common/hash/Funnel.html">Funnel</a>对象以及一个*代表预期插入数量的整数*。<code>Funnel</code>对象的作用，将数据发送给一个接收器（<a href="http://docs.guava-libraries.googlecode.com/git-history/v11.0.2/javadoc/com/google/common/hash/Sink.html">Slink</a>）。</p>
+
+<p>具体例子请点击 @see code 查看代码</p>
+
+<ol>
+<li><p>Guava的默认实现</p>
+
+<p>{% gist 4640364 %}</p></li>
+
+<li><p>创建一个带有自定义Funnel实现的布隆过滤器</p>
+
+<p>在这里我们模拟一种对于邮箱规则进行处理的自定义Funnel的实现。</p>
+
+<p>{% gist 4640358 %}</p></li>
+</ol>
+
+<p><strong>最后，我们需要注意：</strong>
+&gt; 正确估计预期插入数量是很关键的一个参数。当插入的数量接近或高于预期值的时候，布隆过滤器将会填满，这样的话，它会产生很多无用的误报点。</p>
+
+<blockquote>
+<p>这里有另一个版本的 BloomFilter.create 方法，它额外接收一个参数，一个代表假命中概率水平的双精度数字（必须大于零且小于1）</p>
+
+<p>假命中概率等级影响哈希表储存或搜索元素的数量。百分比越低，哈希表的性能越好。</p>
+</blockquote>
+
+<h2>其他参考</h2>
+
+<ol>
+<li>《数学之美》中对布隆过滤器的介绍</li>
+<li><a href="https://github.com/bbejeck/guava-blog/blob/master/src/test/java/bbejeck/guava/hash/BloomFilterTest.java">Guava 布隆过滤器的单元测试类</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Bloom_filter">维基百科的介绍</a></li>
+</ol>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2013/02/centos-6-install-redis.html" title="centos 6 Redis 入门及安装">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2009/05/flex-grid-head.html" title="flex设计表格的复杂表头(类似报表的斜线表头)">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2013-01-29</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#Blog-ref">Blog <span>74</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#bloomfilter-ref">bloomfilter <span>1</span></a>
+</li>
+      
+        <li>
+  <a href="/tags/#google-guava-ref">google-guava <span>1</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

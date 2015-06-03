@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>memcached安装: libevent-repcached-memcached - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="memcached的安装，包括依赖libevent和repcached 树莓派">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>memcached安装: libevent-repcached-memcached </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <blockquote>
+<p>安装顺序：</p>
+</blockquote>
+
+<pre><code>1. 先安装libevent，因为memcached依赖它；
+2. 给memcached打上repcached补丁，支持主从结构，实现高可用；
+3. 安装memcached，启用replication；
+</code></pre>
+
+<h2>1. libevent</h2>
+
+<pre><code># wget https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz -P /opt/softs/
+# ./configure --prefix=/usr/local/
+# make &amp;&amp; make install
+</code></pre>
+
+<h2>2. repcached &amp;&amp; memcached</h2>
+
+<p>当前补丁最新位1.4.13，memcached的版本应该一直，否则会出现异常；</p>
+
+<pre><code># wget https://memcached.googlecode.com/files/memcached-1.4.13.tar.gz -P /opt/softs/
+# wget http://mdounin.ru/files/repcached-2.3.1-1.4.13.patch.gz -P ./
+
+# tar zxvf memcached-1.4.13.tar.gz -C /opt/softs/
+# gzip -d repcached-2.3.1-1.4.13.patch.gz
+
+# cd /opt/softs/memcached-1.4.13
+# patch -p1 -i ../repcached-2.3.1-1.4.13.patch
+# ./configure --prefix=/usr/local/ --with-libevent=/usr/local/ --enable-replication
+# make &amp;&amp; make install
+</code></pre>
+
+<h2>3. memcached (with repcached) 主从测试</h2>
+
+<p>在本机的两个不同的端口上启动两个memcached实例，一主一从，然后测试相互之间的数据同步。
+memcached主从测试在本机的两个不同的端口上启动两个memcached实例，一主一从，然后测试相互之间的数据同步。</p>
+
+<h3>3.1 启动两个memcached实例</h3>
+
+<pre><code># memcached -d -m -p 11211 -u nobody -l 127.0.0.1 -x 127.0.0.1 -X 11222 -P /tmp/localhost_master.pid -vv
+# memcached -d -m -p 11212 -u nobody -l 127.0.0.1 -x 127.0.0.1 -X 11222 -P /tmp/localhost_slave.pid -vv
+</code></pre>
+
+<blockquote>
+<p>两个实例的端口分别为11211和11212，共同的监听端口为11222。</p>
+</blockquote>
+
+<h3>3.2 通过telnet测试数据的同步</h3>
+
+<blockquote>
+<p>进入master，set两个值</p>
+</blockquote>
+
+<pre><code>[root@localhost ~]# telnet 127.0.0.1 11211
+Trying 127.0.0.1...
+&lt;31 new auto-negotiating client connection
+Connected to 127.0.0.1.
+Escape character is '^]'.
+set city 0 0 7
+31: Client using the ascii protocol
+&lt;31 set city 0 0 7
+tianjin
+&gt;31 STORED
+replication: pop
+replication: pop
+STORED
+set city2 0 0 7
+&lt;31 set city2 0 0 7
+beijing
+&gt;31 STORED
+replication: pop
+replication: pop
+STORED  
+</code></pre>
+
+<blockquote>
+<p>进入slave，get刚才设置的值，并删除其中一个值</p>
+</blockquote>
+
+<pre><code>[root@localhost ~]# telnet 127.0.0.1 11212
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is '^]'.
+get city
+VALUE city 0 7
+tianjin
+END
+get city2
+VALUE city2 0 7
+beijing
+END
+delete city2
+&lt;26 delete city2
+REP&gt;26 DELETED
+DELETED
+</code></pre>
+
+<blockquote>
+<p>再次进入master，获取set的两个值，删除的数据是否可以get</p>
+</blockquote>
+
+<pre><code>[root@localhost ~]# telnet 127.0.0.1 11211
+Trying 127.0.0.1...
+&lt;31 new auto-negotiating client connection
+Connected to 127.0.0.1.
+Escape character is '^]'.
+get city
+31: Client using the ascii protocol
+&lt;31 get city
+&gt;31 sending key city
+&gt;31 END
+VALUE city 0 7
+tianjin
+END
+get city2
+&lt;31 get city2
+&gt;31 END
+END
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2014/02/memcached-usage-parameters-commands.html" title="memcached用法：参数和命令详解">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2014/02/45-android-development-productivity-tips.html" title="提高Android开发效率的小贴士">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2014-02-13</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#Blog-ref">Blog <span>74</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#memcached-ref">memcached <span>2</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>
