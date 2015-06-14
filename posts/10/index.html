@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>WebFD Page 10 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="How does zero commision brokerage make money? WebFD">
+  <meta name="description" content="elasticsearch查询api之match query WebFD.tk">
   
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -75,7 +75,7 @@
           <li style="padding-left:10px">
             <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
               <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
-              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+              <input type="hidden" name="as_sitesearch" value="webfd.tk"></form>
           </li>
         </ul>
       </div>
@@ -169,6 +169,64 @@
     </div>
 
 
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/05/ffmpeg-user-guide.html">ffmpeg相关使用说明</a> <span class="date">2013-05-24</span></h1>
+
+        <p>最近使用ffmpeg 来处理下视频相关的信息，整理如下：</p>
+
+<h2>ffmpeg 查看支持的格式</h2>
+
+<pre><code># yfyang at mumu-mbp in ~/Movies/sublime text 2 [10:38:10]
+$ ffmpeg -formats less
+File formats:
+ D. = Demuxing supported
+ .E = Muxing supported
+ --
+  E 3g2             3GP2 (3GPP2 file format)
+  E 3gp             3GP (3GPP file format)
+ D  4xm             4X Technologies
+  E a64             a64 - video for Commodore 64
+ D  aac             raw ADTS AAC (Advanced Audio Coding)
+ DE ac3             raw AC-3
+ D  act             ACT Voice file format
+ ...
+</code></pre>
+
+<h2>ffmpeg 获取视频信息及含义</h2>
+
+
+        <div class="more">
+          <a href="/2013/05/ffmpeg-user-guide.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/05/35-understanding-output.html">树莓派的GPIO接口输出电流限制</a> <span class="date">2013-05-14</span></h1>
+
+        <p>树莓派提供了一个连接头让我们访问CPU的17个GPIO接口，如下图</p>
+
+<p><img src="https://www.evernote.com/shard/s26/sh/92d52938-5bd9-46a7-9b05-478e9f30f5d7/b29dcc510983784a07472c8282330b30/deep/0/Screenshot%205/14/13%208:51%20PM.png"/></p>
+
+<p>这些接口可配置成输入或输出。本文主要讨论GPIO引脚作为输出时电流的限制。</p>
+
+<h1>阻抗 (impendance)</h1>
+
+<p>阻抗和和电阻的区别（resistance）在于电阻的阻值是固定的，不会随着电流变化，阻抗则不然，可能随着外部变化，如电流或频率变化。从另一个角度来说，电阻是线性的，但阻抗不是。比如放大器的阻抗会随着输出的信号频率变化。</p>
+
+<p>树莓派的的每个GPIO引脚都有一个寄存器可以设置引脚的驱动强度，也就是在保持输出电压为逻辑0和1的情况下，可以改变阻抗的大小从而改变GPIO引脚的输出电流大小。</p>
+
+<p>通过如下电路测量相同电流下不同阻抗对应的GPIO电压输出（其中用到了一个电位器调节电流保持恒定）：</p>
+
+<p><img src="https://www.evernote.com/shard/s26/sh/11008332-acac-4625-9b6a-963c97ec7498/1e6d153774b7e95214fe0c2bba9121d8/deep/0/Screenshot%205/14/13%2010:22%20PM.png"/></p>
+
+<p>通过计算后，下表是当输出电流为2，4 … 16mA时，对应的阻抗大小以及如果发生短路时的短路电流大小。</p>
+
+
+        <div class="more">
+          <a href="/2013/05/35-understanding-output.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
     
       <div class="post">
         <h1 class="title"><a href="/2013/05/34-use-74HC595-8-bit-shift-register-with-raspberry-pi.html">使用8位移位寄存器74HC595扩展树莓派的IO端口</a> <span class="date">2013-05-13</span></h1>
@@ -645,74 +703,6 @@ XSS利用站点内的信任用户，而CSRF则通过伪装来自受信任用户�
 
         <div class="more">
           <a href="/2013/04/django-csrf.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/04/27-interrupts-with-gpio-pins.html">Raspberry Pi的GPIO中断编程</a> <span class="date">2013-04-08</span></h1>
-
-        <h1>背景介绍</h1>
-
-<p>树莓派的GPIO引脚不仅可以输出高低电平，也可以当做输入端口（可以想象成键盘输入），当GPIO接入的是高电平，GPIO的值可以认为是1，如果是低电平则是0。如下图所示，可以使用一个Push Button开关按键来控制GPIO 25（BCM Numbering）的高低电平以达到控制的目的。</p>
-
-<p><img src="https://www.evernote.com/shard/s26/sh/bd720803-1b71-454d-98a2-cf0e907df688/649d6eb30376f8a378ef3e8a7cc3c552/deep/0/Screenshot%204/8/13%2011:25%20PM.jpg?noteKey=649d6eb30376f8a378ef3e8a7cc3c552&suffix=deep%2F0%2FScreenshot+4%2F8%2F13+11%3A25+PM.jpg&noteGuid=bd720803-1b71-454d-98a2-cf0e907df688"/></p>
-
-<p>GPIO 25和VCC（3.3V）之间通过R1（10K欧姆）和R2（1K欧姆）<a href="https://zh.wikipedia.org/zh/上拉电阻">上拉电阻</a>相连，当按键未被按下时，GPIO 25上拉到VCC，程序可以读到1，当按键按下时，GPIO 25被下拉电阻R2拉到GND（0V），程序可以读到0。如果不加R1，而GPIO 25不小心被设置成输出低电平时，将直接和VCC相连而造成短路，这样可能会烧掉这个引脚，所以加上限流电阻R1后，即使发生这样的情况，也不会出现短路情况。</p>
-
-<h1>应用</h1>
-
-<p>如果我们需要根据GPIO 25的值来控制树莓派，比如按下按钮时希望点亮某个LED或在液晶上显示当前时间，就需要通过程序来获取状态的变化。</p>
-
-<p>一种常见的做法是在循环里不断读取该引脚的状态，当发生对应的变化的时执行控制逻辑，但显而易见，这种做法很消耗CPU，如果在循环增加<code>sleep(1000)</code>这样的调用，又很容易错过按键变化。较好的做法则是通过<a href="http://zh.wikipedia.org/wiki/中断">中断</a>来实现。</p>
-
-<p>最新的树莓派Raspbian和Arch Linux内核都已经包含了GPIO的中断处理支持。但使用前需要将指定GPIO引脚输出，方法如下：</p>
-
-<p>首先可以通过命令<code>echo 25 &gt; /sys/class/gpio/export</code>导出GPIO 25端口，执行成功后在相应的目录下看到以下文件，得益于Linux下<strong>一切都是文件</strong>的设计理念，GPIO的状态可以通过<code>value</code>文件来获取，这样就可以利用Linux的poll/epoll来获取<code>value</code>文件的变化(这点和Linux高性能网络编程是类似的)。</p>
-
-
-        <div class="more">
-          <a href="/2013/04/27-interrupts-with-gpio-pins.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/04/26-backup-raspberry-pi.html">备份Raspberry Pi</a> <span class="date">2013-04-08</span></h1>
-
-        <p>树莓派的操作系统安装在SD卡，使用一段时间后还是很有必要备份一下，以防哪天SD卡就坏了。</p>
-
-<p>备份的目的地最方便的还是使用网络存储，我使用的是西部数据的<a href="http://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.1.Cz5Mlq&amp;id=13865367896&amp;is_b=1&amp;cat_id=50099232&amp;q=mybooklive&amp;rn=638aa11bdda81f8d589bb0e052c57187">MyBooklive</a>3T网络硬盘。挺不错的一个产品，功能基本满足我的需求。</p>
-
-<p>准备好备份目标盘，将Nas的备份目录mount到树莓派:</p>
-
-<pre><code>mkdir /mnt/backup
-mount -t cifs //mybooklive/Public/Backup /mnt/backup -o guest
-</code></pre>
-
-<h1>完整备份</h1>
-
-<p>确定相应的SD卡设备ID</p>
-
-<pre><code>root@raspberrypi2 ~/bin # fdisk -l
-
-Disk /dev/mmcblk0: 1973 MB, 1973420032 bytes, 3854336 sectors
-Units = sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disk identifier: 0x0004f23a
-
-        Device Boot      Start         End      Blocks   Id  System
-/dev/mmcblk0p1   *        2048      186367       92160    c  W95 FAT32 (LBA)
-/dev/mmcblk0p2          186368     3667967     1740800   83  Linux
-
-Disk /dev/sda: 2107 MB, 2107637760 bytes, 4116480 sectors
-Units = sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-</code></pre>
-
-
-        <div class="more">
-          <a href="/2013/04/26-backup-raspberry-pi.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     

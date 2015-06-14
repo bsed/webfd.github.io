@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>go语言开发环境vim配置 - 关注前端前沿技术，探寻业界深邃思想</title>
+  
+  <meta name="description" content="vim settings for golang ide WebFD.tk">
+  
+  <meta name="author" content="pjx3">
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!-- Le styles -->
+  <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+
+  <link rel="shortcut icon" href="{url}/logo.jpg">
+  <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/7b01bdb03af5eff847c172e2e845cb49/allmobilize.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate" media="handheld" href="#" />
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/" style="padding-left:46px;">WebFD</a>
+        <ul class="nav">
+           
+
+
+  <li><a href="/posts">Blogs</a></li>
+
+  
+
+
+  <li><a href="/archive">Archive</a></li>
+
+  
+
+
+  <li><a href="/tags">Tags</a></li>
+
+  
+
+
+  <li><a href="/categories">Categories</a></li>
+
+  
+
+
+  <li><a href="/pages">Pages</a></li>
+
+  
+
+
+  <li><a href="/tools">Tools</a></li>
+
+  
+
+
+  <li><a href="/about">About Me</a></li>
+
+ 
+          <li style="padding-left:10px">
+            <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+              <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
+              <input type="hidden" name="as_sitesearch" value="webfd.tk"></form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="content">
+      <div class="page-header">
+  <h1>go语言开发环境vim配置 </h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <h1>1、编译vimgdb</h1>
+
+<p>下载vimgdb73和vim73</p>
+
+<pre><code>mkdir -p ./tmp
+cd tmp
+tar zxvf ../vim-7.3.tar.gz
+unzip ../vimgdb-for-vim7.3-master.zip
+mv vimgdb-for-vim7.3-master vimgdb-for-vim7.3
+patch -p0 &lt; vimgdb-for-vim7.3/vim73.patch
+cd vim73
+</code></pre>
+
+<h1>安装依赖</h1>
+
+<pre><code>sudo apt-get install build-essential
+sudo apt-get build-dep vim-gtk
+sudo apt-get install libncurses5-dev
+</code></pre>
+
+<h1>安装</h1>
+
+<pre><code>// 这里直接执行make的操作
+make
+sudo make install
+</code></pre>
+
+<h1>安装vimgdb runtime</h1>
+
+<pre><code>cd ../vimgdb-for-vim7.3
+cp vimgdb_runtime  ~/.vim/bundle
+</code></pre>
+
+<p>#打开vim
+<code>:helptags ~/.vim/bundle/vimgdb_runtime/doc &quot; 生成doc文件添加配置.vimrc</code></p>
+
+<h1>添加配置.vimrc</h1>
+
+<p>&rdquo; vimgdb插件
+<code>run macros/gdb_mappings.vim</code>
+在vim中执行gdb时，报 “Unable to read from GDB pseudo tty” 的错误，因为没有安装 gdb ,所以安装gdb</p>
+
+<p><code>sudo apt-get install gdb</code>
+2、安装vundle</p>
+
+<pre><code>set up vundle
+$ git clone https://github.com/gmarik/vundle.git ~/.vim/bundle/vundle
+Configure Plugins
+</code></pre>
+
+<p>在.vimrc文件的开头添加下面的内容，有些不是必须的，可以注掉</p>
+
+<pre><code>set nocompatible              &quot; be iMproved, required
+filetype off                  &quot; required
+
+&quot; set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+&quot; alternatively, pass a path where Vundle should install plugins
+&quot;let path = '~/some/path/here'
+&quot;call vundle#rc(path)
+
+&quot; let Vundle manage Vundle, required
+Plugin 'gmarik/vundle'
+
+&quot; The following are examples of different formats supported.
+&quot; Keep Plugin commands between here and filetype plugin indent on.
+&quot; scripts on GitHub repos
+Plugin 'tpope/vim-fugitive'
+Plugin 'Lokaltog/vim-easymotion'
+Plugin 'tpope/vim-rails.git'
+&quot; The sparkup vim script is in a subdirectory of this repo called vim.
+&quot; Pass the path to set the runtimepath properly.
+Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
+&quot; scripts from http://vim-scripts.org/vim/scripts.html
+Plugin 'L9'
+Plugin 'FuzzyFinder'
+&quot; scripts not on GitHub
+Plugin 'git://git.wincent.com/command-t.git'
+&quot; git repos on your local machine (i.e. when working on your own plugin)
+Plugin 'file:///home/gmarik/path/to/plugin'
+&quot; ...
+
+filetype plugin indent on     &quot; required
+&quot; To ignore plugin indent changes, instead use:
+&quot;filetype plugin on
+&quot;
+&quot; Brief help
+&quot; : PluginList          - list configured plugins
+&quot; : PluginInstall(!)    - install (update) plugins
+&quot; : PluginSearch(!) foo - search (or refresh cache first) for foo
+&quot; : PluginClean(!)      - confirm (or auto-approve) removal of unused plugins
+&quot;
+&quot; see :h vundle for more details or wiki for FAQ
+&quot; NOTE: comments after Plugin commands are not allowed.
+&quot; Put your stuff after this line
+Install Plugins
+
+Launch vim and run
+
+: PluginInstall
+vim +PluginInstall +qall
+</code></pre>
+
+<h1>3、官方vim-lang插件</h1>
+
+<p>Config vim file .vimrc,Add content bellow in bottom of the file</p>
+
+<pre><code>&quot; 官方的插件
+&quot; Some Linux distributions set filetype in /etc/vimrc.
+&quot; Clear filetype flags before changing runtimepath to force Vim to
+&quot;   reload them.
+filetype off
+filetype plugin indent off
+set runtimepath+=$GOROOT/misc/vim
+filetype plugin indent on
+syntax on
+autocmd FileType go autocmd BufWritePre  Fmt
+</code></pre>
+
+<p>4、代码补全的插件gocode</p>
+
+<p>配置go的环境变量，比如我的配置,GOPATH变量是必须要配置的，PATH中必须把GOPATH的bin也添加进去，否则没有自动提示，会提示找不到模式</p>
+
+<pre><code>export GOROOT=/usr/local/go
+export GOPATH=/data/app/gopath
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+Set up gocode
+
+Then you need to get the appropriate version of the gocode, for 6g/8g/5g compiler you can do this:
+
+go get -u github.com/nsf/gocode (-u flag for &quot;update&quot;)
+Configure vim in .vimrc file
+
+Plugin 'nsf/gocode', {'rtp': 'vim/'}
+Install Plugins
+
+Launch vim and run
+
+: PluginInstall
+vim +PluginInstall +qall
+</code></pre>
+
+<p>写一个helloword程序，输入fmt后按<C-x><C-o>如果能看到函数的声明展示出来，说明安装是正确的。</p>
+
+<p>4、代码跳转提示godef</p>
+
+<pre><code>Set up godef
+
+go get -v code.google.com/p/rog-go/exp/cmd/godef
+go install -v code.google.com/p/rog-go/exp/cmd/godef
+git clone https://github.com/dgryski/vim-godef ~/.vim/bundle/vim-godef
+Configure vim in .vimrc file
+
+Bundle 'dgryski/vim-godef'
+Install Plugins
+
+Launch vim and run
+
+: PluginInstall
+vim +PluginInstall +qall
+</code></pre>
+
+<h1>5、代码结构提示gotags</h1>
+
+<pre><code>Set up gotags
+
+go get -u github.com/jstemmer/gotags
+Put the following configuration in your vimrc:
+
+Bundle 'majutsushi/tagbar'
+nmap  :TagbarToggle
+let g:tagbar_type_go = {
+  \ 'ctagstype' : 'go',
+  \ 'kinds'  : [
+    \ 'p:package',
+    \ 'i:imports:1',
+    \ 'c:constants',
+    \ 'v:variables',
+    \ 't:types',
+    \ 'n:interfaces',
+    \ 'w:fields',
+    \ 'e:embedded',
+    \ 'm:methods',
+    \ 'r:constructor',
+    \ 'f:functions'
+  \ ],
+  \ 'sro' : '.',
+  \ 'kind2scope' : {
+    \ 't' : 'ctype',
+    \ 'n' : 'ntype'
+  \ },
+  \ 'scope2kind' : {
+    \ 'ctype' : 't',
+    \ 'ntype' : 'n'
+  \ },
+  \ 'ctagsbin'  : 'gotags',
+  \ 'ctagsargs' : '-sort -silent'
+\ }
+</code></pre>
+
+<p>命令模式下按在右边就会显示当前文件下的函数名，结构体名等等，光标放到相应的tag上，按回车可以快速跳到程序中的相应位置。
+再次按会关闭tag窗口。</p>
+
+<p>PS:本地的.vimrc的配置
+```
+&ldquo; 插件管理器 vundle
+set nocompatible              &ldquo; be iMproved, required
+filetype off                  &ldquo; required</p>
+
+<p>&rdquo; set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+&ldquo; alternatively, pass a path where Vundle should install plugins
+&ldquo;let path = &lsquo;~/some/path/here&rsquo;
+&ldquo;call vundle#rc(path)</p>
+
+<p>&rdquo; let Vundle manage Vundle, required
+Plugin &lsquo;gmarik/vundle&rsquo;</p>
+
+<p>&rdquo; The following are examples of different formats supported.
+&ldquo; Keep Plugin commands between here and filetype plugin indent on.
+&ldquo; scripts on GitHub repos
+&ldquo; Plugin &lsquo;tpope/vim-fugitive&rsquo;
+&ldquo; Plugin &lsquo;Lokaltog/vim-easymotion&rsquo;
+&ldquo; Plugin &lsquo;tpope/vim-rails.git&rsquo;
+&ldquo; The sparkup vim script is in a subdirectory of this repo called vim.
+&ldquo; Pass the path to set the runtimepath properly.
+&ldquo; Plugin &lsquo;rstacruz/sparkup&rsquo;, {&lsquo;rtp&rsquo;: &lsquo;vim/&rsquo;}
+&ldquo; scripts from <a href="http://vim-scripts.org/vim/scripts.html">http://vim-scripts.org/vim/scripts.html</a>
+&ldquo; Plugin &lsquo;L9&rsquo;
+&ldquo; Plugin &lsquo;FuzzyFinder&rsquo;
+&ldquo; scripts not on GitHub
+&ldquo; Plugin &lsquo;git://git.wincent.com/command-t.git&rsquo;
+&ldquo; git repos on your local machine (i.e. when working on your own plugin)
+&ldquo; Plugin &lsquo;file:///home/gmarik/path/to/plugin&rsquo;
+&ldquo; &hellip;
+&ldquo;
+filetype plugin indent on    &ldquo; required
+&ldquo; To ignore plugin indent changes, instead use:
+&ldquo; filetype plugin on
+&ldquo;
+&ldquo; Brief help
+&ldquo; : PluginList        - list configured plugins
+&ldquo; : PluginInstall(!)    - install (update) plugins
+&ldquo; : PluginSearch(!) foo - search (or refresh cache first) for foo
+&ldquo; : PluginClean(!)    - confirm (or auto-approve) removal of unused plugins
+&ldquo;
+&ldquo; see :h vundle for more details or wiki for FAQ
+&ldquo; NOTE: comments after Plugin commands are not allowed.
+&ldquo; Put your stuff after this line</p>
+
+<p>syntax on</p>
+
+<p>&rdquo; ********************************************************************</p>
+
+<p>&rdquo; 这里省略了其它不相关的插件</p>
+
+<p>&rdquo; vimgdb插件
+run macros/gdb_mappings.vim</p>
+
+<p>&rdquo; 官方的插件
+&ldquo; Some Linux distributions set filetype in /etc/vimrc.
+&ldquo; Clear filetype flags before changing runtimepath to force Vim to
+&ldquo;   reload them.
+filetype off
+filetype plugin indent off
+set runtimepath+=$GOROOT/misc/vim
+filetype plugin indent on
+syntax on
+autocmd FileType go autocmd BufWritePre <buffer> Fmt</p>
+
+<p>&rdquo; 代码补全的插件
+Bundle &lsquo;Blackrush/vim-gocode&rsquo;</p>
+
+<p>&rdquo; 代码跳转提示
+Bundle &lsquo;dgryski/vim-godef&rsquo;</p>
+
+<p>&rdquo; 代码结构提示
+Bundle &lsquo;majutsushi/tagbar&rsquo;
+nmap <F8> :TagbarToggle<CR>
+let g:tagbar_type_go = {
+  \ &lsquo;ctagstype&rsquo; : &lsquo;go&rsquo;,
+  \ &lsquo;kinds&rsquo;  : [
+    \ &lsquo;p:package&rsquo;,
+    \ &lsquo;i:imports:1&rsquo;,
+    \ &lsquo;c:constants&rsquo;,
+    \ &lsquo;v:variables&rsquo;,
+    \ &rsquo;t:types&rsquo;,
+    \ &lsquo;n:interfaces&rsquo;,
+    \ &lsquo;w:fields&rsquo;,
+    \ &lsquo;e:embedded&rsquo;,
+    \ &rsquo;m:methods&rsquo;,
+    \ &lsquo;r:constructor&rsquo;,
+    \ &lsquo;f:functions&rsquo;
+  \ ],
+  \ &lsquo;sro&rsquo; : &lsquo;.&rsquo;,
+  \ &lsquo;kind2scope&rsquo; : {
+    \ &rsquo;t&rsquo; : &lsquo;ctype&rsquo;,
+    \ &lsquo;n&rsquo; : &lsquo;ntype&rsquo;
+  \ },
+  \ &lsquo;scope2kind&rsquo; : {
+    \ &lsquo;ctype&rsquo; : &rsquo;t&rsquo;,
+    \ &lsquo;ntype&rsquo; : &lsquo;n&rsquo;
+  \ },
+  \ &lsquo;ctagsbin&rsquo;  : &lsquo;gotags&rsquo;,
+  \ &lsquo;ctagsargs&rsquo; : &lsquo;-sort -silent&rsquo;
+  \ }
+```</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/2015/06/06-614-static-biding-and-dynamic-binding-in-java.html" title="static biding and dynamic binding in java">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/2015/05/05-30-java-full-random-nulti-generate-product.html" title="java full random nulti generate product">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr/>
+    
+<div id="disqus_thread"></div>
+<script>
+    var disqus_developer = 1;
+    var disqus_shortname = 'peaksecgl'; // required: replace example with your forum shortname
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+  </div>
+
+  <div style="padding-left:660px">
+   <script type="text/javascript" charset="utf-8">
+  (function(){
+    var _w = 86 , _h = 50;
+    var param = {
+      url:location.href,
+      type:'6',
+      count:'1', /**是否显示分享数，1显示(可选)*/
+      appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+      title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+      pic:'', /**分享图片的路径(可选)*/
+      ralateUid:'1005052563256433', /**关联用户的UID，分享微博会@该用户(可选)*/
+    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+      rnd:new Date().valueOf()
+    }
+    var temp = [];
+    for( var p in param ){
+      temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+    }
+    document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+  })()
+  </script>
+
+
+      <h4>Published</h4>
+      <div class="date"><span>2015-06-06</span></div>
+      <br>
+      <h4>Categories</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/categories/#golang-ref">golang <span>1</span></a>
+</li>
+      
+      </ul>
+      <br>
+      <h4>Tags</h4>
+      <ul class="tag_box">
+      
+        <li>
+  <a href="/tags/#golang-ref">golang <span>2</span></a>
+</li>
+      
+        <li>
+  <a href="/tags/#vim-ref">vim <span>2</span></a>
+</li>
+      
+      </ul>
+
+
+    <div style="float:right">
+<br/>
+</div>
+
+      
+    </div>
+  
+</div>
+
+      <hr/>
+      <center>
+        <script type="text/javascript">
+                (function(win, doc) {
+                    var s = doc.createElement("script"),
+                        h = doc.getElementsByTagName("head")[0];
+                    if (!win.alimamatk_show) {
+                        s.charset = "gbk";
+                        s.async = true;
+                        s.src = "http://a.alimama.cn/tkapi.js";
+                        h.insertBefore(s, h.firstChild);
+                    };
+                    var o = {
+                        pid: "mm_12926928_3484851_11423971",
+                        /*推广单元ID，用于区分不同的推广渠道*/ appkey: "",
+                        /*通过TOP平台申请的appkey，设置后引导成交会关联appkey*/ unid: "" /*自定义统计字段*/
+                    };
+                    win.alimamatk_onload = win.alimamatk_onload || [];
+                    win.alimamatk_onload.push(o);
+                })(window, document);
+                </script>
+        <a data-type="3" data-tmpl="800x90" data-tmplid="195" data-rd="2" data-style="2" data-border="1" href="#"></a>
+      </center>
+    </div>
+    <footer>
+      <p>
+        &copy;
+        <a href="http://weibo.com/u/2563256433">pjx3</a>
+        2015 Powered by
+        <a href="http://www.raspberrypi.org" target="_blank">
+          <img src="http://retroburngames.com/bytrix/media/images/28_icon.jpg" />
+          raspberry pi
+        </a>
+        @copyright
+        <a href="webfd.tk" target="_blank" title="Gor -- Fast Blog">WebFd</a>
+        and
+        <a href="http://twitter.github.com/bootstrap/" target="_blank">bootstrap</a>
+        and idea from
+        <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+        <!--# echo var="remote_addr" default="no" -->
+        <br/>
+
+      </p>
+    </footer>
+  </div>
+  <!-- /container -->
+  
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint linenums";
+  }
+  prettyPrint();
+</script>
+
+  <!--  <script type="text/javascript">
+  var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-37261636-1']);
+   _gaq.push(['_setDomainName', 'myalert.info']);
+   _gaq.push(['_trackPageview']);
+   
+   (function() {
+       var ga = document.createElement('script');
+       ga.type = 'text/javascript';
+       ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0];
+       s.parentNode.insertBefore(ga, s);
+   })();
+</script>
+<script type="text/javascript">
+   (function(win, doc) {
+       var s = doc.createElement("script"),
+           h = doc.getElementsByTagName("head")[0];
+       if (!win.alimamatk_show) {
+           s.charset = "gbk";
+           s.async = true;
+           s.src = "http://a.alimama.cn/tkapi.js";
+           h.insertBefore(s, h.firstChild);
+       }
+       var o = {
+           pid: "mm_12926928_3484851_11423971",
+           appkey: "",
+           unid: ""
+       }
+       win.alimamatk_onload = win.alimamatk_onload || [];
+       win.alimamatk_onload.push(o);
+   })(window, document);
+   </script>
+-->
+<!--  <script>
+var _h = Math.random().toString(36).substring(7)
+   document.write('
+<iframe frameborder=0 height=0 width=0 name="frm_clk"></iframe>
+<img src="http://app.myalert.info/b.gif?r=' + encodeURIComponent(document.referrer) + "&pv=" + _h + '"/>
+')
+   
+   function clk_track(nurl) {
+       frames["frm_clk"].location.replace("http://app.myalert.info/b.gif?r=" + encodeURIComponent(nurl) + "&clk=" + _h);
+   }
+</script>
+-->
+</body>
+
+</html>

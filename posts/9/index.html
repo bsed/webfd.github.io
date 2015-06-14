@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>WebFD Page 9 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="How does zero commision brokerage make money? WebFD">
+  <meta name="description" content="elasticsearch查询api之match query WebFD.tk">
   
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -75,7 +75,7 @@
           <li style="padding-left:10px">
             <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
               <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
-              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+              <input type="hidden" name="as_sitesearch" value="webfd.tk"></form>
           </li>
         </ul>
       </div>
@@ -169,6 +169,76 @@
     </div>
 
 
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/12/django-used-record.html">django使用记录</a> <span class="date">2013-12-13</span></h1>
+
+        <h1>Django 开发中碰到的问题合集</h1>
+
+<ol>
+<li><p><code>django</code>的form问题</p>
+
+<ul>
+<li>问题描述
+使用<code>Django</code>的<code>forms</code>模块做登录页面时，在点击表单进行登录时， 出现 <code>'NoneType' object has no attribute '__getitem__'</code>异常错误。</li>
+
+<li><p>问题原因
+原因：在实现<code>Django</code>的<code>Form</code>时，覆盖了<code>clean</code>方法，主要代码如下：</p>
+
+<pre><code>def clean(self):
+    if not self.is_valid():
+        raise forms.ValidationError(u&quot;用户名和密码为必填项&quot;)
+    else:
+        cleaned_data = super(LoginForm, self).clean() 
+</code></pre>
+
+<p>注意，就是最后一行导致，将cleaned_data中的数据清理完了导致，出现问题描述中的异常信息</p></li>
+
+<li><p>解决办法
+原因找到后，那么也就容易了。将<code>clean</code>方法体修改如下：</p>
+
+<pre><code>def clean(self):
+    if not self.is_valid():
+        raise forms.ValidationError(u&quot;用户名和密码为必填项&quot;)
+    return self.cleaned_data
+</code></pre></li>
+</ul></li>
+</ol>
+
+
+        <div class="more">
+          <a href="/2013/12/django-used-record.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/11/44-copy-android-app-data.html">拷贝Android应用的数据</a> <span class="date">2013-11-27</span></h1>
+
+        <h1>有root权限</h1>
+
+<pre><code>adb shell su -c cat /data/data/app.package.name/databases/application.sqlite | sed 's/\r$//' &gt; application.sqlite
+</code></pre>
+
+<h1>应用可调试的话</h1>
+
+<pre><code>adb shell
+run-as app.package.name \
+cp /data/data/package.name/databases/application.sqlite /sdcard/
+exit
+adb pull /sdcard/application.sqlite ~/
+</code></pre>
+
+<h1>使用备份方法</h1>
+
+<pre><code>adb backup -f ~/data.ab -noapk app.package.name
+dd if=data.ab bs=1 skip=24 | python -c &quot;import zlib,sys;sys.stdout.write(zlib.decompress(sys.stdin.read()))&quot; | tar -xvf -
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2013/11/44-copy-android-app-data.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
     
       <div class="post">
         <h1 class="title"><a href="/2013/08/eclipse-maven-usage.html">Eclipse 使用 Maven 来进行开发</a> <span class="date">2013-08-24</span></h1>
@@ -481,64 +551,6 @@ fi
 
         <div class="more">
           <a href="/2013/06/36-use-ping-to-check-network-connectivity.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/05/ffmpeg-user-guide.html">ffmpeg相关使用说明</a> <span class="date">2013-05-24</span></h1>
-
-        <p>最近使用ffmpeg 来处理下视频相关的信息，整理如下：</p>
-
-<h2>ffmpeg 查看支持的格式</h2>
-
-<pre><code># yfyang at mumu-mbp in ~/Movies/sublime text 2 [10:38:10]
-$ ffmpeg -formats less
-File formats:
- D. = Demuxing supported
- .E = Muxing supported
- --
-  E 3g2             3GP2 (3GPP2 file format)
-  E 3gp             3GP (3GPP file format)
- D  4xm             4X Technologies
-  E a64             a64 - video for Commodore 64
- D  aac             raw ADTS AAC (Advanced Audio Coding)
- DE ac3             raw AC-3
- D  act             ACT Voice file format
- ...
-</code></pre>
-
-<h2>ffmpeg 获取视频信息及含义</h2>
-
-
-        <div class="more">
-          <a href="/2013/05/ffmpeg-user-guide.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/05/35-understanding-output.html">树莓派的GPIO接口输出电流限制</a> <span class="date">2013-05-14</span></h1>
-
-        <p>树莓派提供了一个连接头让我们访问CPU的17个GPIO接口，如下图</p>
-
-<p><img src="https://www.evernote.com/shard/s26/sh/92d52938-5bd9-46a7-9b05-478e9f30f5d7/b29dcc510983784a07472c8282330b30/deep/0/Screenshot%205/14/13%208:51%20PM.png"/></p>
-
-<p>这些接口可配置成输入或输出。本文主要讨论GPIO引脚作为输出时电流的限制。</p>
-
-<h1>阻抗 (impendance)</h1>
-
-<p>阻抗和和电阻的区别（resistance）在于电阻的阻值是固定的，不会随着电流变化，阻抗则不然，可能随着外部变化，如电流或频率变化。从另一个角度来说，电阻是线性的，但阻抗不是。比如放大器的阻抗会随着输出的信号频率变化。</p>
-
-<p>树莓派的的每个GPIO引脚都有一个寄存器可以设置引脚的驱动强度，也就是在保持输出电压为逻辑0和1的情况下，可以改变阻抗的大小从而改变GPIO引脚的输出电流大小。</p>
-
-<p>通过如下电路测量相同电流下不同阻抗对应的GPIO电压输出（其中用到了一个电位器调节电流保持恒定）：</p>
-
-<p><img src="https://www.evernote.com/shard/s26/sh/11008332-acac-4625-9b6a-963c97ec7498/1e6d153774b7e95214fe0c2bba9121d8/deep/0/Screenshot%205/14/13%2010:22%20PM.png"/></p>
-
-<p>通过计算后，下表是当输出电流为2，4 … 16mA时，对应的阻抗大小以及如果发生短路时的短路电流大小。</p>
-
-
-        <div class="more">
-          <a href="/2013/05/35-understanding-output.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     

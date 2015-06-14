@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>WebFD Page 2 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="How does zero commision brokerage make money? WebFD">
+  <meta name="description" content="elasticsearch查询api之match query WebFD.tk">
   
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -75,7 +75,7 @@
           <li style="padding-left:10px">
             <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
               <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
-              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+              <input type="hidden" name="as_sitesearch" value="webfd.tk"></form>
           </li>
         </ul>
       </div>
@@ -169,6 +169,69 @@
     </div>
 
 
+    
+      <div class="post">
+        <h1 class="title"><a href="/2015/02/53-robinhood-zero-commission-brokerage.html">零佣金的券商靠什么赚钱？</a> <span class="date">2015-02-10</span></h1>
+
+        <p>最近一家叫<a href="https://www.robinhood.com/">Robinhood</a>的创业公司推出了零佣金的股票交易服务公测，用户可以通过iOS上的专用App交易。</p>
+
+<p>这家公司的两个创始人斯坦福大学毕业后去了纽约给华尔街的大型股票经济公司做交易系统，做了几年后突然有一天发现券商公司对每一笔交易付出的成本微乎其微，但要收取每个客户多达10美金的佣金。。。于是他们毅然决定辞职，回到硅谷创业去了。</p>
+
+<p>公司打出的口号是就是<strong>零佣金</strong>，如果你交易的资金来源于自己，那么买入和卖出交易，以及银行转入和转出（不包括电汇）都是免费的。</p>
+
+<p>零佣金对资金不那么充裕的年轻人来说非常有吸引力。那么问题来了，这家公司靠什么赚钱呢？</p>
+
+<ol>
+<li><p>交易过股票的人大概都知道，券商会提供融资服务给流动资金不充足的投资者，融资交易（Securities Margin Trading）就是投资者以资金或证券作为质押，向券商借入资金用于证券买卖，并在约定的期限内偿还借款本金和利息。相应的还有融券服务，融券交易是投资者以资金或证券作为质押，向券商借入证券卖出，在约定的期限内，买入相同数量和品种的证券归还券商并支付相应的融券费用。所以Robinhood首先可以通过融资融券服务盈利；</p></li>
+
+<li><p>对于投资者在Robinhood账户里的未购买股票的闲余资金，Robinhood可以通过金融市场获得一部分利息收入；</p></li>
+
+<li><p>提供收费接口给小型的量化和对冲基金；</p></li>
+</ol>
+
+<p>目前Robinhood已经完成了千万美元的风险投资，现阶段提供颠覆性的交易体验，吸引更多年轻的新投资者，赢得用户的信任显然更为重要。用户多了，盈利就不是问题了。。。</p>
+
+<p><img src="http://files.techcrunch.cn/2014/09/robinhood-app.png?w=556&amp;h=600"/></p>
+
+<p>App界面</p>
+
+
+        <div class="more">
+          <a href="/2015/02/53-robinhood-zero-commission-brokerage.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/12/virtualbox-install-ubuntu-server.html">VirtualBox安装Ubuntu Server</a> <span class="date">2014-12-16</span></h1>
+
+        <p>有段时间没更新博客了，今天写一篇随手笔记吧。</p>
+
+<p>公司给配置的电脑是Thinkpad， 装的是Windows，但手边没有个Linux环境，总感觉缺点啥，于是决定在虚拟机上装个Ubuntu。</p>
+
+<p>版本情况：</p>
+
+<ul>
+<li>Windows：64位Windows 7</li>
+<li>VirtualBox：VirtualBox-4.3.20-96997-Win</li>
+<li>Ubuntu：ubuntu-14.04.1-server-amd64</li>
+</ul>
+
+<p>在VirtualBox中新建虚拟机时，发现ubuntu的版本只有<code>Ubuntu(32bit)</code>一个选项，有点纳闷，不管了，先继续安装。选择完语言，开始安装后就报错了：</p>
+
+<pre><code>This kernel requires an X86-64 CPU,but only detected an i686 CPU
+</code></pre>
+
+<p>Goolge一下，很常见的问题了，需要在BIOS中启用<code>Intel VT-x</code>的虚拟化配置，该配置默认是禁用的。</p>
+
+<p>然后，重新启动虚拟机，还是同样的错误，原来还需要在settings中将version修改为<code>Ubuntu(64 bit)</code>，再重新启动就OK了。</p>
+
+<p>以前在VirtualBox中安装CentOS时，也遇到相同的问题，只是过了一段时间后就忘了，好记性不如烂笔头。</p>
+
+
+        <div class="more">
+          <a href="/2014/12/virtualbox-install-ubuntu-server.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
     
       <div class="post">
         <h1 class="title"><a href="/2014/11/elkr-log-platform-deploy-ha.html">ElasticSearch+LogStash+Kibana+Redis日志服务的高可用方案</a> <span class="date">2014-11-06</span></h1>
@@ -511,71 +574,6 @@ public String(String original) {
 
         <div class="more">
           <a href="/2014/10/elkr-log-platform-deploy.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2014/10/why-should-choose-gradle.html">为什么应该选择gradle</a> <span class="date">2014-10-27</span></h1>
-
-        <h2>1. 为什么选择Gradle？</h2>
-
-<p><img src="/images/post/why-should-choose-gradle.jpg" alt="为什么应该使用Gradle" /></p>
-
-<h2>2. 简单入门</h2>
-
-<h3>2.1 使用Intellij Idea创建gradle项目</h3>
-
-<p>首先在Idea中启用Gradle支持：Settings-&gt;Plugins: Gradle</p>
-
-<p>然后创建一个gradle项目或模块，会发现目录结构和maven的很像，其中build.gradle是gradle的配置文件，类似于maven中pom.xml文件，以下是build.gradle的简单示例：</p>
-
-<pre><code>apply plugin: 'java'
-
-group = 'org.yousharp'
-version = '1.0-SNAPSHOT'
-
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-</code></pre>
-
-
-        <div class="more">
-          <a href="/2014/10/why-should-choose-gradle.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2014/10/redis-3-dot-0-0-rc1-released-and-update.html">Redis 3.0.0 RC1的发布和更新</a> <span class="date">2014-10-21</span></h1>
-
-        <p>Redis 3.0.0 RC1在10月9日发布，这个版本具有重要的意义，说明Redis Cluster已经非常稳定了。</p>
-
-<p>我们来简单梳理一下RC1中的重要更新。</p>
-
-<h2>Redis 3.0.0 RC1的<a href="https://raw.githubusercontent.com/antirez/redis/3.0/00-RELEASENOTES">release notes</a></h2>
-
-<h3>常规更新</h3>
-
-<ul>
-<li>[修复] 对一些简单问题的修复汇总，修复列表可以参考<a href="https://github.com/antirez/redis/pull/1906">issue #1906</a>，修复的主要内容有：
-
-<ul>
-<li>将sds的size从2GB增加到4GB(即使用<code>unsigned int</code>替换<code>int</code>，其它不变)；</li>
-<li>如果redis在前台运行，Ctrl-C会将server优雅地<code>SHUTDOWN</code>，而不是仅仅将server进程kill掉；</li>
-<li>Sentinel支持<code>INFO ALL</code>命令；</li>
-<li>使用<code>redis-benchmark</code>命令测试时，新增<code>-a</code>参数用于验证；</li>
-<li>对代码的优化、重构等。<br /></li>
-</ul></li>
-<li>[修复] <code>SAVE</code> 命令不会蔓延到AOF文件和Slave实例；</li>
-<li>[修复] 当hash table处于异常状态时，限制<code>SCAN</code>操作的延迟(当数据库正在rehash时，可用的bucket数量很少)；</li>
-<li>[新增] redis在启动时可以加载被截断的AOF文件，而不需要先执行<code>redis-check-aof</code>工具，该功能可以在<code>redis.conf</code>中配置：<code>aof-load-truncated yes</code>；</li>
-<li>[新增] <code>INCR</code>：尽可能地在原地修改自增键，可以得到更好的性能；</li>
-</ul>
-
-<h3>Cluster更新</h3>
-
-
-        <div class="more">
-          <a href="/2014/10/redis-3-dot-0-0-rc1-released-and-update.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     

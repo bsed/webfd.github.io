@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>WebFD Page 11 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="How does zero commision brokerage make money? WebFD">
+  <meta name="description" content="elasticsearch查询api之match query WebFD.tk">
   
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -75,7 +75,7 @@
           <li style="padding-left:10px">
             <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
               <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
-              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+              <input type="hidden" name="as_sitesearch" value="webfd.tk"></form>
           </li>
         </ul>
       </div>
@@ -169,6 +169,74 @@
     </div>
 
 
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/04/27-interrupts-with-gpio-pins.html">Raspberry Pi的GPIO中断编程</a> <span class="date">2013-04-08</span></h1>
+
+        <h1>背景介绍</h1>
+
+<p>树莓派的GPIO引脚不仅可以输出高低电平，也可以当做输入端口（可以想象成键盘输入），当GPIO接入的是高电平，GPIO的值可以认为是1，如果是低电平则是0。如下图所示，可以使用一个Push Button开关按键来控制GPIO 25（BCM Numbering）的高低电平以达到控制的目的。</p>
+
+<p><img src="https://www.evernote.com/shard/s26/sh/bd720803-1b71-454d-98a2-cf0e907df688/649d6eb30376f8a378ef3e8a7cc3c552/deep/0/Screenshot%204/8/13%2011:25%20PM.jpg?noteKey=649d6eb30376f8a378ef3e8a7cc3c552&suffix=deep%2F0%2FScreenshot+4%2F8%2F13+11%3A25+PM.jpg&noteGuid=bd720803-1b71-454d-98a2-cf0e907df688"/></p>
+
+<p>GPIO 25和VCC（3.3V）之间通过R1（10K欧姆）和R2（1K欧姆）<a href="https://zh.wikipedia.org/zh/上拉电阻">上拉电阻</a>相连，当按键未被按下时，GPIO 25上拉到VCC，程序可以读到1，当按键按下时，GPIO 25被下拉电阻R2拉到GND（0V），程序可以读到0。如果不加R1，而GPIO 25不小心被设置成输出低电平时，将直接和VCC相连而造成短路，这样可能会烧掉这个引脚，所以加上限流电阻R1后，即使发生这样的情况，也不会出现短路情况。</p>
+
+<h1>应用</h1>
+
+<p>如果我们需要根据GPIO 25的值来控制树莓派，比如按下按钮时希望点亮某个LED或在液晶上显示当前时间，就需要通过程序来获取状态的变化。</p>
+
+<p>一种常见的做法是在循环里不断读取该引脚的状态，当发生对应的变化的时执行控制逻辑，但显而易见，这种做法很消耗CPU，如果在循环增加<code>sleep(1000)</code>这样的调用，又很容易错过按键变化。较好的做法则是通过<a href="http://zh.wikipedia.org/wiki/中断">中断</a>来实现。</p>
+
+<p>最新的树莓派Raspbian和Arch Linux内核都已经包含了GPIO的中断处理支持。但使用前需要将指定GPIO引脚输出，方法如下：</p>
+
+<p>首先可以通过命令<code>echo 25 &gt; /sys/class/gpio/export</code>导出GPIO 25端口，执行成功后在相应的目录下看到以下文件，得益于Linux下<strong>一切都是文件</strong>的设计理念，GPIO的状态可以通过<code>value</code>文件来获取，这样就可以利用Linux的poll/epoll来获取<code>value</code>文件的变化(这点和Linux高性能网络编程是类似的)。</p>
+
+
+        <div class="more">
+          <a href="/2013/04/27-interrupts-with-gpio-pins.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2013/04/26-backup-raspberry-pi.html">备份Raspberry Pi</a> <span class="date">2013-04-08</span></h1>
+
+        <p>树莓派的操作系统安装在SD卡，使用一段时间后还是很有必要备份一下，以防哪天SD卡就坏了。</p>
+
+<p>备份的目的地最方便的还是使用网络存储，我使用的是西部数据的<a href="http://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.1.Cz5Mlq&amp;id=13865367896&amp;is_b=1&amp;cat_id=50099232&amp;q=mybooklive&amp;rn=638aa11bdda81f8d589bb0e052c57187">MyBooklive</a>3T网络硬盘。挺不错的一个产品，功能基本满足我的需求。</p>
+
+<p>准备好备份目标盘，将Nas的备份目录mount到树莓派:</p>
+
+<pre><code>mkdir /mnt/backup
+mount -t cifs //mybooklive/Public/Backup /mnt/backup -o guest
+</code></pre>
+
+<h1>完整备份</h1>
+
+<p>确定相应的SD卡设备ID</p>
+
+<pre><code>root@raspberrypi2 ~/bin # fdisk -l
+
+Disk /dev/mmcblk0: 1973 MB, 1973420032 bytes, 3854336 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x0004f23a
+
+        Device Boot      Start         End      Blocks   Id  System
+/dev/mmcblk0p1   *        2048      186367       92160    c  W95 FAT32 (LBA)
+/dev/mmcblk0p2          186368     3667967     1740800   83  Linux
+
+Disk /dev/sda: 2107 MB, 2107637760 bytes, 4116480 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2013/04/26-backup-raspberry-pi.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
     
       <div class="post">
         <h1 class="title"><a href="/2013/04/25-get-spi-working-on-raspberry-pi-spi.html">在Raspberry Pi上使用硬件SPI</a> <span class="date">2013-04-05</span></h1>
@@ -556,138 +624,6 @@
 
         <div class="more">
           <a href="/2013/03/19-raspberry-pi-gpio-port-naming.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/hadoop-data-struct.html">hadoop-NameNode 的主要数据结构</a> <span class="date">2013-03-18</span></h1>
-
-        <p>在之前的分析过程中，我们知道NameNode会将文件和目录的元数据信息存储下来，每次保存或者操作HDFS的操作，都会记录到 editlog文件中，当EditLog达到一定大小的时候，namenode会重新将内存中队整个HDFS的目录树和文件元数据刷到fsImage文件中。</p>
-
-<p>那么NameNode有以下几个问题</p>
-
-<ol>
-<li>元数据信息的数据结构是怎样？</li>
-<li>它的EditLog在达到一定大小或者某段保存时间段过后，刷新内存文件到fsImage中是如何做到的呢？</li>
-</ol>
-
-<h2>元数据信息的数据结构</h2>
-
-<p>首先，我们从NameNode启动过程可以看到，NameNode启动时，对<code>FSNamesystem</code>进行初始化操作，这个类是HDFS文件系统的执行的核心操作,提供了各种增删改查的操作接口。它内部维护了多个数据结构之间的关系，它的启动过程主要为：</p>
-
-<p>它的方法链如下：</p>
-
-<p>{% img /images/blog/FSNamesystem_method_flow.png FSNamesystem方法链 %}</p>
-
-<p>这里面主要的方法如下</p>
-
-<p>{% codeblock FSNamesystem#initialize lang:java %}
-private void initialize(NameNode nn, Configuration conf) throws IOException {
-    // 设置检查磁盘可用性的间隔,可以通过 dfs.namenode.resource.check.interval 来设置,默认为5000,单位为毫秒
-    resourceRecheckInterval = conf.getLong(DFSConfigKeys.DFS_NAMENODE_RESOURCE_CHECK_INTERVAL_KEY,DFSConfigKeys.DFS_NAMENODE_RESOURCE_CHECK_INTERVAL_DEFAULT);
-    // 初始化一个&rdquo;检查NameNode上可用磁盘配置的所有卷进行检查&rdquo;的检查类,它的初始化过程一会来说
-    nnResourceChecker = new NameNodeResourceChecker(conf);
-    // 进行资源检查和缓存结果。就是调用 nnResourceChecker.hasAvailableDiskSpace()，它是通过判断文件使用大小来进行是否可用的
-    checkAvailableResources();
-    // 获取当前系统时间
-    this.systemStart = now();
-    // 根据配置对象信息初始化一些配置对象参数
-    setConfigurationParameters(conf);
-    // 创建一个HDFS的身份令牌的管理者
-    dtSecretManager = createDelegationTokenSecretManager(conf);
-    // 获取当前NN的地址
-    this.nameNodeAddress = nn.getNameNodeAddress();
-    // 注册MBean
-    this.registerMBean(conf);
-    // 初始化 存储文件的目录状态的 管理对象
-    this.dir = new FSDirectory(this, conf);
-    // 获取NameNode的启动选项，是format 还是其他的选项
-    StartupOption startOpt = NameNode.getStartupOption(conf);
-    // 根据选项夹在FSImage
-    this.dir.loadFSImage(getNamespaceDirs(conf), getNamespaceEditsDirs(conf), startOpt);
-    // 获取夹在FSImage的时间
-    long timeTakenToLoadFSImage = now() - systemStart;
-    LOG.info(&ldquo;Finished loading FSImage in &rdquo; + timeTakenToLoadFSImage + &ldquo; msecs&rdquo;);
-    //
-    NameNode.getNameNodeMetrics().fsImageLoadTime.set((int) timeTakenToLoadFSImage);
-    // 初始化一个安全模式对象
-    this.safeMode = new SafeModeInfo(conf);
-    // 设置 系统中块的总数
-    setBlockTotal();
-    // 初始化用于 记录所有的block复制请求 的任务线程
-    pendingReplications = new PendingReplicationBlocks( conf.getInt(&ldquo;dfs.replication.pending.timeout.sec&rdquo;, -1) * 1000L);
-    if (isAccessTokenEnabled) {
-        // 设置 主从模式，这里设置当前机器为主机器
-        accessTokenHandler = new BlockTokenSecretManager(true, accessKeyUpdateInterval, accessTokenLifetime);
-    }
-    // 初始化 心跳 检查 任务线程
-    this.hbthread = new Daemon(new HeartbeatMonitor());
-    // 租约管理器LeaseManager负责管理租约
-    this.lmthread = new Daemon(leaseManager.new Monitor());
-    // 定期调用 computeReplicationWork() 的后台任务;
-    this.replthread = new Daemon(new ReplicationMonitor());
-    hbthread.start();
-    lmthread.start();
-    replthread.start();
-    // 定期调用hasAvailableResources的NameNodeResourceChecker，
-    // 如果被发现有可用的资源不足，使NN进入安全模式。
-    // 如果资源已经恢复到可以接受的水平，这个守护进程将导致NN退出安全模式。
-    this.nnrmthread = new Daemon(new NameNodeResourceMonitor());
-    nnrmthread.start();
-    // 保持 DN和JT与NN 和 TT的连接
-    this.hostsReader = new HostsFileReader(conf.get(&ldquo;dfs.hosts&rdquo;,&ldquo;&rdquo;), conf.get(&ldquo;dfs.hosts.exclude&rdquo;,&ldquo;&rdquo;));
-    // 初始化 DN节点的管理线程
-    this.dnthread = new Daemon(new DecommissionManager(this).new Monitor(
-        conf.getInt(&ldquo;dfs.namenode.decommission.interval&rdquo;, 30),
-        conf.getInt(&ldquo;dfs.namenode.decommission.nodes.per.interval&rdquo;, 5)));
-    dnthread.start();
-    // 设置 可插拔DNS-name/IP-address RackID解析器。
-    this.dnsToSwitchMapping = ReflectionUtils.newInstance(
-        conf.getClass(&ldquo;topology.node.switch.mapping.impl&rdquo;, ScriptBasedMapping.class, DNSToSwitchMapping.class),
-        conf);
-    // 如果DNS切换缓存映射支持，将这些主机包括列表中的网络位置存储在高速缓存中的映射，在后续的呼叫中能得到快速响应。
-    if (dnsToSwitchMapping instanceof CachedDNSToSwitchMapping) {
-        // 主机网络位置存储
-        dnsToSwitchMapping.resolve(new ArrayList<String>(hostsReader.getHosts()));
-    }
-    // 获取当前NN的通信地址
-    InetSocketAddress socAddr = NameNode.getAddress(conf);
-    // 设置FSN中的NN的位置信息
-    this.nameNodeHostName = socAddr.getHostName();
-}
-{% endcodeblock %}</p>
-
-
-        <div class="more">
-          <a href="/2013/03/hadoop-data-struct.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2013/03/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html">如何使用Raspberry Pi测量室内温度和湿度并绘制曲线</a> <span class="date">2013-03-17</span></h1>
-
-        <h1>硬件准备</h1>
-
-<p>需要以下硬件：</p>
-
-<ol>
-<li>可以工作的<a href="http://s.click.taobao.com/t?e=zGU34CA7K%2BPkqB07S4%2FK0CITy7klxxrJ35Nnc0iO6niAHo44Chb01aWIu4ho12MwdcCLV6ff8kJMg0iz0FTGXaJAqMvt94sTe0NIrCAdd8LW">树莓派</a>一个</li>
-<li><a href="http://list.tmall.com/search_product.htm?q=%C3%E6%B0%FC%B0%E5&amp;type=p&amp;style=&amp;cat=all&amp;ali_trackid=2:mm_12926928_3484851_11423971:1364041941_4k1_1171281511&amp;upsid=8daf4a561f161cd669d949c6bf367733&amp;clk1=8daf4a561f161cd669d949c6bf367733">面包板</a>和<a href="http://list.tmall.com//search_product.htm?q=%B6%C5%B0%EE%CF%DF&amp;type=p&amp;style=&amp;cat=all">公对母杜邦线</a></li>
-<li><a href="http://list.tmall.com/search_product.htm?q=10K+%B5%E7%CE%BB%C6%F7&amp;user_action=initiative&amp;at_topsearch=1&amp;sort=st&amp;type=p&amp;cat=&amp;style=">10K 电位器</a>一个</li>
-<li><a href="http://list.tmall.com//search_product.htm?q=DHT11&amp;type=p&amp;style=&amp;cat=all">DHT11</a>温度和湿度传感器一个或<a href="http://s.taobao.com/search?q=DHT22&amp;keyword=&amp;commend=all&amp;ssid=s5-e&amp;search_type=item&amp;atype=&amp;tracelog=&amp;sourceId=tb.index&amp;rt=1364041904459&amp;source=haiwaigou&amp;pid=mm_14507416_2297358_8935934&amp;unid=">DHT22</a></li>
-</ol>
-
-<h1>传感器电路及原理</h1>
-
-<h2>DHT11传感器外观</h2>
-
-<p><img src="http://learn.adafruit.com/system/products/images/000/000/386/medium225/dht11_MED.jpg?1342023044"/></p>
-
-<h2>参数</h2>
-
-
-        <div class="more">
-          <a href="/2013/03/03-17-interfacing-temperature-and-humidity-sensor-with-raspberry-pi.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     

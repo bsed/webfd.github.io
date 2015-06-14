@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>WebFD Page 6 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="How does zero commision brokerage make money? WebFD">
+  <meta name="description" content="elasticsearch查询api之match query WebFD.tk">
   
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -75,7 +75,7 @@
           <li style="padding-left:10px">
             <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
               <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
-              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+              <input type="hidden" name="as_sitesearch" value="webfd.tk"></form>
           </li>
         </ul>
       </div>
@@ -169,6 +169,97 @@
     </div>
 
 
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-print-matrix-diagonally.html">算法练习：根据对角线打印矩阵</a> <span class="date">2014-05-16</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>输入一个矩阵，从右上角开始按照斜对角线打印矩阵的值，如矩阵为：</p>
+</blockquote>
+
+<pre><code>1, 2,  3,  4
+5, 6,  7,  8
+9, 10, 11, 12
+13,14, 15, 16
+</code></pre>
+
+<blockquote>
+<p>输出：</p>
+</blockquote>
+
+<pre><code>4, 3, 8, 2, 7, 12, 1, 6, 11, 16, 5, 10, 15, 9, 14, 13
+</code></pre>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>思路：
+将整个输出以最长的斜对角线分为两部分：右上部分和左下部分。
+右上部分：对角线的起点在第一行，列数递减，对角线上相邻元素之间横坐标和纵坐标均相差1；
+左下部分：对角线的起点在第一列上，行数递减，对角线上相邻元素之间横坐标和纵坐标均相差1；
+复杂度：O(n^2)</p>
+</blockquote>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-print-matrix-diagonally.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-del-one-node-from-linklist.html">算法练习：从链表中删除一个节点</a> <span class="date">2014-05-16</span></h1>
+
+        <h2>1. 问题描述：</h2>
+
+<blockquote>
+<p>给定一个链表和其中一个节点，删除该节点；</p>
+</blockquote>
+
+<h2>2. 思路：</h2>
+
+<blockquote>
+<p>思路：
+节点的差异体现在节点对象的内容不同。要删除当前节点，可以将当前节点与下一节点的值互换，然后删除下一个节点即可。
+需要注意的是，如果要删除的节点是最后一个节点，没有下一个节点，此时需要从头遍历了。如果要删除的节点不是最后一
+个节点，复杂度为O(1)，否则复杂度为O(n)，平均复杂度为O(1)。</p>
+</blockquote>
+
+<h2>3. Java参考代码</h2>
+
+<pre><code>/**
+ * 从链表中删除某一个节点
+ * @param head  链表的头节点
+ * @param toDelete  要删除的节点
+ * @return 头节点
+ */
+public static ListNode delete(ListNode head, ListNode toDelete) {
+    // param error
+    if (head == null || toDelete == null) {
+        return head;
+    }
+    // 最后一个节点
+    if (toDelete.next == null) {
+        // 也是头节点
+        if (head == toDelete) {
+            return null;
+        }
+        // 遍历查找前一个节点
+        ListNode node = head;
+        while (node.next != toDelete) {
+            node = node.next;
+        }
+        node.next = node.next.next;
+        return head;
+    }
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-del-one-node-from-linklist.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
     
       <div class="post">
         <h1 class="title"><a href="/2014/05/algorithm-search-sort-two-dim-array.html">算法练习：二维数组中查找元素</a> <span class="date">2014-05-14</span></h1>
@@ -555,74 +646,6 @@ public double getPow(double base, int exponent) {
 
         <div class="more">
           <a href="/2014/05/algorithm-calculate-pow.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2014/05/xshell-select-interrupt-dict.html">Xshell鼠标选中，终端立即中断(CTRL-C)的问题</a> <span class="date">2014-05-05</span></h1>
-
-        <h2>问题：</h2>
-
-<blockquote>
-<p>在Xshell中设置了“自动将选中的文字复制到粘贴板”，之前一直没有问题，最近发现，只要选中屏幕上的文字，复制上了，但shell终端立即被中断了，即向终端发送了CTRL-C；</p>
-</blockquote>
-
-<h2>原因：</h2>
-
-<blockquote>
-<p>很可能是“选中文字复制”与词典软件的“划词翻译”相冲突。我的原因是，最近安装了必应词典，且开启了“划词翻译”功能。
-我在网上求助时，发现也有一些朋友遇到和我一样的问题，都是由于与词典的冲突导致的，如有道词典，关掉划译功能即可。</p>
-</blockquote>
-
-
-        <div class="more">
-          <a href="/2014/05/xshell-select-interrupt-dict.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2014/05/algorithm-practice-addbybit.html">算法练习：不使用加减乘除对两个整数求和</a> <span class="date">2014-05-04</span></h1>
-
-        <h2>1. 问题描述</h2>
-
-<blockquote>
-<p>不使用加法（+）、减法（-）、乘法（*）和除法（/）操作，求两个整数的和。</p>
-</blockquote>
-
-<h2>2. 思路</h2>
-
-<ul>
-<li><p>可以从位运算上考虑，将两个整数以二进制表示，两个数的加法，即对应位上的加法，如果两个数的某一位不同（一个为0，一个为1），则相加后该位为1；如果相同，分两种情况，同为0，则相加后还是0，如果同为1，相加后结果仍为0，但需要向更高位进位；</p></li>
-
-<li><p>于是我们发现，对位进行相加时，如果两个位相同，结果为0，不同，结果为1，这即位的异或运算；进位仅发生在两个位同为1的情况下，即位的与运算，与运算的结果，位为1的表示该位上发生了进位，进位实质上就是在更高位上加1，即左移一位，于是，最终的结果为异或的结果与进位的结果之和，问题又回到了求两个数之和，重复上述操作，直到进位为0为止；复杂度为O(n)。
-例如，求01100101和00101100的和：
-[xor: 01001001, and: 00100100, &lt;&lt;: 01001000]-&gt;[xor: 00000001, and: 01001000, &lt;&lt;: 10010000]-&gt;[xor: 10010001, and: 00000000, &lt;&lt;: 00000000]-&gt;[result: 10010001]</p></li>
-</ul>
-
-<h2>3. Java代码</h2>
-
-<pre><code>/**
- * 输入两个整数，求它们的和（不能使用加减乘除四种运算）
- * @param firstNum
- * @param secondNum
- * @return
- */
-public int add(int firstNum, int secondNum) {
-    int bitXor = 0;
-    int bitAnd = 0;
-    while (0 != secondNum) {
-        bitXor = firstNum ^ secondNum;  // 异或，提取出不同位
-        bitAnd = firstNum &amp; secondNum;  // 与，提取进位
-        firstNum = bitXor;
-        secondNum = bitAnd &lt;&lt; 1;
-    }
-    return firstNum;
-}
-</code></pre>
-
-
-        <div class="more">
-          <a href="/2014/05/algorithm-practice-addbybit.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     

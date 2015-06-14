@@ -4,6 +4,16 @@
 		<loc>http://webfd.tk/</loc>
 	</url>
 	<url>
+		<loc>http://webfd.tk/2015/06/06-614-static-biding-and-dynamic-binding-in-java.html</loc>
+		<lastmod>2015-06-14</lastmod>
+		<changefreq>weekly</changefreq>
+	</url>
+	<url>
+		<loc>http://webfd.tk/2015/06/06-06-vim-settings-for-golang-ide-.html</loc>
+		<lastmod>2015-06-06</lastmod>
+		<changefreq>weekly</changefreq>
+	</url>
+	<url>
 		<loc>http://webfd.tk/2015/05/05-30-java-full-random-nulti-generate-product.html</loc>
 		<lastmod>2015-05-30</lastmod>
 		<changefreq>weekly</changefreq>
@@ -676,6 +686,11 @@
 	<url>
 		<loc>http://webfd.tk/2013/02/centos-6-install-redis.html</loc>
 		<lastmod>2013-02-16</lastmod>
+		<changefreq>weekly</changefreq>
+	</url>
+	<url>
+		<loc>http://webfd.tk/2013/new-born.html</loc>
+		<lastmod>2013-02-08</lastmod>
 		<changefreq>weekly</changefreq>
 	</url>
 	<url>

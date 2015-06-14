@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>WebFD Page 7 - 关注前端前沿技术，探寻业界深邃思想</title>
   
-  <meta name="description" content="How does zero commision brokerage make money? WebFD">
+  <meta name="description" content="elasticsearch查询api之match query WebFD.tk">
   
   <meta name="author" content="pjx3">
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -75,7 +75,7 @@
           <li style="padding-left:10px">
             <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
               <input type="text" name="as_q" class="search-query" placeholder=" Search... ">
-              <input type="hidden" name="as_sitesearch" value="hugozhu.myalert.info"></form>
+              <input type="hidden" name="as_sitesearch" value="webfd.tk"></form>
           </li>
         </ul>
       </div>
@@ -169,6 +169,74 @@
     </div>
 
 
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/xshell-select-interrupt-dict.html">Xshell鼠标选中，终端立即中断(CTRL-C)的问题</a> <span class="date">2014-05-05</span></h1>
+
+        <h2>问题：</h2>
+
+<blockquote>
+<p>在Xshell中设置了“自动将选中的文字复制到粘贴板”，之前一直没有问题，最近发现，只要选中屏幕上的文字，复制上了，但shell终端立即被中断了，即向终端发送了CTRL-C；</p>
+</blockquote>
+
+<h2>原因：</h2>
+
+<blockquote>
+<p>很可能是“选中文字复制”与词典软件的“划词翻译”相冲突。我的原因是，最近安装了必应词典，且开启了“划词翻译”功能。
+我在网上求助时，发现也有一些朋友遇到和我一样的问题，都是由于与词典的冲突导致的，如有道词典，关掉划译功能即可。</p>
+</blockquote>
+
+
+        <div class="more">
+          <a href="/2014/05/xshell-select-interrupt-dict.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
+    
+      <div class="post">
+        <h1 class="title"><a href="/2014/05/algorithm-practice-addbybit.html">算法练习：不使用加减乘除对两个整数求和</a> <span class="date">2014-05-04</span></h1>
+
+        <h2>1. 问题描述</h2>
+
+<blockquote>
+<p>不使用加法（+）、减法（-）、乘法（*）和除法（/）操作，求两个整数的和。</p>
+</blockquote>
+
+<h2>2. 思路</h2>
+
+<ul>
+<li><p>可以从位运算上考虑，将两个整数以二进制表示，两个数的加法，即对应位上的加法，如果两个数的某一位不同（一个为0，一个为1），则相加后该位为1；如果相同，分两种情况，同为0，则相加后还是0，如果同为1，相加后结果仍为0，但需要向更高位进位；</p></li>
+
+<li><p>于是我们发现，对位进行相加时，如果两个位相同，结果为0，不同，结果为1，这即位的异或运算；进位仅发生在两个位同为1的情况下，即位的与运算，与运算的结果，位为1的表示该位上发生了进位，进位实质上就是在更高位上加1，即左移一位，于是，最终的结果为异或的结果与进位的结果之和，问题又回到了求两个数之和，重复上述操作，直到进位为0为止；复杂度为O(n)。
+例如，求01100101和00101100的和：
+[xor: 01001001, and: 00100100, &lt;&lt;: 01001000]-&gt;[xor: 00000001, and: 01001000, &lt;&lt;: 10010000]-&gt;[xor: 10010001, and: 00000000, &lt;&lt;: 00000000]-&gt;[result: 10010001]</p></li>
+</ul>
+
+<h2>3. Java代码</h2>
+
+<pre><code>/**
+ * 输入两个整数，求它们的和（不能使用加减乘除四种运算）
+ * @param firstNum
+ * @param secondNum
+ * @return
+ */
+public int add(int firstNum, int secondNum) {
+    int bitXor = 0;
+    int bitAnd = 0;
+    while (0 != secondNum) {
+        bitXor = firstNum ^ secondNum;  // 异或，提取出不同位
+        bitAnd = firstNum &amp; secondNum;  // 与，提取进位
+        firstNum = bitXor;
+        secondNum = bitAnd &lt;&lt; 1;
+    }
+    return firstNum;
+}
+</code></pre>
+
+
+        <div class="more">
+          <a href="/2014/05/algorithm-practice-addbybit.html" class="btn btn-small">阅读全文</a>
+        </div>
+      </div>
     
       <div class="post">
         <h1 class="title"><a href="/2014/04/jetty-as-linux-service.html">Jetty9作为Linux服务配置记录</a> <span class="date">2014-04-11</span></h1>
@@ -435,77 +503,6 @@ TMPDIR=/usr/local/jetty9.1/tmp
 
         <div class="more">
           <a href="/2014/03/spring-aop-example.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2014/03/centos-zsh-install.html">CentOS Install Zsh 5.0.5</a> <span class="date">2014-03-11</span></h1>
-
-        <blockquote>
-<p>前提条件：</p>
-
-<ol>
-<li><code>sudo yum install git</code></li>
-<li><code>sudo yum install ncurses-devel</code></li>
-</ol>
-</blockquote>
-
-<ol>
-<li><p>编译安装</p>
-
-<ol>
-<li><code>[usr@dev01 zsh-5.0.5]$ wget http://sourceforge.net/projects/zsh/files/zsh/5.0.5/zsh-5.0.5.tar.bz2/download &amp;&amp; mv download zsh-5.0.5.tar.bz2</code></li>
-<li><code>[usr@dev01 zsh-5.0.5]$ tar xvjf zsh-5.0.5.tar.bz2</code></li>
-<li><code>[usr@dev01 zsh-5.0.5]$ cd zsh-5.0.5</code></li>
-<li><code>[usr@dev01 zsh-5.0.5]$ ./configure</code></li>
-<li><code>[usr@dev01 zsh-5.0.5]$ make</code></li>
-<li><code>[usr@dev01 zsh-5.0.5]$ sudo make install</code></li>
-</ol></li>
-</ol>
-
-<p>2， 修改默认Shell</p>
-
-<pre><code>1. `echo &quot;/usr/local/bin/zsh&quot; | tee -a /etc/shells`
-2. `chsh -s /usr/local/bin/zsh`
-</code></pre>
-
-
-        <div class="more">
-          <a href="/2014/03/centos-zsh-install.html" class="btn btn-small">阅读全文</a>
-        </div>
-      </div>
-    
-      <div class="post">
-        <h1 class="title"><a href="/2014/03/spring-di-annotation.html">Spring依赖注入之注解注入</a> <span class="date">2014-03-09</span></h1>
-
-        <h2>1. bean的自动装配和自动检测的区别</h2>
-
-<p>启用注解装配，在xml配置文件里添加：</p>
-
-<pre><code>&lt;context:annotation-config/&gt;
-</code></pre>
-
-<p>启用自动扫描注解，在xml配置文件里添加：</p>
-
-<pre><code>&lt;context:component-scan base-package=&quot;org.yousharp.base&quot;/&gt;
-</code></pre>
-
-<blockquote>
-<p>二者的区别：
-自动装配表示通过@Autowired, @Inject, @Resource等实现对属性或构造函数的自动注入；仍然需要在配置文件里定义bean，只是通过自动装配省去了<code>property</code>和<code>constructor-arg</code>的配置。
-自动检测是扫描特定的注解（包括：@Component, @Controller, @Service, @Repository)，将注解过的类自动定义为bean，自动检测是自动装配的超集，通过自动检测，可以省去在xml配置文件里定义<code>bean</code>了。</p>
-</blockquote>
-
-<h2>2. 通过自动装配和注解实现注入</h2>
-
-<p>在xml配置文件里启动注解装配：</p>
-
-<pre><code>&lt;context:annotation-config/&gt;
-</code></pre>
-
-
-        <div class="more">
-          <a href="/2014/03/spring-di-annotation.html" class="btn btn-small">阅读全文</a>
         </div>
       </div>
     
